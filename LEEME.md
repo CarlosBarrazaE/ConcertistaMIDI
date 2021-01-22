@@ -29,10 +29,10 @@ Concertista MIDI es un juego para aprender a tocar piano facilmente usando el te
 
 ### Capturas
 
-<img src="extra/imagenes/1.png" width="400">
-<img src="extra/imagenes/2.png" width="400">
-<img src="extra/imagenes/3.png" width="400">
-<img src="extra/imagenes/4.png" width="400">
+![Menú](extra/imagenes/1.png "Menú")
+![Selector de Archivos](extra/imagenes/2.png "Selector de Archivos")
+![Selector de Pistas](extra/imagenes/3.png "Selector de Pistas")
+![Organo](extra/imagenes/4.png "Organo")
 
 -----------
 
@@ -130,5 +130,11 @@ Ejecuta el siguiente comando y no cierres el terminal.
 Ahora se puede ejecutar concertista midi, debes asegurarte que en la configuracion de Concertista MIDI este seleccionado el dispositivo de salida correcto.
 
 Para la entrada puedes configurar el Teclado y Raton para tocar, tambien deberia ser posible conectar un teclado MIDI pero no ha sido probado.
+
+-----------
+
+## Licencia
+
+Este proyecto esta diponible bajo la licencia GNU General Public License v2.0
 
 -----------
