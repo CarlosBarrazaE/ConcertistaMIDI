@@ -1,5 +1,4 @@
 # Concertista MIDI
-===================
 
 Concertista MIDI es un juego para aprender a tocar piano facilmente usando el teclado o el ratón de tu computador (Tambien deberia funciona con un teclado MIDI pero no ha sido probado), Concertista MIDI utiliza la libreria midi ([libmidi](https://github.com/linthesia/linthesia/tree/master/src/libmidi)) de linthesia para reproducir archivos y dispositivos MIDI pero incluye varias mejoras como:
 
@@ -29,9 +28,13 @@ Concertista MIDI es un juego para aprender a tocar piano facilmente usando el te
 	* Dispositivos de entrada/salida
 
 ### Capturas
+
 <img src="extra/imagenes/1.png" width="400">
 <img src="extra/imagenes/2.png" width="400">
 <img src="extra/imagenes/3.png" width="400">
+<img src="extra/imagenes/4.png" width="400">
+
+-----------
 
 ### Atajos de Teclado
 
@@ -62,7 +65,6 @@ Concertista MIDI es un juego para aprender a tocar piano facilmente usando el te
 
 
 ## Requerimientos
------------------
 
 Se requieren los siguientes paquetes para compilar concertista midi.
 
@@ -86,16 +88,18 @@ Se requieren los siguientes paquetes para compilar concertista midi.
 
 	emerge --ask media-libs/glew media-libs/libsdl2 media-libs/glm media-libs/freetype dev-libs/icu dev-db/sqlite
 
+-----------------
+
 ## Compilación
---------------
 
 	mkdir binario
 	cd binario
 	cmake ..
 	make
 
+--------------
+
 ## Ejecutar
------------
 
 Ya es posible ejecutar concertista midi con:
 
@@ -127,4 +131,4 @@ Ahora se puede ejecutar concertista midi, debes asegurarte que en la configuraci
 
 Para la entrada puedes configurar el Teclado y Raton para tocar, tambien deberia ser posible conectar un teclado MIDI pero no ha sido probado.
 
-
+-----------
