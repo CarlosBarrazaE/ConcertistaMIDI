@@ -38,7 +38,7 @@ Concertista MIDI es un juego para aprender a tocar piano facilmente usando el te
 
 ### Atajos de Teclado
 
-|Tecla                 | Uso                                                     |
+|Tecla                 | Función                                                 |
 |:---------------------|:--------------------------------------------------------|
 |F4                    |Mostrar y ocultar Subtitulos                             |
 |F5                    |Teclado de 37 teclas                                     |
