@@ -65,13 +65,13 @@ void Organo::dibujar_blancas(float x, float y, unsigned int tecla_inicial, unsig
 		{
 			//La tecla no es tocada, color normal
 			m_tecla_blanca->activar();
-			m_rectangulo->color(Color(1.0f, 1.0f, 1.0f));
+			//Fuera del teclado de 88 teclas tiene otro color
+			if(n < 21 || n > 108)
+				m_rectangulo->color(Color(0.8f, 1.0f, 0.8f));
+			else
+				m_rectangulo->color(Color(1.0f, 1.0f, 1.0f));
 			tecla_presionada_anterior = false;
 		}
-
-		//Fuera del ticlado de 88 teclas tiene otro color
-		//if(n < 21 || n > 108)
-		//	m_rectangulo->color(Color(0.5f, 0.7f, 0.3f));
 
 		m_rectangulo->dibujar(desplazamiento, y, m_ancho_tecla_blanca - 1, m_alto_tecla_blanca);
 
@@ -117,13 +117,13 @@ void Organo::dibujar_negras(float x, float y, unsigned int tecla_inicial, unsign
 		else
 		{
 			//La tecla no es tocada, color normal
-			m_rectangulo->color(Color(1.0f, 1.0f, 1.0f));
+			//Fuera del teclado de 88 teclas tiene otro color
+			if(n < 21 || n > 108)
+				m_rectangulo->color(Color(0.8f, 1.0f, 0.8f));
+			else
+				m_rectangulo->color(Color(1.0f, 1.0f, 1.0f));
 			m_tecla_negra->activar();
 		}
-
-		//Fuera del ticlado de 88 teclas tiene otro color
-		//if(n < 21 || n > 108)
-		//	m_rectangulo->color(Color(0.5f, 0.7f, 0.3f));
 
 		//El ancho de la tecla mas el ancho de la sombra
 		m_rectangulo->dibujar(desplazamiento, y, m_ancho_tecla_negra + m_ancho_tecla_negra * 0.22f, m_alto_tecla_negra);
