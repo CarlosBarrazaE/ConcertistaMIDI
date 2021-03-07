@@ -255,6 +255,7 @@ bool VentanaSeleccionMusica::abrir_archivo_seleccionado()
 	{
 		if(m_lista_archivos[seleccion_actual].es_carpeta)
 		{
+			//Abre la carpeta seleccionada
 			std::string ruta_nueva = m_lista_archivos[seleccion_actual].ruta;
 
 			//Carga la lista de archivos de la carpeta seleccionada

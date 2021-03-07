@@ -29,9 +29,9 @@ Ruta_Exploracion::~Ruta_Exploracion()
 
 void Ruta_Exploracion::eliminar(unsigned long int inicio)
 {
-	if(m_rutas_botones.size() >= 1)
+	if(m_carpetas.size() > 1)
 	{
-		if(inicio+1 == m_rutas_botones.size())
+		if(inicio+1 == m_carpetas.size())
 		{
 			//Elimina la ultima
 			m_ancho_actual -= m_carpetas.back()->ancho();
@@ -55,10 +55,10 @@ void Ruta_Exploracion::eliminar(unsigned long int inicio)
 		}
 
 		//Si quedan solo carpetas extras se pueden agregar mas
-		if(m_rutas_botones.size() <= m_numero_carpeta_extra)
+		if(m_carpetas.size() <= m_numero_carpeta_extra)
 		{
 			m_agregar_carpeta_extra = true;
-			m_numero_carpeta_extra = m_rutas_botones.size();
+			m_numero_carpeta_extra = m_carpetas.size();
 		}
 		this->calcular_carpetas_visibles();
 	}
@@ -116,7 +116,7 @@ void Ruta_Exploracion::evento_raton(Raton *raton)
 	if(m_boton_atras->esta_activado())
 	{
 		m_cambiar_carpeta = true;
-		this->eliminar(m_rutas_botones.size()-1);
+		this->eliminar(m_carpetas.size()-1);
 	}
 
 	unsigned long int eliminar = 0;
@@ -203,7 +203,7 @@ void Ruta_Exploracion::ruta(const std::string &inicio, const std::string &fin)
 
 void Ruta_Exploracion::atras()
 {
-	this->eliminar(m_rutas_botones.size()-1);
+	this->eliminar(m_carpetas.size()-1);
 }
 
 bool Ruta_Exploracion::siguiente()
