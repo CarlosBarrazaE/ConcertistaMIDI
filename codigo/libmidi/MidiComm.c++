@@ -96,8 +96,8 @@ void sendNote(const unsigned int note, bool on)
 		snd_seq_ev_set_direct(&ev);
 
 		if (on)
-			// velocity ~ 60 for audio preview
-			snd_seq_ev_set_noteon(&ev, 0, static_cast<unsigned char>(note), 60);
+			// velocity ~ 100 for audio preview
+			snd_seq_ev_set_noteon(&ev, 0, static_cast<unsigned char>(note), 100);
 		else
 			snd_seq_ev_set_noteoff(&ev, 0, static_cast<unsigned char>(note), 0);
 

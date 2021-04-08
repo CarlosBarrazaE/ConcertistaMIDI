@@ -361,7 +361,6 @@ void VentanaOrgano::escuchar_eventos()
 
 				//Se cambia el canal y la velocidad del evento
 				evento.SetChannel(nota_encontrada->channel);
-				evento.SetVelocity(nota_encontrada->velocity);
 
 				//Aumenta el contador de combos
 				//El modo aprender cuenta el puntaje cuando todas las notas son tocadas correctamente
@@ -385,7 +384,6 @@ void VentanaOrgano::escuchar_eventos()
 				this->insertar_nota_activa(evento.NoteNumber(), evento.Channel(), Pista::Colores_pista[NUMERO_COLORES_PISTA], true, false);
 
 				//Se envia el evento
-				evento.SetVelocity(64);
 				if(m_configuracion->dispositivo_salida() != NULL)
 					m_configuracion->dispositivo_salida()->Write(evento);
 
@@ -398,32 +396,33 @@ void VentanaOrgano::escuchar_eventos()
 		else
 		{
 			//Eventos NoteOff
-			Nota_Activa *nota_encendida = m_notas_activas[evento.NoteNumber()];
-			if(!nota_encendida)
+			std::map<unsigned int, Nota_Activa*>::iterator nota_encendida = m_notas_activas.find(evento.NoteNumber());
+			if(nota_encendida != m_notas_activas.end())
 			{
-				//La nota no existe
-				Registro::Error("Intento borrar una nota que no existe");
-			}
-			else
-			{
-				if(nota_encendida->contador_clic == 0)
+				if(nota_encendida->second->contador_clic == 0)
 				{
 					//Se selecciona el canal
-					evento.SetChannel(nota_encendida->canal);
+					evento.SetChannel(nota_encendida->second->canal);
 
 					//Se envia el evento de apagado
-					if(m_configuracion->dispositivo_salida() != NULL && nota_encendida->sonido)
+					if(m_configuracion->dispositivo_salida() != NULL && nota_encendida->second->sonido)
 						m_configuracion->dispositivo_salida()->Write(evento);
 
 					//Borra la nota
-					m_notas_activas.erase(nota_encendida->id_nota);
-					delete nota_encendida;
+					m_notas_activas.erase(nota_encendida->second->id_nota);
+					delete nota_encendida->second;
 				}
 				//Se puede activar dos veces (o mas) la misma tecla por ejemplo con el teclado y el raton
 				//no se borrara la nota hasta que se reciban la misma cantidad de NoteOff que NoteOn
 				//pero no se cambia nada.
 				else
-					nota_encendida->contador_clic--;
+					nota_encendida->second->contador_clic--;
+			}
+			else
+			{
+				//La nota no existe, esto puede ocurrir al utilizar un teclado MIDI
+				//y estar tocando antes de entrar en esta ventana
+				Registro::Aviso("Intento borrar una nota que no existe");
 			}
 		}
 	}

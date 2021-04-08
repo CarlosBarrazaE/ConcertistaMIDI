@@ -129,7 +129,7 @@ Ejecuta el siguiente comando y no cierres el terminal.
 
 Ahora se puede ejecutar concertista midi, debes asegurarte que en la configuracion de Concertista MIDI este seleccionado el dispositivo de salida correcto en este caso **TiMidity port 0**.
 
-Para la entrada puedes configurar el Teclado y Raton para tocar, tambien deberia ser posible conectar un teclado MIDI pero no ha sido probado.
+Para la entrada puedes configurar el Teclado y Raton para tocar, es compatible con teclado MIDI Casio LK-S250 (no compatible con las teclas luminosas).
 
 -----------
 
