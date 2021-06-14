@@ -28,7 +28,7 @@ private:
 	std::vector<Elemento*> m_elementos;
 
 	void inicializar(Administrador_Recursos *recursos);
-	void actualizar_dimension();
+
 public:
 	Panel_Desplazamiento(float x, float y, float ancho, float alto, float fila, float margen_fila, Administrador_Recursos *recursos);
 	Panel_Desplazamiento(float x, float y, float ancho, float alto, float columna, float fila, float margen_columna, float margen_fila, Administrador_Recursos *recursos);
@@ -45,6 +45,7 @@ public:
 
 	void agregar_elemento(Elemento *e);
 	void vaciar();
+	void actualizar_dimension();
 };
 
 #endif

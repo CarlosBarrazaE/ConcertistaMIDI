@@ -64,10 +64,7 @@ void Tabla::dibujar()
 
 	//Dibuja las filas
 	for(unsigned int x=0; x<m_fila_titulo.size(); x++)
-	{
-		//m_rectangulo->dibujar(m_fila_titulo[x].texto->x(),m_fila_titulo[x].texto->y(), 10, 40, Color(0.8f, 0.9f, 0.8f));
 		m_fila_titulo[x].texto->dibujar();
-	}
 
 	//Dibuja los bordes laterales
 	m_panel_desplazamiento->dibujar();
@@ -78,6 +75,8 @@ void Tabla::dibujar()
 
 void Tabla::evento_raton(Raton *raton)
 {
+	if(!raton->esta_sobre(this->x(), this->y(), this->ancho(), this->alto()))
+		return;//Ignora eventos fuera de la tabla
 	m_panel_desplazamiento->evento_raton(raton);
 	for(unsigned int x=0; x<m_filas.size(); x++)
 	{
@@ -90,8 +89,10 @@ void Tabla::evento_raton(Raton *raton)
 		if(m_filas[x]->esta_seleccionado())
 		{
 			m_seleccion = true;
-			if(raton->numero_clics() == 2)
+			if(raton->activado(BotonIzquierdo) && raton->numero_clics() == 2)
+			{
 				m_seleccion_activada = true;
+			}
 		}
 	}
 }
@@ -233,7 +234,37 @@ void Tabla::cambiar_seleccion(int cambio)
 		float final_fila = m_filas[m_fila_seleccionada]->y() + m_filas[m_fila_seleccionada]->alto();
 		m_panel_desplazamiento->desplazar_y(static_cast<int>(final_tabla - final_fila));
 	}
+}
 
+void Tabla::seleccionar(unsigned long int seleccion)
+{
+	//Actualiza las posiciones de los elementos antes de moverlos, normalmente esto se hace
+	//el panel de desplazamiento una vez al actualizar, pero la llamada a esta función
+	//puede ser realizada antes de actualizar
+	m_panel_desplazamiento->actualizar_dimension();
+	if(seleccion < m_filas.size())
+	{
+		//Deselecciona la anterior y selecciona la nueva
+		m_filas[m_fila_seleccionada]->deseleccionar();
+		m_fila_seleccionada = seleccion;
+		m_filas[m_fila_seleccionada]->seleccionar();
+
+		//Mueve la barra de desplazamiento para mostrar la file seleccionada
+		if(m_filas[m_fila_seleccionada]->y() < this->y()+m_alto_fila)
+		{
+			//Desplaza la barra cuando se sale por arriba
+			float inicio_tabla = this->y()+m_alto_fila;
+			float inicio_fila = m_filas[m_fila_seleccionada]->y();
+			m_panel_desplazamiento->desplazar_y(static_cast<int>(inicio_tabla - inicio_fila));
+		}
+		else if(m_filas[m_fila_seleccionada]->y() + m_filas[m_fila_seleccionada]->alto() > this->y()+this->alto())
+		{
+			//Desplaza la barra cuando se sale por abajo
+			float final_tabla = this->y()+this->alto();
+			float final_fila = m_filas[m_fila_seleccionada]->y() + m_filas[m_fila_seleccionada]->alto();
+			m_panel_desplazamiento->desplazar_y(static_cast<int>(final_tabla - final_fila));
+		}
+	}
 }
 
 unsigned long int Tabla::obtener_seleccion()

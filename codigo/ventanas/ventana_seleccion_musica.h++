@@ -40,6 +40,7 @@ private:
 	void cargar_lista_carpetas();
 	void cargar_contenido_carpeta(std::string ruta_abrir);
 	void crear_tabla(std::string ruta_abrir);
+	void guardar_carpeta_actual();
 	bool abrir_archivo_seleccionado();
 
 public:

@@ -8,7 +8,7 @@ Fila::Fila(float x, float y, float ancho, float alto, Administrador_Recursos *re
 	m_boton_seleccionado = false;
 
 	m_color_actual = m_color_fondo;
-	m_color_seleccion = Color(m_color_fondo.rojo()-0.045f, m_color_fondo.verde()-0.045f, m_color_fondo.azul()-0.045f);
+	m_color_seleccion = Color(m_color_fondo.rojo()-0.08f, m_color_fondo.verde()-0.08f, m_color_fondo.azul()-0.08f);
 }
 
 Fila::~Fila()
@@ -36,9 +36,7 @@ void Fila::dibujar()
 
 	//Dibuja cada una de las celdas
 	for(unsigned int x=0; x<m_celda.size(); x++)
-	{
 		m_celda.at(x)->dibujar();
-	}
 
 	//Dibula el borde de abajo
 	m_rectangulo->dibujar(this->x(), this->y()+this->alto()-1, this->ancho(), 1, Color(0.9f, 0.9f, 0.9f));

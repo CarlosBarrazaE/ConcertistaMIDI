@@ -302,6 +302,15 @@ void VentanaOrgano::escuchar_eventos()
 	while(m_configuracion->dispositivo_entrada()->KeepReading())
 	{
 		MidiEvent evento = m_configuracion->dispositivo_entrada()->Read();
+		/*Registro::Aviso("Evento capturado: " + std::to_string(evento.Type()));
+		if(evento.Type() == MidiEventType_Meta)
+		{
+			Registro::Nota("Evento meta: " + std::to_string(evento.MetaType()));
+			if(evento.HasText())
+			{
+				Registro::Depurar(evento.Text());
+			}
+		}*/
 
 		//Omitir eventos que no son NoteOn o NoteOff
 		if(evento.Type() != MidiEventType_NoteOn && evento.Type() != MidiEventType_NoteOff)

@@ -46,45 +46,6 @@ void Panel_Desplazamiento::inicializar(Administrador_Recursos *recursos)
 	m_raton_ficticio.actualizar_posicion(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
 }
 
-void Panel_Desplazamiento::actualizar_dimension()
-{
-	int numero_columnas = 1;
-	float x_inicio = this->x();
-	//Si m_columna es mayor a cero, puede existir mas de una columna y es centrado
-	if(m_columna > 0)
-	{
-		numero_columnas = static_cast<int>(this->ancho() / (m_columna + m_margen_columna));
-		float ancho_actual = (static_cast<float>(numero_columnas) * m_columna) + (static_cast<float>(numero_columnas - 1) * m_margen_columna);
-		x_inicio = (this->ancho() - ancho_actual) / 2 + this->x();
-	}
-	float x_actual = x_inicio;
-	float y_actual = this->y();
-	int contador_columnas = 1;
-	for(unsigned int i=0; i<m_elementos.size(); i++)
-	{
-		m_elementos[i]->posicion(x_actual, y_actual);
-
-		if(contador_columnas < numero_columnas)
-		{
-			x_actual += m_columna + m_margen_columna;
-		}
-		else
-		{
-			contador_columnas = 0;
-			x_actual = x_inicio;
-			if(i<m_elementos.size()-1)
-				y_actual += m_fila + m_margen_fila;
-		}
-		contador_columnas++;
-	}
-	m_alto_actual = y_actual + m_fila - this->y();
-
-	m_desplazamiento_y = 0;
-	m_calcular_posicion = false;
-	if(this->alto() < m_alto_actual)
-		m_proporcion = (this->alto()-20) / m_alto_actual;
-}
-
 void Panel_Desplazamiento::actualizar(unsigned int diferencia_tiempo)
 {
 	if(m_calcular_posicion)
@@ -234,4 +195,44 @@ void Panel_Desplazamiento::vaciar()
 {
 	m_elementos.clear();
 	m_calcular_posicion = true;
+}
+
+void Panel_Desplazamiento::actualizar_dimension()
+{
+	int numero_columnas = 1;
+	float x_inicio = this->x();
+	//Si m_columna es mayor a cero, puede existir mas de una columna y es centrado
+	if(m_columna > 0)
+	{
+		numero_columnas = static_cast<int>(this->ancho() / (m_columna + m_margen_columna));
+		float ancho_actual = (static_cast<float>(numero_columnas) * m_columna) + (static_cast<float>(numero_columnas - 1) * m_margen_columna);
+		x_inicio = (this->ancho() - ancho_actual) / 2 + this->x();
+	}
+	float x_actual = x_inicio;
+	float y_actual = this->y();
+	int contador_columnas = 1;
+	for(unsigned int i=0; i<m_elementos.size(); i++)
+	{
+		m_elementos[i]->posicion(x_actual, y_actual);
+
+		if(contador_columnas < numero_columnas)
+		{
+			x_actual += m_columna + m_margen_columna;
+		}
+		else
+		{
+			contador_columnas = 0;
+			x_actual = x_inicio;
+			if(i<m_elementos.size()-1)
+				y_actual += m_fila + m_margen_fila;
+		}
+		contador_columnas++;
+	}
+
+	m_alto_actual = y_actual + m_fila - this->y();
+	m_desplazamiento_y = 0;
+
+	m_calcular_posicion = false;
+	if(this->alto() < m_alto_actual)
+		m_proporcion = (this->alto()-20) / m_alto_actual;
 }

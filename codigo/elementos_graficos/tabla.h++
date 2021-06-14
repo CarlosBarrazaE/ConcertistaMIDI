@@ -51,6 +51,7 @@ public:
 	void vaciar();
 
 	void cambiar_seleccion(int cambio);
+	void seleccionar(unsigned long int seleccion);
 	unsigned long int obtener_seleccion();
 	bool seleccion_activada();
 	bool seleccion();

@@ -32,7 +32,7 @@ VentanaSeleccionMusica::VentanaSeleccionMusica(Configuracion *configuracion, Dat
 	m_carpeta_inicial = m_configuracion->leer("carpeta_inicial");
 	m_carpeta_activa = m_configuracion->leer("carpeta_activa");
 
-	m_ruta_exploracion.carpeta_extra("Inicio", "");
+	m_ruta_exploracion.carpeta_extra("Inicio", "-");
 
 	if(m_carpeta_inicial == "-")
 		m_carpeta_activa = "-";
@@ -48,7 +48,7 @@ VentanaSeleccionMusica::VentanaSeleccionMusica(Configuracion *configuracion, Dat
 	}
 
 	if(m_carpeta_activa == "-")
-		this->crear_tabla("");
+		this->crear_tabla("-");
 	else
 		this->crear_tabla(m_carpeta_activa);
 }
@@ -180,7 +180,7 @@ void VentanaSeleccionMusica::crear_tabla(std::string ruta_abrir)
 
 		this->cargar_contenido_carpeta(ruta_abrir);
 	}
-	else if(ruta_abrir != "")
+	else if(ruta_abrir != "-")
 		Notificacion::Error("La carpeta: \"" + ruta_abrir + "\" no existe", 5);
 	else
 	{
@@ -246,6 +246,20 @@ void VentanaSeleccionMusica::crear_tabla(std::string ruta_abrir)
 
 		m_tabla_archivos.insertar_fila(fila_nueva);
 	}
+	//Recupera la fila seleccionada anteriormente si fue guardada
+	unsigned long int seleccionado_anterior = m_datos->leer_ultima_seleccion(ruta_abrir);
+	if(seleccionado_anterior > 0)
+		m_tabla_archivos.seleccionar(seleccionado_anterior-1);
+}
+
+void VentanaSeleccionMusica::guardar_carpeta_actual()
+{
+	unsigned long int seleccion_actual = m_tabla_archivos.obtener_seleccion();
+	if(seleccion_actual < m_lista_archivos.size())
+	{
+		//Guarda el archivo seleccionado en esta carpeta
+		m_datos->guardar_ultima_seleccion(m_carpeta_activa, seleccion_actual);
+	}
 }
 
 bool VentanaSeleccionMusica::abrir_archivo_seleccionado()
@@ -253,6 +267,8 @@ bool VentanaSeleccionMusica::abrir_archivo_seleccionado()
 	unsigned long int seleccion_actual = m_tabla_archivos.obtener_seleccion();
 	if(seleccion_actual < m_lista_archivos.size())
 	{
+		//Guarda el archivo seleccionado en esta carpeta
+		m_datos->guardar_ultima_seleccion(m_carpeta_activa, seleccion_actual);
 		if(m_lista_archivos[seleccion_actual].es_carpeta)
 		{
 			//Abre la carpeta seleccionada
@@ -323,7 +339,10 @@ void VentanaSeleccionMusica::evento_raton(Raton *raton)
 	}
 
 	if(m_ruta_exploracion.cambiar_carpeta())
+	{
+		this->guardar_carpeta_actual();
 		this->crear_tabla(m_ruta_exploracion.nueva_ruta());
+	}
 
 	m_tabla_archivos.evento_raton(raton);
 
@@ -357,6 +376,7 @@ void VentanaSeleccionMusica::evento_teclado(Tecla tecla, bool estado)
 	}
 	else if((tecla == TECLA_BORRAR || tecla == TECLA_FLECHA_IZQUIERDA) && !estado)
 	{
+		this->guardar_carpeta_actual();
 		m_ruta_exploracion.atras();
 		this->crear_tabla(m_ruta_exploracion.nueva_ruta());
 	}
@@ -374,4 +394,8 @@ void VentanaSeleccionMusica::evento_pantalla(float ancho, float alto)
 
 	m_boton_atras->posicion(m_boton_atras->x(), alto - 32);
 	m_boton_continuar->posicion(ancho - 130, alto - 32);
+
+	//Actualiza la seleccion en caso que al achicar el tamaño de la ventana
+	//vaya a quedar fuera de la tabla.
+	m_tabla_archivos.seleccionar(m_tabla_archivos.obtener_seleccion());
 }

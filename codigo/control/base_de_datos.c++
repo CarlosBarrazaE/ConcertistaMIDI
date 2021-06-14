@@ -140,6 +140,7 @@ void Base_de_Datos::crear()
 	//Crea todas las tablas de la base de datos
 	this->consulta("CREATE TABLE configuracion (atributo VARCHAR(30), valor TEXT)");
 	this->consulta("CREATE TABLE carpetas (nombre VARCHAR(30) NOT NULL, ruta TEXT NOT NULL PRIMARY KEY)");
+	this->consulta("CREATE TABLE seleccion (ruta TEXT NOT NULL PRIMARY KEY, seleccion INT DEFAULT 0)");
 	this->consulta("CREATE TABLE archivos (ruta TEXT NOT NULL PRIMARY KEY, visitas INT DEFAULT 0, duracion BIGINT DEFAULT 0, ultimo_acceso DATETIME)");
 
 	this->escribir_configuracion("version_base_de_datos", VERSION_BASE_DE_DATOS);
@@ -149,13 +150,16 @@ void Base_de_Datos::crear()
 void Base_de_Datos::actualizar()
 {
 	//Verificar version de la base de datos
-	std::string version_texto = this->leer_configuracion("version_base_de_datos");
-	Registro::Nota("Versión de la base de datos: " + version_texto);
-	if(version_texto != "")
+	std::string version = this->leer_configuracion("version_base_de_datos");
+	Registro::Nota("Versión de la base de datos: " + version);
+	if(version != VERSION_BASE_DE_DATOS)
 	{
-		/*
-		double version_bd = std::stod(version_texto, NULL);
-		*/
+		this->escribir_configuracion("version_base_de_datos", VERSION_BASE_DE_DATOS);
+		if(version == "1.0")
+		{
+			this->consulta("CREATE TABLE seleccion (ruta TEXT NOT NULL PRIMARY KEY, seleccion INT DEFAULT 0)");
+		}
+		Registro::Aviso("Base de datos actualizada de la versión: " + version + " a la versión " + VERSION_BASE_DE_DATOS);
 	}
 }
 
@@ -211,12 +215,28 @@ bool Base_de_Datos::agregar_carpeta(const std::string &nombre, const std::string
 
 std::vector<std::vector<std::string>> Base_de_Datos::carpetas()
 {
-	return this->consulta_tabla("SELECT * FROM carpetas", 2);
+	return this->consulta_tabla("SELECT nombre, ruta FROM carpetas", 2);
 }
 
 bool Base_de_Datos::eliminar_carpeta(const std::string &ruta)
 {
 	return this->consulta("DELETE FROM carpetas WHERE ruta = '"+ruta+"'");
+}
+
+void Base_de_Datos::guardar_ultima_seleccion(const std::string &ruta, unsigned long int ultima_seleccion)
+{
+	//A ultima_seleccion se le suma 1 para guardar contando desde 1 y no desde 0
+	if(this->consulta_int("SELECT seleccion FROM seleccion WHERE ruta = '"+ruta+"' LIMIT 1") > 0)
+		this->consulta("UPDATE seleccion SET seleccion = '"+std::to_string(ultima_seleccion+1)+"' WHERE ruta = '"+ruta+"'");
+	else
+		this->consulta("INSERT INTO seleccion ('ruta', 'seleccion') VALUES ('"+ruta+"', '"+std::to_string(ultima_seleccion+1)+"')");
+}
+
+unsigned long int Base_de_Datos::leer_ultima_seleccion(const std::string &ruta)
+{
+	//Retorna 0 si no existe, hay que restar uno para obtener la fila correcta
+	unsigned long int respuesta = static_cast<unsigned long int>(this->consulta_int("SELECT seleccion FROM seleccion WHERE ruta = '"+ruta+"' LIMIT 1"));
+	return respuesta;
 }
 
 void Base_de_Datos::agregar_archivo(const std::string &ruta, long int duracion)
