@@ -18,6 +18,7 @@ class Base_de_Datos
 		std::string consulta_texto(const std::string &consulta);
 		std::vector<std::vector<std::string>> consulta_tabla(const std::string &consulta, int columnas);
 		std::vector<std::string> consulta_fila(const std::string &consulta, int columnas);
+		std::vector<std::string> consulta_columna(const std::string &consulta);
 	public:
 		Base_de_Datos();
 		~Base_de_Datos();
@@ -46,8 +47,11 @@ class Base_de_Datos
 		void sumar_visita_archivo(const std::string &ruta);
 		std::vector<std::string> datos_archivo(const std::string &ruta);
 		std::vector<std::string> lista_archivos();
+		std::vector<std::string> lista_seleccion();
 		void borrar_archivo(const std::string &ruta);
 		void borrar_archivos();
+		void borrar_seleccion(const std::string &ruta);
+		void borrar_selecciones();
 };
 
 #endif

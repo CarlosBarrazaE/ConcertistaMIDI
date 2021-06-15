@@ -122,6 +122,26 @@ std::vector<std::string> Base_de_Datos::consulta_fila(const std::string &consult
 	return fila;
 }
 
+std::vector<std::string> Base_de_Datos::consulta_columna(const std::string &consulta)
+{
+	//Retorna siempre la primera columna
+	sqlite3_stmt * respuesta_consulta;
+	int respuesta = sqlite3_prepare(m_base_de_datos, consulta.c_str(), -1, &respuesta_consulta, NULL);
+	std::vector<std::string> datos;
+	if(respuesta == SQLITE_OK)
+	{
+		sqlite3_step(respuesta_consulta);
+		while(sqlite3_column_text(respuesta_consulta, 0))
+		{
+			datos.push_back(std::string(reinterpret_cast<const char*>(sqlite3_column_text(respuesta_consulta, 0))));
+			sqlite3_step(respuesta_consulta);
+		}
+	}
+	sqlite3_finalize(respuesta_consulta);
+
+	return datos;
+}
+
 bool Base_de_Datos::abrir(const std::string &direccion)
 {
 	int respuesta = sqlite3_open(direccion.c_str(), &m_base_de_datos);
@@ -267,22 +287,12 @@ std::vector<std::string> Base_de_Datos::datos_archivo(const std::string &ruta)
 
 std::vector<std::string> Base_de_Datos::lista_archivos()
 {
-	sqlite3_stmt * respuesta_consulta;
-	std::string consulta = "SELECT ruta FROM archivos";
-	int respuesta = sqlite3_prepare(m_base_de_datos, consulta.c_str(), -1, &respuesta_consulta, NULL);
-	std::vector<std::string> rutas;
-	if(respuesta == SQLITE_OK)
-	{
-		sqlite3_step(respuesta_consulta);
-		while(sqlite3_column_text(respuesta_consulta, 0))
-		{
-			rutas.push_back(std::string(reinterpret_cast<const char*>(sqlite3_column_text(respuesta_consulta, 0))));
-			sqlite3_step(respuesta_consulta);
-		}
-	}
-	sqlite3_finalize(respuesta_consulta);
+	return this->consulta_columna("SELECT ruta FROM archivos");
+}
 
-	return rutas;
+std::vector<std::string> Base_de_Datos::lista_seleccion()
+{
+	return this->consulta_columna("SELECT ruta FROM seleccion");
 }
 
 void Base_de_Datos::borrar_archivo(const std::string &ruta)
@@ -294,4 +304,15 @@ void Base_de_Datos::borrar_archivo(const std::string &ruta)
 void Base_de_Datos::borrar_archivos()
 {
 	this->consulta("DELETE FROM archivos");
+}
+
+void Base_de_Datos::borrar_seleccion(const std::string &ruta)
+{
+	if(ruta.length() > 0)
+		this->consulta("DELETE FROM seleccion WHERE ruta = '"+ruta+"' LIMIT 1");
+}
+
+void Base_de_Datos::borrar_selecciones()
+{
+	this->consulta("DELETE FROM seleccion");
 }

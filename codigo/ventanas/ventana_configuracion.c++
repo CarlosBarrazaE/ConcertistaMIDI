@@ -176,6 +176,7 @@ void VentanaConfiguracion::cargar_tabla_carpetas()
 unsigned int VentanaConfiguracion::limpiar_base_de_datos()
 {
 	unsigned int registros_eliminados = 0;
+	m_configuracion->base_de_datos()->iniciar_transaccion();
 	std::vector<std::string> archivos = m_configuracion->base_de_datos()->lista_archivos();
 	for(unsigned int x=0; x<archivos.size(); x++)
 	{
@@ -188,6 +189,36 @@ unsigned int VentanaConfiguracion::limpiar_base_de_datos()
 			registros_eliminados++;
 		}
 	}
+	std::vector<std::string> carpetas = m_configuracion->base_de_datos()->lista_seleccion();
+	for(unsigned int x=0; x<carpetas.size(); x++)
+	{
+		if(!std::ifstream(carpetas[x]) && carpetas[x] != "-")
+		{
+			m_configuracion->base_de_datos()->borrar_seleccion(carpetas[x]);
+			Registro::Nota("La carpeta no existe: " + carpetas[x]);
+			registros_eliminados++;
+		}
+	}
+
+	std::vector<std::vector<std::string>> carpetas_de_busqueda = m_configuracion->base_de_datos()->carpetas();
+	bool cambio_lista = false;
+	for(unsigned int x=0; x<carpetas_de_busqueda.size(); x++)
+	{
+		if(!std::ifstream(carpetas_de_busqueda[x][1]))
+		{
+			m_configuracion->base_de_datos()->eliminar_carpeta(carpetas_de_busqueda[x][1]);
+			Registro::Nota("La carpeta de busqueda no existe: " + carpetas_de_busqueda[x][1]);
+			registros_eliminados++;
+			cambio_lista = true;
+		}
+	}
+	if(cambio_lista)
+	{
+		//Se vuelve a cargar la tabla de carpetas de busqueda
+		this->m_solapa2_tabla->vaciar();
+		this->cargar_tabla_carpetas();
+	}
+	m_configuracion->base_de_datos()->finalizar_transaccion();
 	return registros_eliminados;
 }
 
@@ -263,7 +294,9 @@ void VentanaConfiguracion::evento_raton(Raton *raton)
 		{
 			Notificacion::Nota("Limpiando base de datos...", 1);
 			unsigned int registros_eliminados = this->limpiar_base_de_datos();
-			if(registros_eliminados > 0)
+			if(registros_eliminados == 1)
+				Notificacion::Nota("Se borro 1 registro huerfano", 5);
+			else if(registros_eliminados > 1)
 				Notificacion::Nota("Se borraron "+std::to_string(registros_eliminados)+" registros huerfanos", 5);
 			else
 				Notificacion::Nota("Base de datos limpia", 5);
@@ -271,6 +304,7 @@ void VentanaConfiguracion::evento_raton(Raton *raton)
 		if(m_solapa1_borrar_db->esta_activado())
 		{
 			m_configuracion->base_de_datos()->borrar_archivos();
+			m_configuracion->base_de_datos()->borrar_selecciones();
 			Notificacion::Nota("Base de datos borrada", 5);
 		}
 		if(m_solapa1_casilla_desarrollo->cambio_estado())
