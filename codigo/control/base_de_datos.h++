@@ -38,8 +38,8 @@ class Base_de_Datos
 		bool eliminar_carpeta(const std::string &ruta);
 
 		//Tabla carpeta seleccion
-		void guardar_ultima_seleccion(const std::string &ruta, unsigned long int ultima_seleccion);
-		unsigned long int leer_ultima_seleccion(const std::string &ruta);
+		void guardar_ultima_seleccion(const std::string &ruta, unsigned long int ultima_seleccion, const std::string &ruta_seleccion);
+		std::vector<std::string> leer_ultima_seleccion(const std::string &ruta);
 
 		//Tabla archivos
 		void agregar_archivo(const std::string &ruta, long int duracion);
