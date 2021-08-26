@@ -64,7 +64,7 @@ std::string MidiError::GetErrorDescription() const
 		case MidiError_TrackHeaderTooShort:
 			return "Archivo terminado antes de leer el encabezado de la pista.";
 		case MidiError_TrackTooShort:
-			return "Flijo de datos demasiado corto para leer la pista completa.";
+			return "Flujo de datos demasiado corto para leer la pista completa.";
 		case MidiError_BadTrackEnd:
 			return "La pista MIDI no terminó con el evento End-Of-Track (fin de pista).";
 
