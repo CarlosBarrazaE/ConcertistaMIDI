@@ -5,5 +5,6 @@ set(ventanas
 	${CMAKE_CURRENT_SOURCE_DIR}/ventana_seleccion_musica.c++
 	${CMAKE_CURRENT_SOURCE_DIR}/ventana_seleccion_pista.c++
 	${CMAKE_CURRENT_SOURCE_DIR}/ventana_organo.c++
+	${CMAKE_CURRENT_SOURCE_DIR}/ventana_organo_libre.c++
 	PARENT_SCOPE
 )

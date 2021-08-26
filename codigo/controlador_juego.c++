@@ -110,6 +110,13 @@ void Controlador_Juego::actualizar()
 
 		m_fotograma++;
 	}
+	else if(accion_actual == CambiarAOrganoLibre)
+	{
+		delete m_ventana_actual;
+		m_fps_dinamico = false;
+		m_ventana_actual = new VentanaOrganoLibre(&m_configuracion, m_recursos);
+		cambio_ventana = true;
+	}
 	else if(accion_actual == CambiarAConfiguracion)
 	{
 		delete m_ventana_actual;

@@ -14,6 +14,7 @@ enum Accion
 	CambiarASeleccionMusica,
 	CambiarASeleccionPista,
 	CambiarAOrgano,
+	CambiarAOrganoLibre,
 	Salir,
 	EntrarPantallaCompleta,
 	SalirPantallaCompleta,

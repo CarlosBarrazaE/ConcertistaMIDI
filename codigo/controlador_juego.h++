@@ -16,6 +16,7 @@
 #include "ventanas/ventana_seleccion_musica.h++"
 #include "ventanas/ventana_seleccion_pista.h++"
 #include "ventanas/ventana_organo.h++"
+#include "ventanas/ventana_organo_libre.h++"
 #include "ventanas/ventana_configuracion.h++"
 
 #include "control/configuracion.h++"
