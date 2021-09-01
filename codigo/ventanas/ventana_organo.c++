@@ -71,7 +71,7 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 	m_tablero->notas(m_notas);
 	m_tablero->pistas(m_pistas);
 	m_tablero->lineas(m_musica->musica()->GetBarLines());
-	m_organo->notas_activas(&m_color_teclas_teclas);
+	m_organo->notas_activas(&m_color_teclas);
 	m_organo->notas_requeridas(&m_notas_requeridas);
 
 	//Carga la configuracion de la base de datos de la duracion
@@ -85,7 +85,8 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 		m_duracion_nota = 6500;
 
 	//Elimina las notas tocadas antes de esta ventana
-	m_configuracion->dispositivo_entrada()->Reset();
+	if(m_configuracion->dispositivo_entrada() != NULL)
+		m_configuracion->dispositivo_entrada()->Reset();
 
 	m_cambio_velocidad = false;
 	m_pausa = false;
@@ -108,9 +109,11 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 
 VentanaOrgano::~VentanaOrgano()
 {
-	m_configuracion->dispositivo_entrada()->Reset();
+	if(m_configuracion->dispositivo_entrada() != NULL)
+		m_configuracion->dispositivo_entrada()->Reset();
 	if(m_configuracion->dispositivo_salida() != NULL)
 		m_configuracion->dispositivo_salida()->Reset();
+
 	delete m_barra;
 	delete m_tablero;
 	delete m_organo;
@@ -139,7 +142,7 @@ void VentanaOrgano::actualizar(unsigned int diferencia_tiempo)
 
 	//Agregar al organo el color de las teclas presionada
 	for(std::pair<unsigned int, Nota_Activa*> valor : m_notas_activas)
-		m_color_teclas_teclas[valor.second->id_nota] = valor.second->color;
+		m_color_teclas[valor.second->id_nota] = valor.second->color;
 
 	//Actualiza la etiqueta de combos
 	if(m_puntaje->combo() > COMBO_MINIMO_MOSTRAR)
@@ -576,7 +579,7 @@ void VentanaOrgano::calcular_teclas_activas(unsigned int diferencia_tiempo)
 				else if(posicion_y >= 0)
 				{
 					if(m_tiempo_espera[numero_nota] <= 0)
-						m_color_teclas_teclas[numero_nota] = m_pistas->at(pista).color();
+						m_color_teclas[numero_nota] = m_pistas->at(pista).color();
 				}
 			}
 		}

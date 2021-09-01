@@ -60,7 +60,7 @@ private:
 	NotasPistas m_notas;
 	std::string m_subtitulo_texto;
 	std::map<unsigned int, Nota_Activa*> m_notas_activas;
-	std::array<Color, 128> m_color_teclas_teclas;
+	std::array<Color, 128> m_color_teclas;
 	std::array<float, 128> m_tiempo_espera;
 	std::vector<unsigned int> m_notas_correctas;
 	std::map<unsigned int, Color> m_notas_requeridas;
