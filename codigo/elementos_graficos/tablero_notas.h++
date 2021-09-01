@@ -12,6 +12,12 @@
 #include <vector>
 #include <map>
 
+enum Direccion
+{
+	Bajar,
+	Subir,
+};
+
 class Tablero_Notas : public Elemento
 {
 private:
@@ -31,11 +37,15 @@ private:
 	std::vector<unsigned int> m_ultima_nota;//Ultima nota por cada pista
 	std::vector<Pista> *m_pistas;
 
+	Direccion m_desplazamiento;
+
 	void calcular_tamannos();
 
-	void dibujar_lineas_horizontales();
+	void dibujar_lineas_horizontales_bajar();
+	void dibujar_lineas_horizontales_subir();
 	void dibujar_lineas_verticales();
-	void dibujar_notas(unsigned int pista);
+	void dibujar_notas_bajar(unsigned int pista);
+	void dibujar_notas_subir(unsigned int pista);
 
 public:
 	Tablero_Notas(float x, float y, float alto, float ancho, Teclado_Organo *teclado, Administrador_Recursos *recursos);
@@ -56,7 +66,7 @@ public:
 	void modificar_duracion_nota(int valor);
 	void reiniciar();
 
-
+	void desplazamiento(Direccion direccion);
 };
 
 #endif
