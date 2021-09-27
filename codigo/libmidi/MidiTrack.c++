@@ -73,16 +73,18 @@ MidiTrack MidiTrack::ReadFromStream(std::istream &stream)
 std::vector<MidiTrack> MidiTrack::DividirPistas(MidiTrack pista_dividir)
 {
 	std::vector<MidiTrack> pistas_nuevas;
-	std::map<unsigned char, unsigned int> instrumentos_pistas;
+	std::map<unsigned char, unsigned int> id_pistas;
 
 	unsigned int contador_pistas = 0;
 	unsigned char canal = 0;
 	for(unsigned int x = 0; x<pista_dividir.m_events.size(); x++)
 	{
+		//Se dividen las pistas por canal
 		canal = pista_dividir.m_events[x].Channel();
-		if(instrumentos_pistas.count(canal) == 0)
+		if(id_pistas.count(canal) == 0)
 		{
-			instrumentos_pistas[canal] = contador_pistas;
+			//Se guarda el id de la pista nueva
+			id_pistas[canal] = contador_pistas;
 
 			//Se crea una nueva pista
 			MidiTrack p;
@@ -97,7 +99,7 @@ std::vector<MidiTrack> MidiTrack::DividirPistas(MidiTrack pista_dividir)
 		else
 		{
 			//Se inserta en la pista existente
-			unsigned int numero_pista = instrumentos_pistas[canal];
+			unsigned int numero_pista = id_pistas[canal];
 			pistas_nuevas[numero_pista].m_events.push_back(pista_dividir.m_events[x]);
 			pistas_nuevas[numero_pista].m_event_pulses.push_back(pista_dividir.m_event_pulses[x]);
 		}
@@ -160,6 +162,11 @@ const std::string MidiTrack::InstrumentName() const
 bool MidiTrack::IsPercussion() const
 {
 	return m_instrument_id == InstrumentIdPercussion;
+}
+
+bool MidiTrack::esVarios() const
+{
+	return m_instrument_id == InstrumentIdVarious;
 }
 
 const NoteSet &MidiTrack::Notes() const

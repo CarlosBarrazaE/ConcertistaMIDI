@@ -125,15 +125,19 @@ Midi Midi::ReadFromStream(std::istream &stream)
 	// Read in our tracks
 	for (int i = 0; i < track_count; ++i)
 	{
-		m.m_tracks.push_back(MidiTrack::ReadFromStream(stream));
-	}
+		MidiTrack pista_leida = MidiTrack::ReadFromStream(stream);
 
-	if(format == MidiFormat0)
-	{
-		//Dividir las pistas
-		std::vector<MidiTrack> pistas_divididas = MidiTrack::DividirPistas(m.m_tracks[0]);
-		m.m_tracks = pistas_divididas;
+		//Varios instrumentos agrupados en la misma pista
+		if(pista_leida.esVarios())
+		{
+			std::vector<MidiTrack> pistas_divididas = MidiTrack::DividirPistas(pista_leida);
+			for(unsigned long int p=0; p<pistas_divididas.size(); p++)
+				m.m_tracks.push_back(pistas_divididas[p]);
+		}
+		else
+			m.m_tracks.push_back(pista_leida);
 	}
+	track_count = m.m_tracks.size();
 
 	m.BuildTempoTrack();
 

@@ -34,6 +34,7 @@ public:
 	void SetEventUsecs(const MidiEventMicrosecondList &event_usecs);
 	const std::string InstrumentName() const;
 	bool IsPercussion() const;
+	bool esVarios() const;
 	const NoteSet &Notes() const;
 	void SetTrackId(size_t track_id);
 	unsigned char canal();
