@@ -240,7 +240,6 @@ void Tablero_Notas::dibujar_notas_subir(unsigned int pista)
 			continue;
 		}
 
-		//posicion_y = static_cast<float>(m_tiempo_actual_midi - m_notas[pista][n].start) / static_cast<float>(m_duracion_nota);
 		posicion_y = static_cast<float>(m_notas[pista][n].start - m_tiempo_actual_midi) / static_cast<float>(m_duracion_nota);
 
 		//No se dibujan las notas que aun no entran en pantalla
@@ -353,8 +352,6 @@ void Tablero_Notas::tiempo(microseconds_t tiempo)
 void Tablero_Notas::notas(NotasPistas notas)
 {
 	m_notas = notas;
-	for(unsigned int i=0; i<notas.size(); i++)
-		m_ultima_nota.push_back(0);//Se inician todas las pistas en 0
 }
 
 void Tablero_Notas::lineas(MidiEventMicrosecondList lineas)
@@ -365,6 +362,8 @@ void Tablero_Notas::lineas(MidiEventMicrosecondList lineas)
 void Tablero_Notas::pistas(std::vector<Pista> *pistas)
 {
 	m_pistas = pistas;
+	for(unsigned int i=0; i<pistas->size(); i++)
+		m_ultima_nota.push_back(0);//Se inician todas las pistas en 0
 }
 
 int Tablero_Notas::duracion_nota()

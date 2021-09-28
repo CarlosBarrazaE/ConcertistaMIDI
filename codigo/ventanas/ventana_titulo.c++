@@ -15,7 +15,7 @@ VentanaTitulo::VentanaTitulo(Administrador_Recursos *recursos) : Ventana(), m_te
 	m_boton_tocar = new Boton(Pantalla::Centro_horizontal(), 280, 250, 50, "Tocar", recursos);
 	m_boton_tocar->color_boton(Color(0.9f, 0.9f, 0.9f));
 	m_boton_tocar->centrado(true);
-	m_boton_tocar->habilitado(true);
+	m_boton_tocar->habilitado(false);
 
 	m_boton_configurar = new Boton(Pantalla::Centro_horizontal(), 340, 250, 50, "Configuración", recursos);
 	m_boton_configurar->color_boton(Color(0.9f, 0.9f, 0.9f));
