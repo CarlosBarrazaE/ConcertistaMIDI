@@ -338,7 +338,7 @@ MidiCommDescriptionList MidiCommOut::GetDeviceList()
 
 	return devices;
 }
-
+#include <unistd.h>
 void MidiCommOut::Write(const MidiEvent &out)
 {
 	snd_seq_event_t ev;
@@ -381,6 +381,79 @@ void MidiCommOut::Write(const MidiEvent &out)
 	else if (out.Type() == MidiEventType_ProgramChange)
 	{
 		snd_seq_ev_set_pgmchange(&ev, out.Channel(), out.ProgramNumber());
+	}
+	else if (out.Type() == MidiEventType_SysEx)
+	{
+		/*ev.type = SND_SEQ_EVENT_SYSEX;
+		unsigned char *datos = new unsigned char[9];
+		//datos[0] = 0xF0;//Inicio
+		datos[0] = 0x44;//Casio
+		datos[1] = 0x7E;//Casio
+		datos[2] = 0x7E;//Casio
+		datos[3] = 0x7F;//Casio
+		datos[4] = 0x02;//Luz
+		datos[5] = 0x00;//Luz
+		datos[6] = 0x40;//Id Nota
+		datos[7] = 0x01;//Encendida
+		//datos[9] = 0xF7;//Fin
+		datos[8] = 0;*/
+		/*ev.type = SND_SEQ_EVENT_SYSEX;
+		char *datos0 = "\xF0\x44\x7E\x7E\x7F\x00\03\xF7";
+		snd_seq_ev_set_sysex(&ev, 8, datos0);
+		snd_seq_event_output(alsa_seq, &ev);
+		snd_seq_drain_output(alsa_seq);
+*/
+		snd_seq_ev_clear(&ev);
+		snd_seq_ev_set_source(&ev, static_cast<unsigned char>(local_out));
+		snd_seq_ev_set_subs(&ev);
+		snd_seq_ev_set_direct(&ev);
+		ev.type = SND_SEQ_EVENT_SYSEX;
+		//\xF0\x44\x7E\x7E\x7F\x00\03\xF7   -> Mantener luces encendidas
+		//\xF0\x44\x7E\x7E\x7F\x02\x00\xNN\xEE\xF7 -->Encender luz NN con estado EE = {0 apagado, 1 encendido}
+		char *datos = "\xF0\x44\x7E\x7E\x7F\x00\x03\xF7\xF0\x44\x7E\x7E\x7F\x02\x00\x40\x01\xF7";
+		snd_seq_ev_set_sysex(&ev, 18, datos);
+		//snd_seq_event_output(alsa_seq, &ev);
+		//snd_seq_drain_output(alsa_seq);
+/*
+		std::cout << "Enviando luz encendida\n";
+		for(unsigned int m = 0; m<10; m++)
+		{
+			snd_seq_ev_clear(&ev);
+			snd_seq_ev_set_source(&ev, static_cast<unsigned char>(local_out));
+			snd_seq_ev_set_subs(&ev);
+			snd_seq_ev_set_direct(&ev);
+			char *datos2 = "\xF0\x44\x7E\x7E\x7F\x00\03\xF7";
+			//char *datos2 = "\x00\x90\x40\x7f";
+			ev.type = SND_SEQ_EVENT_SYSEX;
+			snd_seq_ev_set_sysex(&ev, 8, datos2);
+			snd_seq_event_output(alsa_seq, &ev);
+			snd_seq_drain_output(alsa_seq);
+			std::cout << "Ciclo\n";
+			usleep(100000);
+		}*/
+
+
+		//char *datos2 = "\xf0\x44\x7e\x7e\x7f\x00\x03";
+		//snd_seq_ev_set_sysex(&ev, 8, datos2);
+/*
+F0 44 7E 7E 7F 02 00 40 01 F7
+F0 7F 7F 04 01 ll mm F7
+F0 7F 7F 04 02 00 40 F7
+F0 7F 7F 04 02 00 40 F7
+F0 7F 7F 04 03 ll mm F7
+F0 7F 7F 04 04 ll mm F7
+F0 7F 7F 04 05 01 01 01 01 01 00 vv F7
+*/
+/*
+SysEx = F0 message F7
+  where
+    CASIO = 44 7E 7E 7F
+    message
+      | Ping = CASIO 00 03  -- Keeps lights on.
+      | ?? = CASIO 00 06 00
+      | LightOn note = CASIO 02 00 note 01
+      | LightOff note = CASIO 02 00 note 00
+*/
 	}
 
 	snd_seq_event_output(alsa_seq, &ev);

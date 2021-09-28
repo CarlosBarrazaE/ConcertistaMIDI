@@ -811,6 +811,12 @@ void VentanaOrgano::evento_teclado(Tecla tecla, bool estado)
 		m_tiempo_actual_midi = m_musica->musica()->GetSongPositionInMicroseconds();
 		this->reiniciar();
 	}
+	else if(tecla == TECLA_M && estado)
+	{
+		MidiEvent evento_nuevo = MidiEvent::Build(MidiEventSimple(0xF0, 0, 0));
+		if(m_configuracion->dispositivo_salida() != NULL)
+			m_configuracion->dispositivo_salida()->Write(evento_nuevo);
+	}
 	if(cambio_teclado)
 	{
 		m_organo->calcular_tamannos();
