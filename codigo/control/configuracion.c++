@@ -12,8 +12,13 @@ Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL)
 		Registro::Depurar("Abriendo la base de datos en: " + ruta_base_de_datos);
 		m_datos.abrir(ruta_base_de_datos);
 		m_datos.actualizar();
-		id_dispositivo_entrada = static_cast<unsigned int>(std::stoi(m_datos.leer_configuracion("dispositivo_entrada")));
-		id_dispositivo_salida = static_cast<unsigned int>(std::stoi(m_datos.leer_configuracion("dispositivo_salida")));
+		std::string dispositivo_entrada_texto = m_datos.leer_configuracion("dispositivo_entrada");
+		if(dispositivo_entrada_texto != "")
+			id_dispositivo_entrada = static_cast<unsigned int>(std::stoi(dispositivo_entrada_texto));
+
+		std::string dispositivo_salida_texto = m_datos.leer_configuracion("dispositivo_salida");
+		if(dispositivo_entrada_texto != "")
+			id_dispositivo_salida = static_cast<unsigned int>(std::stoi(dispositivo_entrada_texto));
 	}
 	else
 	{
