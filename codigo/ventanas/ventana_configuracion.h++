@@ -8,6 +8,7 @@
 #include "../elementos_graficos/lista_opciones.h++"
 #include "../elementos_graficos/tabla.h++"
 #include "../elementos_graficos/selector_archivos.h++"
+#include "../dispositivos/teclas_luminosas.h++"
 #include "../control/configuracion.h++"
 #include "../util/usuario.h++"
 
@@ -37,8 +38,8 @@ private:
 
 	//Solapa Dispositivos (3)
 	Etiqueta *m_solapa3_titulo;
-	Etiqueta *m_solapa3_texto_entrada, *m_solapa3_texto_salida;
-	Lista_Opciones *m_solapa3_opcion_entrada, *m_solapa3_opcion_salida;
+	Etiqueta *m_solapa3_texto_entrada, *m_solapa3_texto_salida, *m_solapa3_texto_teclas_luminosas;
+	Lista_Opciones *m_solapa3_opcion_entrada, *m_solapa3_opcion_salida, *m_solapa3_teclas_luminosas;
 
 	//Solapa Video (4)
 	Etiqueta *m_solapa4_titulo;
@@ -48,9 +49,14 @@ private:
 	Configuracion *m_configuracion;
 	unsigned int m_ultima_solapa;
 	unsigned int m_id_dispositivo_entrada;
-	unsigned int m_id_dispositivo_salida;
 	unsigned int m_id_entrada_anterior;
+
+	unsigned int m_id_dispositivo_salida;
 	unsigned int m_id_salida_anterior;
+
+	TeclasLuminosas *m_organo_luminoso;
+	unsigned int m_id_teclas_luminosas;
+	unsigned int m_id_teclas_luminosas_anterior;
 
 	std::vector<std::string> obtener_dispositivos(MidiCommDescriptionList lista);
 	void guardar_configuracion();

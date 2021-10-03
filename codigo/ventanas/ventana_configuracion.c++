@@ -6,10 +6,27 @@ VentanaConfiguracion::VentanaConfiguracion(Configuracion *configuracion, Adminis
 
 	m_recursos = recursos;
 	m_rectangulo = recursos->figura(F_Rectangulo);
-	m_id_dispositivo_entrada = static_cast<unsigned int>(std::stoi(m_configuracion->leer("dispositivo_entrada")));
-	m_id_dispositivo_salida = static_cast<unsigned int>(std::stoi(m_configuracion->leer("dispositivo_salida")));
+
+	//Carga la configuracion del dispositivo de entrada
+	m_id_dispositivo_entrada = 0;
+	std::string dispositivo_entrada = m_configuracion->leer("dispositivo_entrada");
+	if(dispositivo_entrada != "")
+		m_id_dispositivo_entrada = static_cast<unsigned int>(std::stoi(dispositivo_entrada));
 	m_id_entrada_anterior = m_id_dispositivo_entrada;
+
+	//Carga la configuracion del dispositivo de salida
+	m_id_dispositivo_salida = 0;
+	std::string dispositivo_salida = m_configuracion->leer("dispositivo_salida");
+	if(dispositivo_salida != "")
+		m_id_dispositivo_salida = static_cast<unsigned int>(std::stoi(dispositivo_salida));
 	m_id_salida_anterior = m_id_dispositivo_salida;
+
+	//Carga la configuracion de las teclas luminosas
+	m_id_teclas_luminosas = 0;
+	std::string teclas_luminosas = m_configuracion->leer("teclas_luminosas");
+	if(teclas_luminosas != "")
+		m_id_teclas_luminosas = static_cast<unsigned int>(std::stoi(teclas_luminosas));
+	m_id_teclas_luminosas_anterior = m_id_teclas_luminosas;
 
 	m_texto_titulo.texto("Configuración");
 	m_texto_titulo.tipografia(recursos->tipografia(LetraTitulo));
@@ -66,22 +83,42 @@ VentanaConfiguracion::VentanaConfiguracion(Configuracion *configuracion, Adminis
 	m_solapa3_titulo = new Etiqueta(250, 50, Pantalla::Ancho-250, 40, true, "Dispositivos", LetraTitulo, recursos);
 	m_solapa3_texto_entrada = new Etiqueta(260, 100, Pantalla::Ancho-270, 30, false, "Dispositivo de Entrada", LetraMediana, recursos);
 	m_solapa3_texto_salida = new Etiqueta(260, 140, Pantalla::Ancho-270, 30, false, "Dispositivo de Salida", LetraMediana, recursos);
+	m_solapa3_texto_teclas_luminosas = new Etiqueta(260, 180, Pantalla::Ancho-270, 30, false, "Teclas Luminosas", LetraMediana, recursos);
 	m_solapa3_opcion_entrada = new Lista_Opciones(500, 100, 200, 20, recursos);
 	m_solapa3_opcion_salida = new Lista_Opciones(500, 140, 200, 20, recursos);
+	m_solapa3_teclas_luminosas = new Lista_Opciones(500, 180, 200, 20, recursos);
 	//Se agregan las opciones opciones_textos
 	m_solapa3_opcion_entrada->tipografia(recursos->tipografia(LetraMediana));
 	m_solapa3_opcion_entrada->opciones_textos(this->obtener_dispositivos(MidiCommIn::GetDeviceList()));
 	m_solapa3_opcion_salida->tipografia(recursos->tipografia(LetraMediana));
 	m_solapa3_opcion_salida->opciones_textos(this->obtener_dispositivos(MidiCommOut::GetDeviceList()));
+	m_solapa3_teclas_luminosas->tipografia(recursos->tipografia(LetraMediana));
+
+	std::vector<std::string> opciones_teclas_luminosas;
+	unsigned int teclas_luminosas_predeterminada = 0;
+	opciones_teclas_luminosas.push_back("Desactivado");
+	for(unsigned int n=0; n<TeclasLuminosas::Lista.size(); n++)
+	{
+		opciones_teclas_luminosas.push_back(TeclasLuminosas::Lista[n]->nombre());
+
+		//Se aprobecha de encontrar el identificador, m_id_teclas_luminosas no necesariamente debe
+		//coincidir con n porque el orden podria ser cambiado.
+		if(TeclasLuminosas::Lista[n]->identificador() == m_id_teclas_luminosas)
+			teclas_luminosas_predeterminada = n+1;//+1 Porque se cuanta tambien la opcion extra "Desactivado"
+	}
+	m_solapa3_teclas_luminosas->opciones_textos(opciones_teclas_luminosas);
 
 	m_solapa3_opcion_entrada->opcion_predeterminada(m_id_dispositivo_entrada);
 	m_solapa3_opcion_salida->opcion_predeterminada(m_id_dispositivo_salida);
+	m_solapa3_teclas_luminosas->opcion_predeterminada(teclas_luminosas_predeterminada);
 
 	m_solapa->agregar_elemento_solapa(2, m_solapa3_titulo);
 	m_solapa->agregar_elemento_solapa(2, m_solapa3_texto_entrada);
 	m_solapa->agregar_elemento_solapa(2, m_solapa3_texto_salida);
+	m_solapa->agregar_elemento_solapa(2, m_solapa3_texto_teclas_luminosas);
 	m_solapa->agregar_elemento_solapa(2, m_solapa3_opcion_entrada);
 	m_solapa->agregar_elemento_solapa(2, m_solapa3_opcion_salida);
+	m_solapa->agregar_elemento_solapa(2, m_solapa3_teclas_luminosas);
 
 	//Pestaña de configuracion de videos
 	m_solapa->agregar_solapa("Video");
@@ -127,8 +164,10 @@ VentanaConfiguracion::~VentanaConfiguracion()
 	delete m_solapa3_titulo;
 	delete m_solapa3_texto_entrada;
 	delete m_solapa3_texto_salida;
+	delete m_solapa3_texto_teclas_luminosas;
 	delete m_solapa3_opcion_entrada;
 	delete m_solapa3_opcion_salida;
+	delete m_solapa3_teclas_luminosas;
 
 	delete m_solapa4_titulo;
 	delete m_solapa4_casilla_pantalla_completa;
@@ -157,6 +196,9 @@ void VentanaConfiguracion::guardar_configuracion()
 
 	if(m_id_dispositivo_salida != m_id_salida_anterior)
 		m_configuracion->escribir("dispositivo_salida", std::to_string(m_id_dispositivo_salida));
+
+	if(m_id_teclas_luminosas != m_id_teclas_luminosas_anterior)
+		m_configuracion->escribir("teclas_luminosas", std::to_string(m_id_teclas_luminosas));
 }
 
 void VentanaConfiguracion::cargar_tabla_carpetas()
@@ -357,6 +399,20 @@ void VentanaConfiguracion::evento_raton(Raton *raton)
 			m_id_dispositivo_salida = static_cast<unsigned int>(m_solapa3_opcion_salida->opcion_seleccionada());
 			m_configuracion->dispositivo_salida(m_id_dispositivo_salida);
 		}
+
+		unsigned int seleccion_teclas_luminosas = static_cast<unsigned int>(m_solapa3_teclas_luminosas->opcion_seleccionada());
+
+		//Se resta 1 porque m_solapa3_teclas_luminosas contiene la opcion extra "Desactivado" que no se encuentra en TeclasLuminosas::Lista
+		if(seleccion_teclas_luminosas > 0)
+		{
+			seleccion_teclas_luminosas--;
+			if(m_id_teclas_luminosas != TeclasLuminosas::Lista[seleccion_teclas_luminosas]->identificador())
+				m_id_teclas_luminosas = TeclasLuminosas::Lista[seleccion_teclas_luminosas]->identificador();
+		}
+		else
+			m_id_teclas_luminosas = 0;//Desactivado
+
+
 	}
 	else if(m_solapa->solapa_activa() == 3)
 	{
