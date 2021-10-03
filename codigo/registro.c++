@@ -17,13 +17,13 @@ void Registro::Escribir_registro(CodigoEstado estado, std::string texto)
 	if(IMPRIMIR_TERMINAL)
 	{
 		if(estado == EstadoError)
-			std::cout << "\033[31m[ERROR]\033[0m " << texto << "\n";
+			std::cout << "\033[31m[ERROR]\033[0m " << texto << "\n" << std::flush;
 		else if(estado == EstadoAviso && NIVEL_REGISTRO >= 1)
-			std::cout << "\033[33m[AVISO]\033[0m " << texto << "\n";
+			std::cout << "\033[33m[AVISO]\033[0m " << texto << "\n" << std::flush;
 		else if(estado == EstadoNota && NIVEL_REGISTRO >= 2)
-			std::cout << "\033[32m[NOTA]\033[0m " << texto << "\n";
+			std::cout << "\033[32m[NOTA]\033[0m " << texto << "\n" << std::flush;
 		else if(estado == EstadoDepurar && NIVEL_REGISTRO >= 3)
-			std::cout << "\033[34m[DEPURAR]\033[0m " << texto << "\n";
+			std::cout << "\033[34m[DEPURAR]\033[0m " << texto << "\n" << std::flush;
 	}
 }
 
