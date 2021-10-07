@@ -1,9 +1,10 @@
 #include "configuracion.h++"
 
-Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL)
+Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL), m_teclas_luminosas(NULL)
 {
 	unsigned int id_dispositivo_entrada = 0;
 	unsigned int id_dispositivo_salida = 0;
+	unsigned int id_teclas_luminosas = 0;
 
 	std::string ruta_base_de_datos = Usuario::carpeta_personal() + ".concertista.db";
 	if(std::ifstream(ruta_base_de_datos))
@@ -19,6 +20,10 @@ Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL)
 		std::string dispositivo_salida_texto = m_datos.leer_configuracion("dispositivo_salida");
 		if(dispositivo_entrada_texto != "")
 			id_dispositivo_salida = static_cast<unsigned int>(std::stoi(dispositivo_entrada_texto));
+
+		std::string teclas_luminosas_texto = m_datos.leer_configuracion("teclas_luminosas");
+		if(teclas_luminosas_texto != "")
+			id_teclas_luminosas = static_cast<unsigned int>(std::stoi(teclas_luminosas_texto));
 	}
 	else
 	{
@@ -36,6 +41,7 @@ Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL)
 
 	this->dispositivo_entrada(id_dispositivo_entrada);
 	this->dispositivo_salida(id_dispositivo_salida);
+	m_teclas_luminosas = TeclasLuminosas::Cargar_tecla_luminosa(id_teclas_luminosas);
 }
 
 Configuracion::~Configuracion()
@@ -45,6 +51,8 @@ Configuracion::~Configuracion()
 	if(m_salida != NULL)
 		delete m_salida;
 	midiStop();
+	if(m_teclas_luminosas != NULL)
+		delete m_teclas_luminosas;
 }
 
 Base_de_Datos* Configuracion::base_de_datos()
@@ -98,6 +106,12 @@ void Configuracion::dispositivo_salida(unsigned int id_salida)
 		Notificacion::Error("No se pudo conectar al dispositivo MIDI de salida", 10);
 }
 
+void Configuracion::teclas_luminosas(unsigned int identificador)
+{
+	delete m_teclas_luminosas;
+	m_teclas_luminosas = TeclasLuminosas::Cargar_tecla_luminosa(identificador);;
+}
+
 MidiCommIn *Configuracion::dispositivo_entrada()
 {
 	return m_entrada;
@@ -120,4 +134,9 @@ void Configuracion::reconectar()
 				m_salida->Reconnect();
 		}
 	}
+}
+
+TeclasLuminosas *Configuracion::teclas_luminosas()
+{
+	return m_teclas_luminosas;
 }

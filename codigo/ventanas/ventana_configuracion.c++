@@ -93,24 +93,11 @@ VentanaConfiguracion::VentanaConfiguracion(Configuracion *configuracion, Adminis
 	m_solapa3_opcion_salida->tipografia(recursos->tipografia(LetraMediana));
 	m_solapa3_opcion_salida->opciones_textos(this->obtener_dispositivos(MidiCommOut::GetDeviceList()));
 	m_solapa3_teclas_luminosas->tipografia(recursos->tipografia(LetraMediana));
-
-	std::vector<std::string> opciones_teclas_luminosas;
-	unsigned int teclas_luminosas_predeterminada = 0;
-	opciones_teclas_luminosas.push_back("Desactivado");
-	for(unsigned int n=0; n<TeclasLuminosas::Lista.size(); n++)
-	{
-		opciones_teclas_luminosas.push_back(TeclasLuminosas::Lista[n]->nombre());
-
-		//Se aprobecha de encontrar el identificador, m_id_teclas_luminosas no necesariamente debe
-		//coincidir con n porque el orden podria ser cambiado.
-		if(TeclasLuminosas::Lista[n]->identificador() == m_id_teclas_luminosas)
-			teclas_luminosas_predeterminada = n+1;//+1 Porque se cuanta tambien la opcion extra "Desactivado"
-	}
-	m_solapa3_teclas_luminosas->opciones_textos(opciones_teclas_luminosas);
+	m_solapa3_teclas_luminosas->opciones_textos(TeclasLuminosas::Lista);
 
 	m_solapa3_opcion_entrada->opcion_predeterminada(m_id_dispositivo_entrada);
 	m_solapa3_opcion_salida->opcion_predeterminada(m_id_dispositivo_salida);
-	m_solapa3_teclas_luminosas->opcion_predeterminada(teclas_luminosas_predeterminada);
+	m_solapa3_teclas_luminosas->opcion_predeterminada(m_id_teclas_luminosas);
 
 	m_solapa->agregar_elemento_solapa(2, m_solapa3_titulo);
 	m_solapa->agregar_elemento_solapa(2, m_solapa3_texto_entrada);
@@ -400,19 +387,11 @@ void VentanaConfiguracion::evento_raton(Raton *raton)
 			m_configuracion->dispositivo_salida(m_id_dispositivo_salida);
 		}
 
-		unsigned int seleccion_teclas_luminosas = static_cast<unsigned int>(m_solapa3_teclas_luminosas->opcion_seleccionada());
-
-		//Se resta 1 porque m_solapa3_teclas_luminosas contiene la opcion extra "Desactivado" que no se encuentra en TeclasLuminosas::Lista
-		if(seleccion_teclas_luminosas > 0)
+		if(m_id_teclas_luminosas != m_solapa3_teclas_luminosas->opcion_seleccionada())
 		{
-			seleccion_teclas_luminosas--;
-			if(m_id_teclas_luminosas != TeclasLuminosas::Lista[seleccion_teclas_luminosas]->identificador())
-				m_id_teclas_luminosas = TeclasLuminosas::Lista[seleccion_teclas_luminosas]->identificador();
+			m_id_teclas_luminosas = static_cast<unsigned int>(m_solapa3_teclas_luminosas->opcion_seleccionada());
+			m_configuracion->teclas_luminosas(m_id_teclas_luminosas);
 		}
-		else
-			m_id_teclas_luminosas = 0;//Desactivado
-
-
 	}
 	else if(m_solapa->solapa_activa() == 3)
 	{

@@ -460,6 +460,19 @@ SysEx = F0 message F7
 	snd_seq_drain_output(alsa_seq);
 }
 
+void MidiCommOut::evento_sysex(char *datos, unsigned int largo)
+{
+	snd_seq_event_t ev;
+	snd_seq_ev_clear(&ev);
+	snd_seq_ev_set_source(&ev, static_cast<unsigned char>(local_out));
+	snd_seq_ev_set_subs(&ev);
+	snd_seq_ev_set_direct(&ev);
+	ev.type = SND_SEQ_EVENT_SYSEX;
+	snd_seq_ev_set_sysex(&ev, largo, datos);
+	snd_seq_event_output(alsa_seq, &ev);
+	snd_seq_drain_output(alsa_seq);
+}
+
 void MidiCommOut::Reset()
 {
 	// Sent Note-Off to every open note

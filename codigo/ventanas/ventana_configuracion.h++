@@ -54,7 +54,6 @@ private:
 	unsigned int m_id_dispositivo_salida;
 	unsigned int m_id_salida_anterior;
 
-	TeclasLuminosas *m_organo_luminoso;
 	unsigned int m_id_teclas_luminosas;
 	unsigned int m_id_teclas_luminosas_anterior;
 

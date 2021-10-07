@@ -86,6 +86,7 @@ public:
 
 	// Send a single event out to the device.
 	void Write(const MidiEvent &out);
+	void evento_sysex(char *datos, unsigned int largo);
 
 	// Turns all notes off and resets all controllers
 	void Reset();

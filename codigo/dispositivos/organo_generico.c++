@@ -1,6 +1,6 @@
 #include "organo_generico.h++"
 
-OrganoGenerico::OrganoGenerico(const std::string &nombre, unsigned char canal, unsigned int identificador) : TeclasLuminosas(nombre, identificador)
+OrganoGenerico::OrganoGenerico(unsigned char canal, unsigned int identificador) : TeclasLuminosas(identificador)
 {
 	m_canal = canal;
 }
@@ -9,14 +9,14 @@ OrganoGenerico::~OrganoGenerico()
 {
 }
 
-void OrganoGenerico::actualizar(unsigned int diferencia_tiempo)
+void OrganoGenerico::actualizar(unsigned int /*diferencia_tiempo*/, MidiCommOut */*dispositivo_salida*/)
 {
 }
 
-void OrganoGenerico::encender(unsigned int id_nota)
+void OrganoGenerico::encender(unsigned int /*id_nota*/, MidiCommOut */*dispositivo_salida*/)
 {
 }
 
-void OrganoGenerico::apagar(unsigned int id_nota)
+void OrganoGenerico::apagar(unsigned int /*id_nota*/, MidiCommOut */*dispositivo_salida*/)
 {
 }

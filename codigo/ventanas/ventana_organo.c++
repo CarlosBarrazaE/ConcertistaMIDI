@@ -88,6 +88,8 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 	if(m_configuracion->dispositivo_entrada() != NULL)
 		m_configuracion->dispositivo_entrada()->Reset();
 
+	m_teclas_luminosas = m_configuracion->teclas_luminosas();
+
 	m_cambio_velocidad = false;
 	m_pausa = false;
 	m_retorno_carro = false;
@@ -131,6 +133,8 @@ void VentanaOrgano::actualizar(unsigned int diferencia_tiempo)
 		m_musica->reiniciar();
 		m_accion = CambiarASeleccionPista;
 	}
+
+	m_teclas_luminosas->actualizar(diferencia_tiempo, m_configuracion->dispositivo_salida());
 
 	//Se calculan los microsegundos entre fotogramas para actualizar el midi
 	unsigned int microsegundos_actualizar = static_cast<unsigned int>((static_cast<double>(diferencia_tiempo) / 1000.0) * m_velocidad_musica);
@@ -664,6 +668,7 @@ void VentanaOrgano::eliminar_nota_tocada(unsigned int id_nota)
 
 void VentanaOrgano::agregar_nota_requerida(unsigned int id_nota, const Color &color)
 {
+	m_teclas_luminosas->encender(id_nota, m_configuracion->dispositivo_salida());
 	m_notas_requeridas[id_nota] = color;
 }
 
@@ -683,6 +688,12 @@ void VentanaOrgano::borrar_notas_requeridas()
 			}
 			else
 				return;//La nota no es tocada
+		}
+
+		for(std::pair<unsigned int, Color> valor : m_notas_requeridas)
+		{
+			//Apagando luces
+			m_teclas_luminosas->apagar(valor.first, m_configuracion->dispositivo_salida());
 		}
 		//Todas son tocadas correctamente por lo que se suman al combo
 		m_puntaje->combo(static_cast<unsigned int>(m_notas_requeridas.size()));
@@ -810,12 +821,6 @@ void VentanaOrgano::evento_teclado(Tecla tecla, bool estado)
 		m_musica->reiniciar(2000000);
 		m_tiempo_actual_midi = m_musica->musica()->GetSongPositionInMicroseconds();
 		this->reiniciar();
-	}
-	else if(tecla == TECLA_M && estado)
-	{
-		MidiEvent evento_nuevo = MidiEvent::Build(MidiEventSimple(0xF0, 0, 0));
-		if(m_configuracion->dispositivo_salida() != NULL)
-			m_configuracion->dispositivo_salida()->Write(evento_nuevo);
 	}
 	if(cambio_teclado)
 	{

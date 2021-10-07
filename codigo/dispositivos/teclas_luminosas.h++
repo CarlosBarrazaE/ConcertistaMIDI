@@ -9,20 +9,19 @@ class TeclasLuminosas
 {
 private:
 	unsigned int m_identificador;
-	std::string m_nombre;
 
 public:
-	static std::vector<TeclasLuminosas*> Lista;
+	static std::vector<std::string> Lista;
+	static TeclasLuminosas *Cargar_tecla_luminosa(unsigned int identificador);
 
-	TeclasLuminosas(const std::string &nombre, unsigned int identificador);
+	TeclasLuminosas(unsigned int identificador);
 	~TeclasLuminosas();
 
-	virtual void actualizar(unsigned int diferencia_tiempo) = 0;
-	virtual void encender(unsigned int id_nota) = 0;
-	virtual void apagar(unsigned int id_nota) = 0;
+	virtual void actualizar(unsigned int diferencia_tiempo, MidiCommOut *dispositivo_salida) = 0;
+	virtual void encender(unsigned int id_nota, MidiCommOut *dispositivo_salida) = 0;
+	virtual void apagar(unsigned int id_nota, MidiCommOut *dispositivo_salida) = 0;
 
 	unsigned int identificador();
-	const std::string &nombre();
 };
 
 #endif

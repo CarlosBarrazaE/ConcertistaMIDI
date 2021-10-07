@@ -13,6 +13,7 @@
 #include "../control/configuracion.h++"
 #include "../control/datos_musica.h++"
 #include "../control/nota_activa.h++"
+#include "../dispositivos/teclas_luminosas.h++"
 #include "../libmidi/Midi.h++"
 #include "../libmidi/MidiComm.h++"
 #include "../util/texto.h++"
@@ -57,6 +58,7 @@ private:
 	Teclado_Organo m_teclado_actual;
 	Configuracion *m_configuracion;
 	Datos_Musica *m_musica;
+	TeclasLuminosas *m_teclas_luminosas;
 	NotasPistas m_notas;
 	std::string m_subtitulo_texto;
 	std::map<unsigned int, Nota_Activa*> m_notas_activas;

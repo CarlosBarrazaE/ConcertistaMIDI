@@ -3,35 +3,56 @@
 #include "organo_generico.h++"
 #include "casio_lks250.h++"
 
-std::vector<TeclasLuminosas*> TeclasLuminosas::Lista
+std::vector<std::string> TeclasLuminosas::Lista
 {
-	//NOTE El numero del identificador no se puede cambiarse ni repetirse
-	//porque se usa para guardar la configuracion en la base de datos
-	new OrganoGenerico("Generico - Canal 1", 0, 1),
-	new OrganoGenerico("Generico - Canal 2", 1, 2),
-	new OrganoGenerico("Generico - Canal 3", 2, 3),
-	new OrganoGenerico("Generico - Canal 4", 3, 4),
-	new OrganoGenerico("Generico - Canal 5", 4, 5),
-	new OrganoGenerico("Generico - Canal 6", 5, 6),
-	new OrganoGenerico("Generico - Canal 7", 6, 7),
-	new OrganoGenerico("Generico - Canal 8", 7, 8),
-	new OrganoGenerico("Generico - Canal 9", 8, 9),
-	new OrganoGenerico("Generico - Canal 10", 9, 10),
-	new OrganoGenerico("Generico - Canal 11", 10, 11),
-	new OrganoGenerico("Generico - Canal 12", 11, 12),
-	new OrganoGenerico("Generico - Canal 13", 12, 13),
-	new OrganoGenerico("Generico - Canal 14", 13, 14),
-	new OrganoGenerico("Generico - Canal 15", 14, 15),
-	new OrganoGenerico("Generico - Canal 16", 15, 16),
-	new CasioLks250(17),
+	"Desactivado",
+	"Generico - Canal 1",
+	"Generico - Canal 2",
+	"Generico - Canal 3",
+	"Generico - Canal 4",
+	"Generico - Canal 5",
+	"Generico - Canal 6",
+	"Generico - Canal 7",
+	"Generico - Canal 8",
+	"Generico - Canal 9",
+	"Generico - Canal 10",
+	"Generico - Canal 11",
+	"Generico - Canal 12",
+	"Generico - Canal 13",
+	"Generico - Canal 14",
+	"Generico - Canal 15",
+	"Generico - Canal 16",
+	"Casio LK-S250 - SysEx",
 };
 
-TeclasLuminosas::TeclasLuminosas(const std::string &nombre, unsigned int identificador)
+TeclasLuminosas *TeclasLuminosas::Cargar_tecla_luminosa(unsigned int identificador)
 {
-	if(identificador == 0)
-		Registro::Error("El identificador tiene que ser mayor a 0");//TODO lanzar a una excepcion
+	switch(identificador)
+	{
+		case 1: return new OrganoGenerico(0, 1);	//Generico - Canal 1
+		case 2: return new OrganoGenerico(1, 2);	//Generico - Canal 2
+		case 3: return new OrganoGenerico(2, 3);	//Generico - Canal 3
+		case 4: return new OrganoGenerico(3, 4);	//Generico - Canal 4
+		case 5: return new OrganoGenerico(4, 5);	//Generico - Canal 5
+		case 6: return new OrganoGenerico(5, 6);	//Generico - Canal 6
+		case 7: return new OrganoGenerico(6, 7);	//Generico - Canal 7
+		case 8: return new OrganoGenerico(7, 8);	//Generico - Canal 8
+		case 9: return new OrganoGenerico(8, 9);	//Generico - Canal 9
+		case 10: return new OrganoGenerico(9, 10);	//Generico - Canal 10
+		case 11: return new OrganoGenerico(10, 11);	//Generico - Canal 11
+		case 12: return new OrganoGenerico(11, 12);	//Generico - Canal 12
+		case 13: return new OrganoGenerico(12, 13);	//Generico - Canal 13
+		case 14: return new OrganoGenerico(13, 14);	//Generico - Canal 14
+		case 15: return new OrganoGenerico(14, 15);	//Generico - Canal 15
+		case 16: return new OrganoGenerico(15, 16);	//Generico - Canal 16
+		case 17: return new CasioLks250(17);
+		default: return new OrganoGenerico(0, 0);	//Desactivado
+	}
+}
+
+TeclasLuminosas::TeclasLuminosas(unsigned int identificador)
+{
 	m_identificador = identificador;
-	m_nombre = nombre;
 }
 
 TeclasLuminosas::~TeclasLuminosas()
@@ -41,9 +62,4 @@ TeclasLuminosas::~TeclasLuminosas()
 unsigned int TeclasLuminosas::identificador()
 {
 	return m_identificador;
-}
-
-const std::string &TeclasLuminosas::nombre()
-{
-	return m_nombre;
 }
