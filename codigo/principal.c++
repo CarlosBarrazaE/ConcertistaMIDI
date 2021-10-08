@@ -85,6 +85,9 @@ int main (int /*n*/, char **/*argumentos*/)
 		SDL_GL_SwapWindow(ventana);
 	}
 
+	SDL_DestroyWindow(ventana);
+	SDL_Quit();
+
 	return 0;
 }
 

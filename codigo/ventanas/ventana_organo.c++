@@ -425,8 +425,9 @@ void VentanaOrgano::escuchar_eventos()
 						m_configuracion->dispositivo_salida()->Write(evento);
 
 					//Borra la nota
-					m_notas_activas.erase(nota_encendida->second->id_nota);
+					unsigned int nota_a_borrar = nota_encendida->second->id_nota;
 					delete nota_encendida->second;
+					m_notas_activas.erase(nota_a_borrar);
 				}
 				//Se puede activar dos veces (o mas) la misma tecla por ejemplo con el teclado y el raton
 				//no se borrara la nota hasta que se reciban la misma cantidad de NoteOff que NoteOn
