@@ -829,6 +829,7 @@ void VentanaOrgano::evento_teclado(Tecla tecla, bool estado)
 		//El organo puede cambiar de tamaño al cambiar el numero de teclas, entonces hay que
 		//ajustar el tamaño del tablero de notas
 		m_tablero->dimension(Pantalla::Ancho, Pantalla::Alto - (m_organo->alto() + m_barra->alto()+40));
+		m_tablero->reiniciar();
 		m_guardar_tipo_teclado = true;
 	}
 }
