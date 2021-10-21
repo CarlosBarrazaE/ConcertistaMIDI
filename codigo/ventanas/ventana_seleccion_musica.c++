@@ -100,7 +100,7 @@ void VentanaSeleccionMusica::cargar_lista_carpetas()
 void VentanaSeleccionMusica::cargar_contenido_carpeta(std::string ruta_abrir)
 {
 	m_datos->iniciar_transaccion();
-	for(const std::filesystem::directory_entry elemento : std::filesystem::directory_iterator(ruta_abrir))
+	for(const std::filesystem::directory_entry &elemento : std::filesystem::directory_iterator(ruta_abrir))
 	{
 		std::string ruta = std::string(elemento.path());
 		std::string nombre_archivo = Funciones::nombre_archivo(ruta, elemento.is_directory());

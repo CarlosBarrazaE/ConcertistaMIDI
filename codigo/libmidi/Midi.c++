@@ -123,7 +123,7 @@ Midi Midi::ReadFromStream(std::istream &stream)
 	unsigned short pulses_per_quarter_note = time_division;
 
 	// Read in our tracks
-	for (int i = 0; i < track_count; ++i)
+	for (unsigned int i = 0; i < track_count; ++i)
 	{
 		MidiTrack pista_leida = MidiTrack::ReadFromStream(stream);
 
@@ -137,7 +137,7 @@ Midi Midi::ReadFromStream(std::istream &stream)
 		else
 			m.m_tracks.push_back(pista_leida);
 	}
-	track_count = m.m_tracks.size();
+	track_count = static_cast<short unsigned int>(m.m_tracks.size());
 
 	m.BuildTempoTrack();
 

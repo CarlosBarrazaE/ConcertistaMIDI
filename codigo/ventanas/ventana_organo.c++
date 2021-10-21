@@ -544,7 +544,7 @@ void VentanaOrgano::calcular_teclas_activas(unsigned int diferencia_tiempo)
 				posicion_y = static_cast<float>(m_tiempo_actual_midi - m_notas[pista][n].start) / static_cast<float>(m_duracion_nota);
 
 				//Si la nota no esta sonando termina el recorrido por la pista actual
-				if(posicion_y < -5)
+				if(posicion_y < -5)//-5 igual al tiempo de espera
 					break;
 
 				largo_nota = static_cast<float>(m_notas[pista][n].end - m_notas[pista][n].start) / static_cast<float>(m_duracion_nota);
@@ -583,6 +583,7 @@ void VentanaOrgano::calcular_teclas_activas(unsigned int diferencia_tiempo)
 					m_tiempo_espera[numero_nota] = (-posicion_y)-1;
 				else if(posicion_y >= 0)
 				{
+					//Almacena el color si cumplio el tiempo de espera
 					if(m_tiempo_espera[numero_nota] <= 0)
 						m_color_teclas[numero_nota] = m_pistas->at(pista).color();
 				}

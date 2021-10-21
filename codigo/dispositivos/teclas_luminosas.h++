@@ -15,7 +15,7 @@ public:
 	static TeclasLuminosas *Cargar_tecla_luminosa(unsigned int identificador);
 
 	TeclasLuminosas(unsigned int identificador);
-	~TeclasLuminosas();
+	virtual ~TeclasLuminosas();
 
 	virtual void actualizar(unsigned int diferencia_tiempo, MidiCommOut *dispositivo_salida) = 0;
 	virtual void encender(unsigned int id_nota, MidiCommOut *dispositivo_salida) = 0;

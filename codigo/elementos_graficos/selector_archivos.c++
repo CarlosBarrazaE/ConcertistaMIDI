@@ -36,7 +36,7 @@ void Selector_Archivos::cargar_tabla(std::string ruta_abrir)
 	m_tabla.vaciar();//Se vacia la tabla
 	m_ruta.ruta("/", ruta_abrir);
 	m_lista_archivos.clear();
-	for(const std::filesystem::directory_entry elemento : std::filesystem::directory_iterator(ruta_abrir))
+	for(const std::filesystem::directory_entry &elemento : std::filesystem::directory_iterator(ruta_abrir))
 	{
 		std::string nombre_archivo = Funciones::nombre_archivo(elemento.path(), elemento.is_directory());
 

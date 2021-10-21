@@ -111,7 +111,7 @@ namespace Funciones
 		unsigned int archivos = 0;
 		if(!std::ifstream(carpeta))
 			return 0;
-		for(const std::filesystem::directory_entry elemento : std::filesystem::directory_iterator(carpeta))
+		for(const std::filesystem::directory_entry &elemento : std::filesystem::directory_iterator(carpeta))
 		{
 			std::string ruta = std::string(elemento.path());
 			std::string extencion = Funciones::extencion_archivo(ruta);
