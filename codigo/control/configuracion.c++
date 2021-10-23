@@ -71,9 +71,9 @@ Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL), m_teclas_lumin
 	m_carpeta_activa = m_carpeta_activa_original;
 
 	//Configuracion Reproduccion
-	m_volumen = m_volumen_original;
-	m_velocidad = m_velocidad_original;
-	m_duracion_nota = m_duracion_nota_original;
+	this->volumen(m_volumen_original);
+	this->velocidad(m_velocidad_original);
+	this->duracion_nota(m_duracion_nota_original);
 	m_subtitulos_original = m_subtitulos;
 	m_teclado_visible = m_teclado_visible_original;
 	m_teclado_util = m_teclado_util_original;
@@ -299,7 +299,12 @@ void Configuracion::velocidad(double valor)
 
 void Configuracion::duracion_nota(unsigned int duracion)
 {
-	m_duracion_nota = duracion;
+	if(duracion < 1500)
+		m_duracion_nota = 1500;
+	else if(duracion > 14000)
+		m_duracion_nota = 14000;
+	else
+		m_duracion_nota = duracion;
 }
 
 void Configuracion::subtitulos(bool estado)
