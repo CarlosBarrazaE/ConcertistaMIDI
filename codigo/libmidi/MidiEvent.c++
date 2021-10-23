@@ -308,6 +308,11 @@ void MidiEvent::SetVelocity(int velocity)
 	if (Type() != MidiEventType_NoteOn)
 		return;
 
+	if(velocity > 127)
+		velocity = 127;
+	else if(velocity < 0)
+		velocity = 0;
+
 	m_data2 = static_cast<unsigned char>(velocity);
 }
 

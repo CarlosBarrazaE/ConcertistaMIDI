@@ -10,10 +10,16 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 
 	m_teclas_luminosas = m_configuracion->teclas_luminosas();
 
+	m_volumen = m_configuracion->volumen();
 	m_velocidad_musica = m_configuracion->velocidad();
 	m_duracion_nota = m_configuracion->duracion_nota();
 	m_mostrar_subtitulo = m_configuracion->subtitulos();
 	m_teclado_actual = m_configuracion->teclado_visible();
+
+	if(m_volumen > 0)
+		m_volumen_antes_mute = m_volumen;
+	else
+		m_volumen_antes_mute = 1;
 
 	m_barra = new Barra_Progreso(0, 40, Pantalla::Ancho, 40, m_musica->musica()->GetSongLengthInMicroseconds(), m_musica->musica()->GetBarLines(), recursos);
 	m_organo = new Organo(0, Pantalla::Alto, Pantalla::Ancho, &m_teclado_actual, recursos);
@@ -254,7 +260,13 @@ void VentanaOrgano::reproducir_eventos(unsigned int microsegundos_actualizar)
 		if(reproducir_evento && m_pistas->at(i->first).sonido())
 		{
 			if(m_configuracion->dispositivo_salida() != NULL)
-				m_configuracion->dispositivo_salida()->Write(i->second);
+			{
+				//Se copia el evento para poder editarlo
+				MidiEvent evento_salida = i->second;
+				//Escala el volumen
+				evento_salida.SetVelocity(static_cast<int>(evento_salida.NoteVelocity() * m_volumen));
+				m_configuracion->dispositivo_salida()->Write(evento_salida);
+			}
 		}
 	}
 	//Borra las notas requeridas si todas son tocadas a la vez
@@ -273,10 +285,10 @@ void VentanaOrgano::escuchar_eventos()
 	while(m_configuracion->dispositivo_entrada()->KeepReading())
 	{
 		MidiEvent evento = m_configuracion->dispositivo_entrada()->Read();
-		/*Registro::Aviso("Evento capturado: " + std::to_string(evento.Type()));
+		/*Registro::Aviso("Evento capturado: " + GetMidiEventTypeDescription(evento.Type()));
 		if(evento.Type() == MidiEventType_Meta)
 		{
-			Registro::Nota("Evento meta: " + std::to_string(evento.MetaType()));
+			Registro::Nota("Evento meta: " + GetMidiMetaEventTypeDescription(evento.MetaType()));
 			if(evento.HasText())
 			{
 				Registro::Depurar(evento.Text());
@@ -339,8 +351,10 @@ void VentanaOrgano::escuchar_eventos()
 				//Nota correcta
 				this->insertar_nota_activa(nota_encontrada->note_id, nota_encontrada->channel, m_pistas->at(pista_encontrada).color(), m_pistas->at(pista_encontrada).sonido(), true);
 
-				//Se cambia el canal y la velocidad del evento
+				//Se cambia el canal
 				evento.SetChannel(nota_encontrada->channel);
+				//Escala el volumen
+				evento.SetVelocity(static_cast<int>(evento.NoteVelocity() * m_volumen));
 
 				//Aumenta el contador de combos
 				//El modo aprender cuenta el puntaje cuando todas las notas son tocadas correctamente
@@ -365,7 +379,11 @@ void VentanaOrgano::escuchar_eventos()
 
 				//Se envia el evento
 				if(m_configuracion->dispositivo_salida() != NULL)
+				{
+					//Escala el volumen
+					evento.SetVelocity(static_cast<int>(evento.NoteVelocity() * m_volumen));
 					m_configuracion->dispositivo_salida()->Write(evento);
+				}
 
 				//Pierde el combo
 				m_puntaje->reiniciar_combo();
@@ -398,12 +416,6 @@ void VentanaOrgano::escuchar_eventos()
 				//pero no se cambia nada.
 				else
 					nota_encendida->second->contador_clic--;
-			}
-			else
-			{
-				//La nota no existe, esto puede ocurrir al utilizar un teclado MIDI
-				//y estar tocando antes de entrar en esta ventana
-				Registro::Aviso("Intento borrar una nota que no existe");
 			}
 		}
 	}
@@ -684,6 +696,36 @@ void VentanaOrgano::evento_teclado(Tecla tecla, bool estado)
 		m_tablero->duracion_nota(-1);
 		m_duracion_nota = m_tablero->duracion_nota();
 		m_configuracion->duracion_nota(m_duracion_nota);
+	}
+	else if(tecla == TECLA_RESTA_NUMERICO && estado)
+	{
+		m_volumen-=0.1;
+		m_volumen_antes_mute = m_volumen;
+		if(m_volumen <= 0)
+		{
+			m_volumen = 0;
+			m_volumen_antes_mute = 0.1;
+		}
+		m_configuracion->volumen(m_volumen);
+	}
+	else if(tecla == TECLA_SUMA_NUMERIO && estado)
+	{
+		m_volumen+=0.1;
+		if(m_volumen > 2)
+			m_volumen = 2;
+		m_volumen_antes_mute = m_volumen;
+		m_configuracion->volumen(m_volumen);
+	}
+	else if(tecla == TECLA_M && estado)
+	{
+		if(m_volumen > 0)
+		{
+			m_volumen_antes_mute = m_volumen;
+			m_volumen = 0;
+		}
+		else
+			m_volumen = m_volumen_antes_mute;
+		m_configuracion->volumen(m_volumen);
 	}
 	else if(tecla == TECLA_FLECHA_IZQUIERDA && estado)
 	{

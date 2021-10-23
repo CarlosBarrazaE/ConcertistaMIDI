@@ -223,6 +223,9 @@ void eventos_taclado(Controlador_Juego *controlador, int tecla, bool estado)
 		case 161: controlador->eventos_teclado(TECLA_EXCLAMACIONINICIO, estado); break;
 		case SDLK_PLUS: controlador->eventos_teclado(TECLA_SUMA, estado); break;
 
+		case SDLK_KP_MINUS: controlador->eventos_teclado(TECLA_RESTA_NUMERICO, estado); break;
+		case SDLK_KP_PLUS: controlador->eventos_teclado(TECLA_SUMA_NUMERIO, estado); break;
+
 		case SDLK_F1: controlador->eventos_teclado(TECLA_F1, estado); break;
 		case SDLK_F2: controlador->eventos_teclado(TECLA_F2, estado); break;
 		case SDLK_F3: controlador->eventos_teclado(TECLA_F3, estado); break;

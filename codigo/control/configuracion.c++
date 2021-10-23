@@ -279,8 +279,8 @@ std::string Configuracion::carpeta_activa()
 //Configuracion Reproduccion
 void Configuracion::volumen(double valor)
 {
-	if(valor <= 0)
-		m_volumen = 0.01;
+	if(valor < 0)
+		m_volumen = 0;
 	else if(m_volumen > 2)
 		m_volumen = 2;
 	else
@@ -289,7 +289,12 @@ void Configuracion::volumen(double valor)
 
 void Configuracion::velocidad(double valor)
 {
-	m_velocidad = valor;
+	if(valor <= 0)
+		m_velocidad = 0.01;
+	else if(m_velocidad > 2)
+		m_velocidad = 2;
+	else
+		m_velocidad = valor;
 }
 
 void Configuracion::duracion_nota(unsigned int duracion)

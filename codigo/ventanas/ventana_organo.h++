@@ -43,12 +43,14 @@ private:
 
 	//Controles
 	double m_velocidad_musica;
+	double m_volumen;
 	bool m_cambio_velocidad;
 	bool m_pausa;
 	bool m_retorno_carro;
 	bool m_mostrar_subtitulo;
 	bool m_descartar_texto_inicial;
 	unsigned int m_duracion_nota;
+	double m_volumen_antes_mute;
 
 	//Datos
 	Teclado_Organo m_teclado_actual;
