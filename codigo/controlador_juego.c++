@@ -26,13 +26,8 @@ Controlador_Juego::Controlador_Juego(Administrador_Recursos *recursos) : m_texto
 	m_depurar = false;
 	m_modo_alambre = false;
 	m_finalizar = false;
-	m_guardar_cambios = false;
 
-	std::string resultado_pantalla_completa = m_configuracion.leer("pantalla_completa");
-	if(resultado_pantalla_completa == "verdadero")
-		m_pantalla_completa = true;
-	else
-		m_pantalla_completa = false;
+	m_pantalla_completa = m_configuracion.pantalla_completa();
 }
 
 Controlador_Juego::~Controlador_Juego()
@@ -52,7 +47,15 @@ void Controlador_Juego::actualizar()
 	//unsigned int diferencia_tiempo = (1.0/60.0)*1000000000;
 
 	//Reconecta los dispositivos midis si es necesario
-	m_configuracion.reconectar();
+	if(m_configuracion.dispositivo_entrada() != NULL)
+	{
+		if(m_configuracion.dispositivo_entrada()->ShouldReconnect())
+		{
+			m_configuracion.dispositivo_entrada()->Reconnect();
+			if(m_configuracion.dispositivo_salida() != NULL)
+				m_configuracion.dispositivo_salida()->Reconnect();
+		}
+	}
 
 	m_ventana_actual->actualizar(diferencia_tiempo);
 	m_notificaciones.actualizar(diferencia_tiempo);
@@ -129,18 +132,12 @@ void Controlador_Juego::actualizar()
 	else if(accion_actual == EntrarPantallaCompleta)
 	{
 		if(!m_pantalla_completa)
-		{
 			m_pantalla_completa = true;
-			m_guardar_cambios = !m_guardar_cambios;
-		}
 	}
 	else if(accion_actual == SalirPantallaCompleta)
 	{
 		if(m_pantalla_completa)
-		{
 			m_pantalla_completa = false;
-			m_guardar_cambios = !m_guardar_cambios;
-		}
 	}
 	else if(accion_actual == EntrarModoAlambre)
 	{
@@ -230,10 +227,7 @@ void Controlador_Juego::eventos_teclado(Tecla tecla, bool estado)
 		Pantalla::ModoDesarrollo = m_depurar;
 	}
 	else if(tecla == TECLA_F11 && estado)
-	{
 		m_pantalla_completa = !m_pantalla_completa;
-		m_guardar_cambios = !m_guardar_cambios;
-	}
 	else if(tecla == TECLA_F12 && estado)
 		m_modo_alambre = !m_modo_alambre;
 	else
@@ -276,14 +270,8 @@ void Controlador_Juego::evento_ventana(float ancho, float alto)
 void Controlador_Juego::evento_salir()
 {
 	m_finalizar = true;
-	//Se guarda solo si hay cambios
-	if(m_guardar_cambios)
-	{
-		if(m_pantalla_completa)
-			m_configuracion.escribir("pantalla_completa", "verdadero");
-		else
-			m_configuracion.escribir("pantalla_completa", "falso");
-	}
+	m_configuracion.pantalla_completa(m_pantalla_completa);
+	m_configuracion.guardar_configuracion();
 }
 
 void Controlador_Juego::reiniciar_contador_inactividad()

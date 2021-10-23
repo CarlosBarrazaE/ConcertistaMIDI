@@ -55,3 +55,13 @@ std::string Teclado_Organo::texto()
 {
 	return std::to_string(m_tecla_inicial) + "," + std::to_string(m_numero_teclas);
 }
+
+bool Teclado_Organo::operator == (const Teclado_Organo &tc) const
+{
+	return m_tecla_inicial == tc.m_tecla_inicial && m_numero_teclas == tc.m_numero_teclas;
+}
+
+bool Teclado_Organo::operator != (const Teclado_Organo &tc) const
+{
+	return m_tecla_inicial != tc.m_tecla_inicial || m_numero_teclas != tc.m_numero_teclas;
+}

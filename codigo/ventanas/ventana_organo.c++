@@ -8,25 +8,12 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 	m_rectangulo = recursos->figura(F_Rectangulo);
 	m_textura_subtitulo = recursos->textura(T_Nota);
 
-	//Carga la configuracion de la base de datos
-	std::string resultado_velocidad = m_configuracion->leer("velocidad_musica");
+	m_teclas_luminosas = m_configuracion->teclas_luminosas();
 
-	if(resultado_velocidad != "")
-	{
-		m_velocidad_musica = std::stod(resultado_velocidad);
-		if(m_velocidad_musica <= 0)
-			m_velocidad_musica = 0.01;
-		else if(m_velocidad_musica > 2)
-			m_velocidad_musica = 2;
-	}
-	else
-		m_velocidad_musica = 1.0;
-
-	std::string resultado_teclado = m_configuracion->leer("tipo_teclado");
-	if(resultado_teclado != "")
-		m_teclado_actual.cargar(resultado_teclado);
-	else
-		m_teclado_actual.cambiar(21, 88);//Teclado normal de 88 teclas
+	m_velocidad_musica = m_configuracion->velocidad();
+	m_duracion_nota = m_configuracion->duracion_nota();
+	m_mostrar_subtitulo = m_configuracion->subtitulos();
+	m_teclado_actual = m_configuracion->teclado_visible();
 
 	m_barra = new Barra_Progreso(0, 40, Pantalla::Ancho, 40, m_musica->musica()->GetSongLengthInMicroseconds(), m_musica->musica()->GetBarLines(), recursos);
 	m_organo = new Organo(0, Pantalla::Alto, Pantalla::Ancho, &m_teclado_actual, recursos);
@@ -71,41 +58,20 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 	m_tablero->notas(m_notas);
 	m_tablero->pistas(m_pistas);
 	m_tablero->lineas(m_musica->musica()->GetBarLines());
+	m_tablero->modificar_duracion_nota(m_duracion_nota);
 	m_organo->notas_activas(&m_color_teclas);
 	m_organo->notas_requeridas(&m_notas_requeridas);
-
-	//Carga la configuracion de la base de datos de la duracion
-	std::string resultado_duracion = m_configuracion->leer("duracion_nota");
-	if(resultado_duracion != "")
-	{
-		m_duracion_nota = std::stoi(resultado_duracion);
-		m_tablero->modificar_duracion_nota(m_duracion_nota);
-	}
-	else
-		m_duracion_nota = 6500;
 
 	//Elimina las notas tocadas antes de esta ventana
 	if(m_configuracion->dispositivo_entrada() != NULL)
 		m_configuracion->dispositivo_entrada()->Reset();
 
-	m_teclas_luminosas = m_configuracion->teclas_luminosas();
-
 	m_cambio_velocidad = false;
 	m_pausa = false;
 	m_retorno_carro = false;
 
-	//Carga la configuracion de los subtitulos
-	std::string estado_subtitulo = m_configuracion->leer("estado_subtitulo");
-	if(estado_subtitulo == "inactivo")
-		m_mostrar_subtitulo = false;
-	else
-		m_mostrar_subtitulo = true;
 	m_descartar_texto_inicial = true;
 
-	m_guardar_velocidad = false;
-	m_guardar_duracion_nota = false;
-	m_guardar_tipo_teclado = false;
-	m_guardar_estado_subtitulo = false;
 	this->inicializar();
 }
 
@@ -128,8 +94,6 @@ void VentanaOrgano::actualizar(unsigned int diferencia_tiempo)
 	//Cuando termina la cancion se retrocede a la ventana anterior
 	if(m_musica->musica()->IsSongOver())
 	{
-		this->guardar_configuracion();
-
 		m_musica->reiniciar();
 		m_accion = CambiarASeleccionPista;
 	}
@@ -504,24 +468,6 @@ void VentanaOrgano::reproducir_subtitulos(const MidiEvent &evento)
 		Registro::Depurar("Evento Meta: MidiMetaEvent_DeviceName Contenido: " + evento.Text() + " Largo: " + std::to_string(evento.Text().length()));*/
 }
 
-void VentanaOrgano::guardar_configuracion()
-{
-	//Se guarda la configuracion
-	if(m_guardar_velocidad)
-		m_configuracion->escribir("velocidad_musica", std::to_string(m_velocidad_musica));
-	if(m_guardar_duracion_nota)
-		m_configuracion->escribir("duracion_nota", std::to_string(m_tablero->duracion_nota()));//modificar_duracion_nota
-	if(m_guardar_tipo_teclado)
-		m_configuracion->escribir("tipo_teclado", m_teclado_actual.texto());
-	if(m_guardar_estado_subtitulo)
-	{
-		if(m_mostrar_subtitulo)
-			m_configuracion->escribir("estado_subtitulo", "activo");
-		else
-			m_configuracion->escribir("estado_subtitulo", "inactivo");
-	}
-}
-
 void VentanaOrgano::calcular_teclas_activas(unsigned int diferencia_tiempo)
 {
 	float posicion_y = 0;
@@ -724,8 +670,6 @@ void VentanaOrgano::evento_teclado(Tecla tecla, bool estado)
 	bool cambio_teclado = false;
 	if(tecla == TECLA_ESCAPE && !estado)
 	{
-		this->guardar_configuracion();
-
 		m_musica->reiniciar();
 		m_accion = CambiarASeleccionPista;
 	}
@@ -733,13 +677,13 @@ void VentanaOrgano::evento_teclado(Tecla tecla, bool estado)
 	{
 		m_tablero->duracion_nota(1);
 		m_duracion_nota = m_tablero->duracion_nota();
-		m_guardar_duracion_nota = true;
+		m_configuracion->duracion_nota(m_duracion_nota);
 	}
 	else if(tecla == TECLA_FLECHA_ABAJO && estado)
 	{
 		m_tablero->duracion_nota(-1);
 		m_duracion_nota = m_tablero->duracion_nota();
-		m_guardar_duracion_nota = true;
+		m_configuracion->duracion_nota(m_duracion_nota);
 	}
 	else if(tecla == TECLA_FLECHA_IZQUIERDA && estado)
 	{
@@ -747,7 +691,7 @@ void VentanaOrgano::evento_teclado(Tecla tecla, bool estado)
 		if(m_velocidad_musica < 0.01)
 			m_velocidad_musica = 0.01;
 		m_cambio_velocidad = true;
-		m_guardar_velocidad = true;
+		m_configuracion->velocidad(m_velocidad_musica);
 	}
 	else if(tecla == TECLA_FLECHA_DERECHA && estado)
 	{
@@ -755,7 +699,7 @@ void VentanaOrgano::evento_teclado(Tecla tecla, bool estado)
 		if(m_velocidad_musica > 2)
 			m_velocidad_musica = 2;
 		m_cambio_velocidad = true;
-		m_guardar_velocidad = true;
+		m_configuracion->velocidad(m_velocidad_musica);
 	}
 	else if(tecla == TECLA_ESPACIO && !estado)
 	{
@@ -767,7 +711,7 @@ void VentanaOrgano::evento_teclado(Tecla tecla, bool estado)
 	else if(tecla == TECLA_F4 && estado)
 	{
 		m_mostrar_subtitulo = !m_mostrar_subtitulo;
-		m_guardar_estado_subtitulo = !m_guardar_estado_subtitulo;
+		m_configuracion->subtitulos(m_mostrar_subtitulo);
 		//Actualiza el subtitulo
 		if(m_mostrar_subtitulo)
 			m_subtitulos.texto(Texto::quitar_espacios_en_extremos(m_subtitulo_texto));
@@ -831,7 +775,7 @@ void VentanaOrgano::evento_teclado(Tecla tecla, bool estado)
 		//ajustar el tamaño del tablero de notas
 		m_tablero->dimension(Pantalla::Ancho, Pantalla::Alto - (m_organo->alto() + m_barra->alto()+40));
 		m_tablero->reiniciar();
-		m_guardar_tipo_teclado = true;
+		m_configuracion->teclado_visible(m_teclado_actual.tecla_inicial(), m_teclado_actual.numero_teclas());
 	}
 }
 

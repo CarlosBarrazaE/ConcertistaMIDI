@@ -366,7 +366,7 @@ void Tablero_Notas::pistas(std::vector<Pista> *pistas)
 		m_ultima_nota.push_back(0);//Se inician todas las pistas en 0
 }
 
-int Tablero_Notas::duracion_nota()
+unsigned int Tablero_Notas::duracion_nota()
 {
 	return m_duracion_nota;
 }
@@ -384,7 +384,7 @@ void Tablero_Notas::duracion_nota(int valor)
 		m_duracion_nota = 14000;
 }
 
-void Tablero_Notas::modificar_duracion_nota(int valor)
+void Tablero_Notas::modificar_duracion_nota(unsigned int valor)
 {
 	m_duracion_nota = valor;
 

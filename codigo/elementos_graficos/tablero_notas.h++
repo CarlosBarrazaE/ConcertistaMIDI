@@ -30,7 +30,7 @@ private:
 	Teclado_Organo *m_teclado;
 	microseconds_t m_tiempo_actual_midi;
 	float m_ancho_blanca, m_ancho_negra;
-	int m_duracion_nota;
+	unsigned int m_duracion_nota;
 	NotasPistas m_notas;
 	MidiEventMicrosecondList m_lineas;
 
@@ -61,9 +61,9 @@ public:
 	void notas(NotasPistas notas);
 	void lineas(MidiEventMicrosecondList lineas);
 	void pistas(std::vector<Pista> *pistas);
-	int duracion_nota();
+	unsigned int duracion_nota();
 	void duracion_nota(int valor);
-	void modificar_duracion_nota(int valor);
+	void modificar_duracion_nota(unsigned int valor);
 	void reiniciar();
 
 	void desplazamiento(Direccion direccion);

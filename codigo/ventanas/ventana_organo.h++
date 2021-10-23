@@ -1,6 +1,8 @@
 #ifndef VENTANAORGANO_H
 #define VENTANAORGANO_H
 
+#define TIEMPO_DETECCION 165000
+
 #include "ventana.h++"
 #include "../elementos_graficos/barra_progreso.h++"
 #include "../elementos_graficos/etiqueta.h++"
@@ -46,13 +48,7 @@ private:
 	bool m_retorno_carro;
 	bool m_mostrar_subtitulo;
 	bool m_descartar_texto_inicial;
-	int m_duracion_nota;
-
-	//Para saver si es necesario guardar
-	bool m_guardar_velocidad;
-	bool m_guardar_duracion_nota;
-	bool m_guardar_tipo_teclado;
-	bool m_guardar_estado_subtitulo;
+	unsigned int m_duracion_nota;
 
 	//Datos
 	Teclado_Organo m_teclado_actual;
@@ -74,7 +70,6 @@ private:
 	void reproducir_eventos(unsigned int microsegundos_actualizar);
 	void escuchar_eventos();
 	void reproducir_subtitulos(const MidiEvent &evento);
-	void guardar_configuracion();
 
 	void calcular_teclas_activas(unsigned int diferencia_tiempo);
 	void reiniciar();

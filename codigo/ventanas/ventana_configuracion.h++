@@ -49,16 +49,10 @@ private:
 	Configuracion *m_configuracion;
 	unsigned int m_ultima_solapa;
 	unsigned int m_id_dispositivo_entrada;
-	unsigned int m_id_entrada_anterior;
-
 	unsigned int m_id_dispositivo_salida;
-	unsigned int m_id_salida_anterior;
-
 	unsigned int m_id_teclas_luminosas;
-	unsigned int m_id_teclas_luminosas_anterior;
 
 	std::vector<std::string> obtener_dispositivos(MidiCommDescriptionList lista);
-	void guardar_configuracion();
 	void cargar_tabla_carpetas();
 	unsigned int limpiar_base_de_datos();
 

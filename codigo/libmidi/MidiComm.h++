@@ -93,8 +93,6 @@ public:
 	void Reconnect();
 
 private:
-	void Release();
-
 	MidiCommDescription m_description;
 	std::vector<std::pair<int,int> > m_notes_on;
 };

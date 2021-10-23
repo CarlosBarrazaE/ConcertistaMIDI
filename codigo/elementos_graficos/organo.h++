@@ -1,6 +1,10 @@
 #ifndef ORGANO_H
 #define ORGANO_H
 
+#define PROPORCION_BLANCA 6.52941f
+#define PROPORCION_NEGRA 0.657f
+#define SIN_NOTA 130
+
 #include "elemento.h++"
 #include "../recursos/generador_particulas.h++"
 #include "../recursos/rectangulo.h++"
@@ -13,8 +17,6 @@
 
 #include <array>
 #include <vector>
-
-#define SIN_NOTA 130
 
 class Organo : public Elemento
 {

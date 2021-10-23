@@ -54,6 +54,13 @@ namespace Funciones
 		return false;
 	}
 
+	bool comparar_double(double valor1, double valor2, double diferencia_minima)
+	{
+		if(valor1 < valor2 + diferencia_minima && valor1 > valor2 - diferencia_minima)
+			return true;
+		return false;
+	}
+
 	std::string nombre_archivo(const std::string &ruta, bool carpeta)
 	{
 		unsigned long int extencion = ruta.length()-1;

@@ -7,26 +7,9 @@ VentanaConfiguracion::VentanaConfiguracion(Configuracion *configuracion, Adminis
 	m_recursos = recursos;
 	m_rectangulo = recursos->figura(F_Rectangulo);
 
-	//Carga la configuracion del dispositivo de entrada
-	m_id_dispositivo_entrada = 0;
-	std::string dispositivo_entrada = m_configuracion->leer("dispositivo_entrada");
-	if(dispositivo_entrada != "")
-		m_id_dispositivo_entrada = static_cast<unsigned int>(std::stoi(dispositivo_entrada));
-	m_id_entrada_anterior = m_id_dispositivo_entrada;
-
-	//Carga la configuracion del dispositivo de salida
-	m_id_dispositivo_salida = 0;
-	std::string dispositivo_salida = m_configuracion->leer("dispositivo_salida");
-	if(dispositivo_salida != "")
-		m_id_dispositivo_salida = static_cast<unsigned int>(std::stoi(dispositivo_salida));
-	m_id_salida_anterior = m_id_dispositivo_salida;
-
-	//Carga la configuracion de las teclas luminosas
-	m_id_teclas_luminosas = 0;
-	std::string teclas_luminosas = m_configuracion->leer("teclas_luminosas");
-	if(teclas_luminosas != "")
-		m_id_teclas_luminosas = static_cast<unsigned int>(std::stoi(teclas_luminosas));
-	m_id_teclas_luminosas_anterior = m_id_teclas_luminosas;
+	m_id_dispositivo_entrada = m_configuracion->id_dispositivo_entrada();
+	m_id_dispositivo_salida = m_configuracion->id_dispositivo_salida();
+	m_id_teclas_luminosas = m_configuracion->teclas_luminosas()->identificador();
 
 	m_texto_titulo.texto("Configuración");
 	m_texto_titulo.tipografia(recursos->tipografia(LetraTitulo));
@@ -176,18 +159,6 @@ std::vector<std::string> VentanaConfiguracion::obtener_dispositivos(MidiCommDesc
 	return opciones_entrada;
 }
 
-void VentanaConfiguracion::guardar_configuracion()
-{
-	if(m_id_dispositivo_entrada != m_id_entrada_anterior)
-		m_configuracion->escribir("dispositivo_entrada", std::to_string(m_id_dispositivo_entrada));
-
-	if(m_id_dispositivo_salida != m_id_salida_anterior)
-		m_configuracion->escribir("dispositivo_salida", std::to_string(m_id_dispositivo_salida));
-
-	if(m_id_teclas_luminosas != m_id_teclas_luminosas_anterior)
-		m_configuracion->escribir("teclas_luminosas", std::to_string(m_id_teclas_luminosas));
-}
-
 void VentanaConfiguracion::cargar_tabla_carpetas()
 {
 	std::vector<std::vector<std::string>> carpetas = m_configuracion->base_de_datos()->carpetas();
@@ -304,19 +275,16 @@ void VentanaConfiguracion::evento_raton(Raton *raton)
 	m_solapa->evento_raton(raton);
 	m_boton_atras->evento_raton(raton);
 	if(m_boton_atras->esta_activado())
-	{
 		m_accion = CambiarATitulo;
-		this->guardar_configuracion();
-	}
 
 	if(m_solapa->solapa_activa() == 0)
 	{
 		if(m_solapa1_restablecer->esta_activado())
 		{
-			m_configuracion->escribir("velocidad_musica", "1.000000");
-			m_configuracion->escribir("duracion_nota", "6500");
-			m_configuracion->escribir("tipo_teclado", "21,88");
-			m_configuracion->escribir("estado_subtitulo", "activo");
+			m_configuracion->velocidad(1.0);
+			m_configuracion->duracion_nota(6500);
+			m_configuracion->teclado_visible(21,88);
+			m_configuracion->subtitulos(true);
 			Notificacion::Nota("Configuración restablecida", 5);
 		}
 		if(m_solapa1_limpiar_bd->esta_activado())
@@ -408,10 +376,7 @@ void VentanaConfiguracion::evento_raton(Raton *raton)
 void VentanaConfiguracion::evento_teclado(Tecla tecla, bool estado)
 {
 	if(tecla == TECLA_ESCAPE && !estado)
-	{
 		m_accion = CambiarATitulo;
-		this->guardar_configuracion();
-	}
 	//Modo desarrollo activado desde teclado
 	if(m_solapa1_casilla_desarrollo->activado() != Pantalla::ModoDesarrollo)
 		m_solapa1_casilla_desarrollo->estado(Pantalla::ModoDesarrollo);

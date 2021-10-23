@@ -14,6 +14,7 @@ namespace Funciones
 	std::string microsegundo_a_texto(microseconds_t ms, bool mostrar_vacio);
 	microseconds_t duracion_midi(const std::string &ruta_midi);
 	bool comparar_float(float valor1, float valor2, float diferencia_minima);
+	bool comparar_double(double valor1, double valor2, double diferencia_minima);
 
 	std::string nombre_archivo(const std::string &ruta, bool carpeta);
 	std::string extencion_archivo(const std::string &nombre);

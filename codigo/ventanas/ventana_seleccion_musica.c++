@@ -29,8 +29,8 @@ VentanaSeleccionMusica::VentanaSeleccionMusica(Configuracion *configuracion, Dat
 	m_tabla_archivos.agregar_columna("Fecha", true, 2);
 
 	m_es_carpeta_inicial = false;
-	m_carpeta_inicial = m_configuracion->leer("carpeta_inicial");
-	m_carpeta_activa = m_configuracion->leer("carpeta_activa");
+	m_carpeta_inicial = m_configuracion->carpeta_inicial();
+	m_carpeta_activa = m_configuracion->carpeta_activa();
 
 	m_ruta_exploracion.carpeta_extra("Inicio", "-");
 
@@ -162,7 +162,7 @@ void VentanaSeleccionMusica::crear_tabla(std::string ruta_abrir)
 		if(m_es_carpeta_inicial)
 		{
 			m_carpeta_inicial = ruta_abrir;
-			m_configuracion->escribir("carpeta_inicial", ruta_abrir);
+			m_configuracion->carpeta_inicial(ruta_abrir);
 			m_es_carpeta_inicial = false;
 
 			for(unsigned long int m = 0; m<m_lista_archivos.size(); m++)
@@ -173,7 +173,7 @@ void VentanaSeleccionMusica::crear_tabla(std::string ruta_abrir)
 
 		}
 		m_carpeta_activa = ruta_abrir;
-		m_configuracion->escribir("carpeta_activa", ruta_abrir);
+		m_configuracion->carpeta_activa(ruta_abrir);
 
 		//Limpia la lista de archivos
 		m_lista_archivos.clear();
@@ -191,8 +191,8 @@ void VentanaSeleccionMusica::crear_tabla(std::string ruta_abrir)
 		m_es_carpeta_inicial = true;
 		m_carpeta_inicial = "-";
 		m_carpeta_activa = "-";
-		m_configuracion->escribir("carpeta_inicial", "-");
-		m_configuracion->escribir("carpeta_activa", "-");
+		m_configuracion->carpeta_inicial(m_carpeta_inicial);
+		m_configuracion->carpeta_activa(m_carpeta_activa);
 
 		this->cargar_lista_carpetas();
 	}

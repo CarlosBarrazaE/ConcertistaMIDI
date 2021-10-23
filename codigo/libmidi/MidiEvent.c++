@@ -171,9 +171,7 @@ void MidiEvent::ReadMeta(std::istream &stream)
 
 		default:
 			// Ignore unknown event
-			Registro::Aviso("Ignorando evento MIDI desconocido " + std::to_string((m_meta_type * 1)) + " de largo " + std::to_string(meta_length));
-		//  delete[] buffer;
-		//  throw MidiError(MidiError_UnknownMetaEventType);
+			throw MidiError(MidiError_UnknownMetaEventType);
 	}
 
 	delete[] buffer;

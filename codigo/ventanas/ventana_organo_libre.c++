@@ -5,11 +5,7 @@ VentanaOrganoLibre::VentanaOrganoLibre(Configuracion *configuracion, Administrad
 	m_rectangulo = recursos->figura(F_Rectangulo);
 	m_configuracion = configuracion;
 
-	std::string resultado_teclado = m_configuracion->leer("tipo_teclado");
-	if(resultado_teclado != "")
-		m_teclado_actual.cargar(resultado_teclado);
-	else
-		m_teclado_actual.cambiar(21, 88);//Teclado normal de 88 teclas
+	m_teclado_actual = m_configuracion->teclado_visible();
 
 	m_organo = new Organo(0, Pantalla::Alto, Pantalla::Ancho, &m_teclado_actual, recursos);
 	m_tablero = new Tablero_Notas(0, 40, Pantalla::Ancho, Pantalla::Alto - (m_organo->alto() + 40), &m_teclado_actual, recursos);

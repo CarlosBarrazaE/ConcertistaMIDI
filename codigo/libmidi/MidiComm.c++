@@ -229,10 +229,6 @@ MidiEvent MidiCommIn::Read()
 			int lost_client = ev->data.addr.client;
 			int lost_port   = ev->data.addr.port;
 
-			Registro::Depurar("Dispositivo MIDI desconectado cliente: " + std::to_string(lost_client) + ", puerto=" + std::to_string(lost_port));
-
-			Notificacion::Aviso("Dispositivo MIDI desconectado", 10);
-
 			MidiCommIn::UpdateDeviceList();
 			MidiCommOut::UpdateDeviceList();
 
