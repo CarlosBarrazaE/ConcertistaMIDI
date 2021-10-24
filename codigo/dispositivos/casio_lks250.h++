@@ -11,9 +11,9 @@ public:
 	CasioLks250(unsigned int identificador);
 	~CasioLks250();
 
-	void actualizar(unsigned int diferencia_tiempo, MidiCommOut *dispositivo_salida);
-	void encender(unsigned int id_nota, MidiCommOut *dispositivo_salida);
-	void apagar(unsigned int id_nota, MidiCommOut *dispositivo_salida);
+	void actualizar_virtual(unsigned int diferencia_tiempo, MidiCommOut *dispositivo_salida);
+	void encender_virtual(unsigned int id_nota, MidiCommOut *dispositivo_salida);
+	void apagar_virtual(unsigned int id_nota, MidiCommOut *dispositivo_salida);
 };
 
 #endif

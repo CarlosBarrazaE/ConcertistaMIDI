@@ -59,7 +59,54 @@ TeclasLuminosas::~TeclasLuminosas()
 {
 }
 
+void TeclasLuminosas::actualizar(unsigned int diferencia_tiempo, MidiCommOut *dispositivo_salida)
+{
+	if(dispositivo_salida == NULL)
+		return;
+	this->actualizar_virtual(diferencia_tiempo, dispositivo_salida);
+}
+
+void TeclasLuminosas::encender(unsigned int id_nota, MidiCommOut *dispositivo_salida)
+{
+	if(dispositivo_salida == NULL)
+		return;
+
+	this->encender_virtual(id_nota, dispositivo_salida);
+	m_luces_encendidas.push_back(id_nota);
+}
+
+void TeclasLuminosas::apagar(unsigned int id_nota, MidiCommOut *dispositivo_salida)
+{
+	if(dispositivo_salida == NULL)
+		return;
+
+	this->apagar_virtual(id_nota, dispositivo_salida);
+
+	//Se borra de la lista
+	bool borrado = false;
+	for(unsigned int x=0; x<m_luces_encendidas.size() && !borrado; x++)
+	{
+		if(m_luces_encendidas[x] == id_nota)
+		{
+			if(x != m_luces_encendidas.size()-1)
+				m_luces_encendidas[x] = m_luces_encendidas[m_luces_encendidas.size()-1];//Lo sobrescribe con el ultimo
+			m_luces_encendidas.pop_back();//Borra el ultimo
+			borrado = true;
+		}
+	}
+}
+
 unsigned int TeclasLuminosas::identificador()
 {
 	return m_identificador;
+}
+
+void TeclasLuminosas::reiniciar(MidiCommOut *dispositivo_salida)
+{
+	if(dispositivo_salida == NULL)
+		return;
+
+	for(unsigned int x=0; x<m_luces_encendidas.size(); x++)
+		this->apagar(m_luces_encendidas[x], dispositivo_salida);
+	m_luces_encendidas.clear();
 }

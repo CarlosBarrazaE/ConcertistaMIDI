@@ -12,20 +12,18 @@ OrganoGenerico::~OrganoGenerico()
 {
 }
 
-void OrganoGenerico::actualizar(unsigned int /*diferencia_tiempo*/, MidiCommOut */*dispositivo_salida*/)
+void OrganoGenerico::actualizar_virtual(unsigned int /*diferencia_tiempo*/, MidiCommOut */*dispositivo_salida*/)
 {
 }
 
-void OrganoGenerico::encender(unsigned int id_nota, MidiCommOut *dispositivo_salida)
+void OrganoGenerico::encender_virtual(unsigned int id_nota, MidiCommOut *dispositivo_salida)
 {
 	MidiEvent evento_nuevo = MidiEvent::Build(MidiEventSimple(0x90 | m_canal, static_cast<unsigned char>(id_nota), 1));
-	if(dispositivo_salida != NULL)
-		dispositivo_salida->Write(evento_nuevo);
+	dispositivo_salida->Write(evento_nuevo);
 }
 
-void OrganoGenerico::apagar(unsigned int id_nota, MidiCommOut *dispositivo_salida)
+void OrganoGenerico::apagar_virtual(unsigned int id_nota, MidiCommOut *dispositivo_salida)
 {
 	MidiEvent evento_nuevo = MidiEvent::Build(MidiEventSimple(0x80 | m_canal, static_cast<unsigned char>(id_nota), 0));
-	if(dispositivo_salida != NULL)
-		dispositivo_salida->Write(evento_nuevo);
+	dispositivo_salida->Write(evento_nuevo);
 }

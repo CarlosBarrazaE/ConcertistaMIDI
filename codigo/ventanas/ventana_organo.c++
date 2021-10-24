@@ -83,6 +83,8 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 
 VentanaOrgano::~VentanaOrgano()
 {
+	m_teclas_luminosas->reiniciar(m_configuracion->dispositivo_salida());
+
 	if(m_configuracion->dispositivo_entrada() != NULL)
 		m_configuracion->dispositivo_entrada()->Reset();
 	if(m_configuracion->dispositivo_salida() != NULL)
@@ -575,6 +577,9 @@ void VentanaOrgano::reiniciar()
 	//Reinicia la primera nota de cada pista a 0
 	for(unsigned int i=0; i<m_primera_nota.size(); i++)
 		m_primera_nota[i] = 0;
+
+	//Reinicia las luces
+	m_teclas_luminosas->reiniciar(m_configuracion->dispositivo_salida());
 
 	//Reinicia la salida
 	if(m_configuracion->dispositivo_salida() != NULL)
