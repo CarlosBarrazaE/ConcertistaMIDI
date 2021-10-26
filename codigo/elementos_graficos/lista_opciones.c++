@@ -37,7 +37,11 @@ Lista_Opciones::Lista_Opciones(float x, float y, float ancho, float alto, bool m
 
 Lista_Opciones::~Lista_Opciones()
 {
-
+	if(m_mostrar_flechas)
+	{
+		delete m_flecha_izquierda;
+		delete m_flecha_derecha;
+	}
 }
 
 void Lista_Opciones::actualizar(unsigned int /*diferencia_tiempo*/)
