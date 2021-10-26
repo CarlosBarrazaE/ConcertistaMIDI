@@ -251,7 +251,7 @@ void VentanaOrgano::reproducir_eventos(unsigned int microsegundos_actualizar)
 					//no se considera erroneo pero cambia el color a plomo
 					if(nota->second->correcta && !this->esta_tocada(i->second.NoteNumber()))
 					{
-						nota->second->color = Pista::Colores_pista[NUMERO_COLORES_PISTA];
+						nota->second->color = Pista::Colores_pista[0];
 						nota->second->correcta = false;
 					}
 				}
@@ -377,7 +377,7 @@ void VentanaOrgano::escuchar_eventos()
 			else
 			{
 				//Notas plomas son notas erroneas
-				this->insertar_nota_activa(evento.NoteNumber(), evento.Channel(), Pista::Colores_pista[NUMERO_COLORES_PISTA], true, false);
+				this->insertar_nota_activa(evento.NoteNumber(), evento.Channel(), Pista::Colores_pista[0], true, false);
 
 				//Se envia el evento
 				if(m_configuracion->dispositivo_salida() != NULL)

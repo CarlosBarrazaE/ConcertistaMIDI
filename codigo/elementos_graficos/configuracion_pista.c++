@@ -162,18 +162,18 @@ void Configuracion_Pista::evento_raton(Raton *raton)
 	{
 		unsigned long int modo_seleccionado = m_seleccion_modo.opcion_seleccionada();
 		if(modo_seleccionado == 0)
-			m_datos_pista.modo(Tocar);
-		else if(modo_seleccionado == 1)
-			m_datos_pista.modo(Aprender);
-		else if(modo_seleccionado == 2)
 			m_datos_pista.modo(Fondo);
+		else if(modo_seleccionado == 1)
+			m_datos_pista.modo(Tocar);
+		else if(modo_seleccionado == 2)
+			m_datos_pista.modo(Aprender);
 	}
 
 	if(m_seleccion_color.cambio_opcion_seleccionada())
 	{
 		m_datos_pista.color(Pista::Colores_pista[m_seleccion_color.opcion_seleccionada()]);
 
-		if(m_seleccion_color.opcion_seleccionada() == NUMERO_COLORES_PISTA)
+		if(m_seleccion_color.opcion_seleccionada() == 0)
 			m_datos_pista.visible(false);
 		else
 			m_datos_pista.visible(true);
