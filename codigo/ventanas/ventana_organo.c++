@@ -14,7 +14,8 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 	m_velocidad_musica = m_configuracion->velocidad();
 	m_duracion_nota = m_configuracion->duracion_nota();
 	m_mostrar_subtitulo = m_configuracion->subtitulos();
-	m_teclado_actual = m_configuracion->teclado_visible();
+	m_teclado_visible = m_configuracion->teclado_visible();
+	m_teclado_util = m_configuracion->teclado_util();
 
 	if(m_volumen > 0)
 		m_volumen_antes_mute = m_volumen;
@@ -22,8 +23,8 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 		m_volumen_antes_mute = 1;
 
 	m_barra = new Barra_Progreso(0, 40, Pantalla::Ancho, 40, m_musica->musica()->GetSongLengthInMicroseconds(), m_musica->musica()->GetBarLines(), recursos);
-	m_organo = new Organo(0, Pantalla::Alto, Pantalla::Ancho, &m_teclado_actual, recursos);
-	m_tablero = new Tablero_Notas(0, m_barra->alto()+40, Pantalla::Ancho, Pantalla::Alto - (m_organo->alto() + m_barra->alto() + 40), &m_teclado_actual, recursos);
+	m_organo = new Organo(0, Pantalla::Alto, Pantalla::Ancho, &m_teclado_visible, &m_teclado_util, recursos);
+	m_tablero = new Tablero_Notas(0, m_barra->alto()+40, Pantalla::Ancho, Pantalla::Alto - (m_organo->alto() + m_barra->alto() + 40), &m_teclado_visible, recursos);
 
 	m_titulo_musica = new Titulo(0, m_barra->alto()+40, Pantalla::Ancho, Pantalla::Alto - (m_organo->alto() + m_barra->alto() + 40), recursos);
 	m_titulo_musica->datos(musica);
@@ -196,7 +197,17 @@ void VentanaOrgano::inicializar()
 	for(unsigned int i=0; i<pistas_midi.size(); i++)
 	{
 		if(m_pistas->at(i).modo() != Fondo)
-			notas_jugables += pistas_midi[i].AggregateNoteCount();
+		{
+			for(unsigned int j=0; j<m_notas[i].size(); j++)
+			{
+				//Cuenta solo las notas que se pueden tocar con el teclado_util actual
+				if(m_notas[i][j].note_id >= m_teclado_util.tecla_inicial() &&
+					m_notas[i][j].note_id <= m_teclado_util.tecla_final() &&
+					m_notas[i][j].end > m_notas[i][j].start
+				)
+					notas_jugables ++;
+			}
+		}
 	}
 	m_puntaje->notas_totales(notas_jugables);
 }
@@ -223,12 +234,19 @@ void VentanaOrgano::reproducir_eventos(unsigned int microsegundos_actualizar)
 		//Reproduce todos los eventos que no sean NoteOn o NoteOff de todas las pistas
 		else if(i->second.Type() != MidiEventType_NoteOn && i->second.Type() != MidiEventType_NoteOff)
 			reproducir_evento = true;
+		//Reproduce las notas que no puede tocar porque estan fuera del teclado
+		else if(i->second.NoteNumber() < m_teclado_util.tecla_inicial() ||
+			i->second.NoteNumber() > m_teclado_util.tecla_final())
+			reproducir_evento = true;
 
 		//Solo son erroneas las notas que no se tocan correctamente en el noteon
 		if(i->second.Type() == MidiEventType_NoteOn && i->second.NoteVelocity() > 0)
 		{
-			//Agrega la nota actual a notas requeridas
-			if(m_pistas->at(i->first).modo() == Aprender)
+			//Agrega la nota actual a notas requeridas excepto si esta fuera de rango
+			if(m_pistas->at(i->first).modo() == Aprender &&
+				i->second.NoteNumber() >= m_teclado_util.tecla_inicial() &&
+				i->second.NoteNumber() <= m_teclado_util.tecla_final()
+			)
 			{
 				this->agregar_nota_requerida(i->second.NoteNumber(), m_pistas->at(i->first).color());
 				notas_requeridas_nuevas = true;
@@ -237,7 +255,10 @@ void VentanaOrgano::reproducir_eventos(unsigned int microsegundos_actualizar)
 		else if((i->second.Type() == MidiEventType_NoteOn || i->second.Type() == MidiEventType_NoteOff) && i->second.NoteVelocity() == 0)
 		{
 			//Si nota activa y llega un noteoff apagar y cambiar a plomo
-			if(m_pistas->at(i->first).modo() != Fondo)
+			if(m_pistas->at(i->first).modo() != Fondo &&
+				i->second.NoteNumber() >= m_teclado_util.tecla_inicial() &&
+				i->second.NoteNumber() <= m_teclado_util.tecla_final()
+			)
 			{
 				if(this->esta_tocada(i->second.NoteNumber()))
 					this->eliminar_nota_tocada(i->second.NoteNumber());
@@ -498,7 +519,7 @@ void VentanaOrgano::calcular_teclas_activas(unsigned int diferencia_tiempo)
 				numero_nota = m_notas[pista][n].note_id;
 
 				//Se salta las notas fuera de la pantalla
-				if(numero_nota < m_teclado_actual.tecla_inicial() || numero_nota >= m_teclado_actual.tecla_inicial() + m_teclado_actual.numero_teclas())
+				if(numero_nota < m_teclado_visible.tecla_inicial() || numero_nota >= m_teclado_visible.tecla_final())
 					continue;
 
 				posicion_y = static_cast<float>(m_tiempo_actual_midi - m_notas[pista][n].start) / static_cast<float>(m_duracion_nota);
@@ -535,7 +556,9 @@ void VentanaOrgano::calcular_teclas_activas(unsigned int diferencia_tiempo)
 				}
 
 				//Solo se actualiza el color de las pistas de Fondo
-				if(m_pistas->at(pista).modo() != Fondo)
+				if(m_pistas->at(pista).modo() != Fondo &&
+					numero_nota >= m_teclado_util.tecla_inicial() &&
+					numero_nota <= m_teclado_util.tecla_final())
 					continue;
 
 				//Cambia el tiempo de espera de las notas
@@ -765,47 +788,47 @@ void VentanaOrgano::evento_teclado(Tecla tecla, bool estado)
 	}
 	else if(tecla == TECLA_F5 && estado)
 	{
-		m_teclado_actual.cambiar(48, 37);
+		m_teclado_visible.cambiar(48, 37);
 		cambio_teclado = true;
 	}
 	else if(tecla == TECLA_F6 && estado)
 	{
-		m_teclado_actual.cambiar(36, 49);
+		m_teclado_visible.cambiar(36, 49);
 		cambio_teclado = true;
 	}
 	else if(tecla == TECLA_F7 && estado)
 	{
-		m_teclado_actual.cambiar(36, 61);
+		m_teclado_visible.cambiar(36, 61);
 		cambio_teclado = true;
 	}
 	else if(tecla == TECLA_F8 && estado)
 	{
-		m_teclado_actual.cambiar(28, 76);
+		m_teclado_visible.cambiar(28, 76);
 		cambio_teclado = true;
 	}
 	else if(tecla == TECLA_F9 && estado)
 	{
-		m_teclado_actual.cambiar(21, 88);
+		m_teclado_visible.cambiar(21, 88);
 		cambio_teclado = true;
 	}
 	else if(tecla == TECLA_INSERTAR && estado)
 	{
-		m_teclado_actual.tecla_inicial(m_teclado_actual.tecla_inicial()+1);
+		m_teclado_visible.tecla_inicial(m_teclado_visible.tecla_inicial()+1);
 		cambio_teclado = true;
 	}
 	else if(tecla == TECLA_SUPRIMIR && estado)
 	{
-		m_teclado_actual.tecla_inicial(m_teclado_actual.tecla_inicial()-1);
+		m_teclado_visible.tecla_inicial(m_teclado_visible.tecla_inicial()-1);
 		cambio_teclado = true;
 	}
 	else if(tecla == TECLA_REPAG && estado)
 	{
-		m_teclado_actual.numero_teclas(m_teclado_actual.numero_teclas()+1);
+		m_teclado_visible.numero_teclas(m_teclado_visible.numero_teclas()+1);
 		cambio_teclado = true;
 	}
 	else if(tecla == TECLA_AVPAG && estado)
 	{
-		m_teclado_actual.numero_teclas(m_teclado_actual.numero_teclas()-1);
+		m_teclado_visible.numero_teclas(m_teclado_visible.numero_teclas()-1);
 		cambio_teclado = true;
 	}
 	else if(tecla == TECLA_INICIO && estado)
@@ -822,7 +845,7 @@ void VentanaOrgano::evento_teclado(Tecla tecla, bool estado)
 		//ajustar el tamaño del tablero de notas
 		m_tablero->dimension(Pantalla::Ancho, Pantalla::Alto - (m_organo->alto() + m_barra->alto()+40));
 		m_tablero->reiniciar();
-		m_configuracion->teclado_visible(m_teclado_actual.tecla_inicial(), m_teclado_actual.numero_teclas());
+		m_configuracion->teclado_visible(m_teclado_visible.tecla_inicial(), m_teclado_visible.numero_teclas());
 	}
 }
 

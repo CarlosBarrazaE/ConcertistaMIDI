@@ -2,6 +2,8 @@
 
 Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL), m_teclas_luminosas(NULL)
 {
+	m_id_entrada = 0;
+	m_id_salida = 0;
 	//Configuracion MIDI
 	m_id_entrada_original = 0;
 	m_id_salida_original = 0;
@@ -179,6 +181,8 @@ void Configuracion::guardar_configuracion()
 //Configuracion MIDI
 void Configuracion::dispositivo_entrada(unsigned int id_entrada)
 {
+	if(id_entrada == m_id_entrada && m_entrada != NULL)
+		return;
 	MidiCommDescriptionList dispositivos_entrada = MidiCommIn::GetDeviceList();
 	if(dispositivos_entrada.size() > 0)
 	{
@@ -197,6 +201,8 @@ void Configuracion::dispositivo_entrada(unsigned int id_entrada)
 
 void Configuracion::dispositivo_salida(unsigned int id_salida)
 {
+	if(id_salida == m_id_salida && m_salida != NULL)
+		return;
 	MidiCommDescriptionList dispositivos_salida = MidiCommOut::GetDeviceList();
 	if(dispositivos_salida.size() > 0)
 	{

@@ -53,7 +53,7 @@ private:
 	double m_volumen_antes_mute;
 
 	//Datos
-	Teclado_Organo m_teclado_actual;
+	Teclado_Organo m_teclado_visible, m_teclado_util;
 	Configuracion *m_configuracion;
 	Datos_Musica *m_musica;
 	TeclasLuminosas *m_teclas_luminosas;

@@ -22,6 +22,11 @@ void Teclado_Organo::tecla_inicial(unsigned int inicial)
 		m_tecla_inicial = inicial;
 }
 
+unsigned int Teclado_Organo::tecla_final()
+{
+	return m_tecla_inicial + m_numero_teclas - 1;
+}
+
 unsigned int Teclado_Organo::numero_teclas()
 {
 	return m_numero_teclas;

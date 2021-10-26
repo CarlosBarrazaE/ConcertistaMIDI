@@ -38,8 +38,8 @@ private:
 
 	//Solapa Dispositivos (3)
 	Etiqueta *m_solapa3_titulo;
-	Etiqueta *m_solapa3_texto_entrada, *m_solapa3_texto_salida, *m_solapa3_texto_teclas_luminosas;
-	Lista_Opciones *m_solapa3_opcion_entrada, *m_solapa3_opcion_salida, *m_solapa3_teclas_luminosas;
+	Etiqueta *m_solapa3_texto_entrada, *m_solapa3_texto_salida, *m_solapa3_texto_tamanno_teclado, *m_solapa3_texto_teclas_luminosas;
+	Lista_Opciones *m_solapa3_opcion_entrada, *m_solapa3_opcion_salida, *m_solapa3_tamanno_teclado, *m_solapa3_teclas_luminosas;
 
 	//Solapa Video (4)
 	Etiqueta *m_solapa4_titulo;
@@ -47,10 +47,6 @@ private:
 
 	//Datos
 	Configuracion *m_configuracion;
-	unsigned int m_ultima_solapa;
-	unsigned int m_id_dispositivo_entrada;
-	unsigned int m_id_dispositivo_salida;
-	unsigned int m_id_teclas_luminosas;
 
 	std::vector<std::string> obtener_dispositivos(MidiCommDescriptionList lista);
 	void cargar_tabla_carpetas();

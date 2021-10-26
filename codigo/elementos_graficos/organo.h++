@@ -36,7 +36,7 @@ private:
 	float m_tiempo;
 	unsigned int m_numero_particulas;
 
-	Teclado_Organo *m_teclado;
+	Teclado_Organo *m_teclado_visible, *m_teclado_util;
 	float m_ancho_tecla_blanca, m_ancho_tecla_negra;
 	float m_alto_tecla_blanca, m_alto_tecla_negra;
 
@@ -49,7 +49,7 @@ private:
 	void dibujar_negras(float x, float y, unsigned int tecla_inicial, unsigned int numero_teclas);
 
 public:
-	Organo(float x, float y, float ancho, Teclado_Organo *teclado, Administrador_Recursos *recursos);
+	Organo(float x, float y, float ancho, Teclado_Organo *teclado_visible, Teclado_Organo *teclado_util, Administrador_Recursos *recursos);
 	~Organo();
 
 	void actualizar(unsigned int diferencia_tiempo) override;

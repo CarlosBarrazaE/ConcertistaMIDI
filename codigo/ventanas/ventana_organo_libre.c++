@@ -5,10 +5,11 @@ VentanaOrganoLibre::VentanaOrganoLibre(Configuracion *configuracion, Administrad
 	m_rectangulo = recursos->figura(F_Rectangulo);
 	m_configuracion = configuracion;
 
-	m_teclado_actual = m_configuracion->teclado_visible();
+	m_teclado_visible = m_configuracion->teclado_visible();
+	m_teclado_util = m_configuracion->teclado_util();
 
-	m_organo = new Organo(0, Pantalla::Alto, Pantalla::Ancho, &m_teclado_actual, recursos);
-	m_tablero = new Tablero_Notas(0, 40, Pantalla::Ancho, Pantalla::Alto - (m_organo->alto() + 40), &m_teclado_actual, recursos);
+	m_organo = new Organo(0, Pantalla::Alto, Pantalla::Ancho, &m_teclado_visible, &m_teclado_util, recursos);
+	m_tablero = new Tablero_Notas(0, 40, Pantalla::Ancho, Pantalla::Alto - (m_organo->alto() + 40), &m_teclado_visible, recursos);
 	m_tablero->desplazamiento(Subir);
 
 	m_organo->notas_activas(&m_color_teclas);

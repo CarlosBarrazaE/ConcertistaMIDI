@@ -26,7 +26,7 @@ private:
 
 	//Datos
 	Configuracion *m_configuracion;
-	Teclado_Organo m_teclado_actual;
+	Teclado_Organo m_teclado_visible, m_teclado_util;
 	std::array<Color, 128> m_color_teclas;
 	std::map<unsigned int, Nota_Activa*> m_notas_activas;
 

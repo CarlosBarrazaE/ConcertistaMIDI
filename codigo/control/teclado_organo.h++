@@ -17,6 +17,7 @@ public:
 
 	unsigned int tecla_inicial();
 	void tecla_inicial(unsigned int inicial);
+	unsigned int tecla_final();
 
 	unsigned int numero_teclas();
 	void numero_teclas(unsigned int largo);

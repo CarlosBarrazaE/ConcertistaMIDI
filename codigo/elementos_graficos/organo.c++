@@ -1,9 +1,10 @@
 #include "organo.h++"
 
-Organo::Organo(float x, float y, float ancho, Teclado_Organo *teclado, Administrador_Recursos *recursos) : Elemento(x, y, ancho, 0)
+Organo::Organo(float x, float y, float ancho, Teclado_Organo *teclado_visible, Teclado_Organo *teclado_util, Administrador_Recursos *recursos) : Elemento(x, y, ancho, 0)
 {
 	//El origen del organo esta abajo a la izquierda
-	m_teclado = teclado;
+	m_teclado_visible = teclado_visible;
+	m_teclado_util = teclado_util;
 
 	m_tecla_blanca = recursos->textura(T_TeclaBlanca);
 	m_tecla_negra = recursos->textura(T_TeclaNegra);
@@ -68,9 +69,9 @@ void Organo::dibujar_blancas(float x, float y, unsigned int tecla_inicial, unsig
 		{
 			//La tecla no es tocada, color normal
 			m_tecla_blanca->activar();
-			//Fuera del teclado de 88 teclas tiene otro color
-			if(n < 21 || n > 108)
-				m_rectangulo->color(Color(0.8f, 1.0f, 0.8f));
+			//Fuera del m_teclado_util tiene un color mas oscuro
+			if(n < m_teclado_util->tecla_inicial() || n > m_teclado_util->tecla_final())
+				m_rectangulo->color(Color(0.7f, 0.7f, 0.7f));
 			else
 				m_rectangulo->color(Color(1.0f, 1.0f, 1.0f));
 			tecla_presionada_anterior = false;
@@ -116,16 +117,15 @@ void Organo::dibujar_negras(float x, float y, unsigned int tecla_inicial, unsign
 			//La tecla es tocada, se cambia de color
 			m_rectangulo->color(color_actual);
 			m_tecla_negra_presionada->activar();
-
 			m_generador_particulas->agregar_particulas(desplazamiento + m_ancho_tecla_negra/2.0f - m_ancho_tecla_blanca/2.0f, y, m_numero_particulas, color_actual);
 			m_notas_activas->at(n) = Color(0.0f, 0.0f, 0.0f);
 		}
 		else
 		{
 			//La tecla no es tocada, color normal
-			//Fuera del teclado de 88 teclas tiene otro color
-			if(n < 21 || n > 108)
-				m_rectangulo->color(Color(0.8f, 1.0f, 0.8f));
+			//Fuera del m_teclado_util tiene un color mas oscuro
+			if(n < m_teclado_util->tecla_inicial() || n > m_teclado_util->tecla_final())
+				m_rectangulo->color(Color(0.7f, 0.7f, 0.7f));
 			else
 				m_rectangulo->color(Color(1.0f, 1.0f, 1.0f));
 			m_tecla_negra->activar();
@@ -175,11 +175,11 @@ void Organo::dibujar()
 	m_tecla_blanca->activar();
 	m_rectangulo->textura(true);
 	m_rectangulo->color(Color(1.0f, 1.0f, 1.0f));
-	this->dibujar_blancas(this->x(), this->y() - this->alto() + 10, m_teclado->tecla_inicial(), m_teclado->numero_teclas());
+	this->dibujar_blancas(this->x(), this->y() - this->alto() + 10, m_teclado_visible->tecla_inicial(), m_teclado_visible->numero_teclas());
 
 	//Dibuja las notas negras
 	m_tecla_negra->activar();
-	this->dibujar_negras(this->x(), this->y() - this->alto() + 10, m_teclado->tecla_inicial(), m_teclado->numero_teclas());
+	this->dibujar_negras(this->x(), this->y() - this->alto() + 10, m_teclado_visible->tecla_inicial(), m_teclado_visible->numero_teclas());
 
 	//Dibuja un borde negro
 	m_borde_negro->activar();
@@ -201,8 +201,8 @@ void Organo::evento_raton(Raton *raton)
 	{
 		unsigned int ajuste_teclas = 0;
 		//Cuenta el numero de teclas desde el inicio hasta la primera tecla visible sin contar la visible
-		if(m_teclado->tecla_inicial() > 0)
-			ajuste_teclas = Octava::blancas_desde_inicio(m_teclado->tecla_inicial()-1);
+		if(m_teclado_visible->tecla_inicial() > 0)
+			ajuste_teclas = Octava::blancas_desde_inicio(m_teclado_visible->tecla_inicial()-1);
 
 		//Cuenta las teclas blancas que aparecen en pantalla
 		unsigned int tecla_presionada = static_cast<unsigned int>((static_cast<float>(raton->x()) - this->x()) / m_ancho_tecla_blanca);
@@ -273,7 +273,7 @@ void Organo::notas_requeridas(std::map<unsigned int, Color> *notas_requeridas)
 
 void Organo::calcular_tamannos()
 {
-	unsigned int numero_blancas = Octava::numero_blancas(m_teclado->tecla_inicial(), m_teclado->numero_teclas());
+	unsigned int numero_blancas = Octava::numero_blancas(m_teclado_visible->tecla_inicial(), m_teclado_visible->numero_teclas());
 	m_ancho_tecla_blanca = (this->ancho() / static_cast<float>(numero_blancas));
 	m_alto_tecla_blanca = m_ancho_tecla_blanca * PROPORCION_BLANCA;
 	if(m_alto_tecla_blanca > 250)

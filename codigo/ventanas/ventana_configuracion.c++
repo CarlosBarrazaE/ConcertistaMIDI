@@ -7,10 +7,6 @@ VentanaConfiguracion::VentanaConfiguracion(Configuracion *configuracion, Adminis
 	m_recursos = recursos;
 	m_rectangulo = recursos->figura(F_Rectangulo);
 
-	m_id_dispositivo_entrada = m_configuracion->id_dispositivo_entrada();
-	m_id_dispositivo_salida = m_configuracion->id_dispositivo_salida();
-	m_id_teclas_luminosas = m_configuracion->teclas_luminosas()->identificador();
-
 	m_texto_titulo.texto("Configuración");
 	m_texto_titulo.tipografia(recursos->tipografia(LetraTitulo));
 	m_texto_titulo.color(Color(1.0f, 1.0f, 1.0f));
@@ -66,28 +62,59 @@ VentanaConfiguracion::VentanaConfiguracion(Configuracion *configuracion, Adminis
 	m_solapa3_titulo = new Etiqueta(250, 50, Pantalla::Ancho-250, 40, true, "Dispositivos", LetraTitulo, recursos);
 	m_solapa3_texto_entrada = new Etiqueta(260, 100, Pantalla::Ancho-270, 30, false, "Dispositivo de Entrada", LetraMediana, recursos);
 	m_solapa3_texto_salida = new Etiqueta(260, 140, Pantalla::Ancho-270, 30, false, "Dispositivo de Salida", LetraMediana, recursos);
-	m_solapa3_texto_teclas_luminosas = new Etiqueta(260, 180, Pantalla::Ancho-270, 30, false, "Teclas Luminosas", LetraMediana, recursos);
+	m_solapa3_texto_tamanno_teclado = new Etiqueta(260, 180, Pantalla::Ancho-270, 30, false, "Numero de Teclas", LetraMediana, recursos);
+	m_solapa3_texto_teclas_luminosas = new Etiqueta(260, 220, Pantalla::Ancho-270, 30, false, "Teclas Luminosas", LetraMediana, recursos);
 	m_solapa3_opcion_entrada = new Lista_Opciones(500, 100, 300, 20, true, recursos);
 	m_solapa3_opcion_salida = new Lista_Opciones(500, 140, 300, 20, true, recursos);
-	m_solapa3_teclas_luminosas = new Lista_Opciones(500, 180, 300, 20, true, recursos);
+	m_solapa3_tamanno_teclado = new Lista_Opciones(500, 180, 300, 20, true, recursos);
+	m_solapa3_teclas_luminosas = new Lista_Opciones(500, 210, 300, 20, true, recursos);
 	//Se agregan las opciones opciones_textos
 	m_solapa3_opcion_entrada->tipografia(recursos->tipografia(LetraMediana));
 	m_solapa3_opcion_entrada->opciones_textos(this->obtener_dispositivos(MidiCommIn::GetDeviceList()));
 	m_solapa3_opcion_salida->tipografia(recursos->tipografia(LetraMediana));
 	m_solapa3_opcion_salida->opciones_textos(this->obtener_dispositivos(MidiCommOut::GetDeviceList()));
+
+	std::vector<std::string> opciones_teclado;
+	opciones_teclado.push_back("Teclado (24 teclas)");
+	opciones_teclado.push_back("Organo de 37 teclas");
+	opciones_teclado.push_back("Organo de 49 teclas");
+	opciones_teclado.push_back("Organo de 61 teclas");
+	opciones_teclado.push_back("Organo de 76 teclas");
+	opciones_teclado.push_back("Organo de 88 teclas");
+
+	m_solapa3_tamanno_teclado->opciones_textos(opciones_teclado);
+	m_solapa3_tamanno_teclado->tipografia(recursos->tipografia(LetraMediana));
 	m_solapa3_teclas_luminosas->tipografia(recursos->tipografia(LetraMediana));
 	m_solapa3_teclas_luminosas->opciones_textos(TeclasLuminosas::Lista);
 
-	m_solapa3_opcion_entrada->opcion_predeterminada(m_id_dispositivo_entrada);
-	m_solapa3_opcion_salida->opcion_predeterminada(m_id_dispositivo_salida);
-	m_solapa3_teclas_luminosas->opcion_predeterminada(m_id_teclas_luminosas);
+	m_solapa3_opcion_entrada->opcion_predeterminada(m_configuracion->id_dispositivo_entrada());
+	m_solapa3_opcion_salida->opcion_predeterminada(m_configuracion->id_dispositivo_salida());
+
+	unsigned int opcion_predeterminada_util = 0;
+	if(m_configuracion->teclado_util().numero_teclas() == 24)
+		opcion_predeterminada_util = 0;
+	else if(m_configuracion->teclado_util().numero_teclas() == 37)
+		opcion_predeterminada_util = 1;
+	else if(m_configuracion->teclado_util().numero_teclas() == 49)
+		opcion_predeterminada_util = 2;
+	else if(m_configuracion->teclado_util().numero_teclas() == 61)
+		opcion_predeterminada_util = 3;
+	else if(m_configuracion->teclado_util().numero_teclas() == 76)
+		opcion_predeterminada_util = 4;
+	else if(m_configuracion->teclado_util().numero_teclas() == 88)
+		opcion_predeterminada_util = 5;
+
+	m_solapa3_tamanno_teclado->opcion_predeterminada(opcion_predeterminada_util);
+	m_solapa3_teclas_luminosas->opcion_predeterminada(m_configuracion->teclas_luminosas()->identificador());
 
 	m_solapa->agregar_elemento_solapa(2, m_solapa3_titulo);
 	m_solapa->agregar_elemento_solapa(2, m_solapa3_texto_entrada);
 	m_solapa->agregar_elemento_solapa(2, m_solapa3_texto_salida);
+	m_solapa->agregar_elemento_solapa(2, m_solapa3_texto_tamanno_teclado);
 	m_solapa->agregar_elemento_solapa(2, m_solapa3_texto_teclas_luminosas);
 	m_solapa->agregar_elemento_solapa(2, m_solapa3_opcion_entrada);
 	m_solapa->agregar_elemento_solapa(2, m_solapa3_opcion_salida);
+	m_solapa->agregar_elemento_solapa(2, m_solapa3_tamanno_teclado);
 	m_solapa->agregar_elemento_solapa(2, m_solapa3_teclas_luminosas);
 
 	//Pestaña de configuracion de videos
@@ -104,8 +131,6 @@ VentanaConfiguracion::VentanaConfiguracion(Configuracion *configuracion, Adminis
 		m_solapa1_casilla_desarrollo->estado(Pantalla::ModoDesarrollo);
 	if(m_solapa1_casilla_modo_alambre->activado() != Pantalla::ModoAlambre)
 		m_solapa1_casilla_modo_alambre->estado(Pantalla::ModoAlambre);
-
-	m_ultima_solapa = 0;
 }
 
 VentanaConfiguracion::~VentanaConfiguracion()
@@ -134,9 +159,11 @@ VentanaConfiguracion::~VentanaConfiguracion()
 	delete m_solapa3_titulo;
 	delete m_solapa3_texto_entrada;
 	delete m_solapa3_texto_salida;
+	delete m_solapa3_texto_tamanno_teclado;
 	delete m_solapa3_texto_teclas_luminosas;
 	delete m_solapa3_opcion_entrada;
 	delete m_solapa3_opcion_salida;
+	delete m_solapa3_tamanno_teclado;
 	delete m_solapa3_teclas_luminosas;
 
 	delete m_solapa4_titulo;
@@ -344,22 +371,23 @@ void VentanaConfiguracion::evento_raton(Raton *raton)
 	}
 	else if(m_solapa->solapa_activa() == 2)
 	{
-		if(m_id_dispositivo_entrada != m_solapa3_opcion_entrada->opcion_seleccionada())
-		{
-			m_id_dispositivo_entrada = static_cast<unsigned int>(m_solapa3_opcion_entrada->opcion_seleccionada());
-			m_configuracion->dispositivo_entrada(m_id_dispositivo_entrada);
-		}
-		if(m_id_dispositivo_salida != m_solapa3_opcion_salida->opcion_seleccionada())
-		{
-			m_id_dispositivo_salida = static_cast<unsigned int>(m_solapa3_opcion_salida->opcion_seleccionada());
-			m_configuracion->dispositivo_salida(m_id_dispositivo_salida);
-		}
+		m_configuracion->dispositivo_entrada(static_cast<unsigned int>(m_solapa3_opcion_entrada->opcion_seleccionada()));
+		m_configuracion->dispositivo_salida(static_cast<unsigned int>(m_solapa3_opcion_salida->opcion_seleccionada()));
 
-		if(m_id_teclas_luminosas != m_solapa3_teclas_luminosas->opcion_seleccionada())
-		{
-			m_id_teclas_luminosas = static_cast<unsigned int>(m_solapa3_teclas_luminosas->opcion_seleccionada());
-			m_configuracion->teclas_luminosas(m_id_teclas_luminosas);
-		}
+		if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 0)
+			m_configuracion->teclado_util(48, 24);
+		else if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 1)
+			m_configuracion->teclado_util(48, 37);
+		else if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 2)
+			m_configuracion->teclado_util(36, 49);
+		else if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 3)
+			m_configuracion->teclado_util(36, 61);
+		else if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 4)
+			m_configuracion->teclado_util(28, 76);
+		else if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 5)
+			m_configuracion->teclado_util(21, 88);
+
+		m_configuracion->teclas_luminosas(static_cast<unsigned int>(m_solapa3_teclas_luminosas->opcion_seleccionada()));
 	}
 	else if(m_solapa->solapa_activa() == 3)
 	{
@@ -426,6 +454,7 @@ void VentanaConfiguracion::evento_pantalla(float ancho, float alto)
 	m_solapa3_titulo->dimension(Pantalla::Ancho-250, 40);
 	m_solapa3_opcion_entrada->dimension(ancho - 500, 20); //new Lista_Opciones(500, 100, 300, 20, true, recursos);
 	m_solapa3_opcion_salida->dimension(ancho - 500, 20);//new Lista_Opciones(500, 140, 300, 20, true, recursos);
+	m_solapa3_tamanno_teclado->dimension(ancho - 500, 20);
 	m_solapa3_teclas_luminosas->dimension(ancho - 500, 20);//new Lista_Opciones(500, 180, 300, 20, true, recursos);
 
 	m_solapa4_titulo->dimension(Pantalla::Ancho-250, 40);
