@@ -67,9 +67,9 @@ VentanaConfiguracion::VentanaConfiguracion(Configuracion *configuracion, Adminis
 	m_solapa3_texto_entrada = new Etiqueta(260, 100, Pantalla::Ancho-270, 30, false, "Dispositivo de Entrada", LetraMediana, recursos);
 	m_solapa3_texto_salida = new Etiqueta(260, 140, Pantalla::Ancho-270, 30, false, "Dispositivo de Salida", LetraMediana, recursos);
 	m_solapa3_texto_teclas_luminosas = new Etiqueta(260, 180, Pantalla::Ancho-270, 30, false, "Teclas Luminosas", LetraMediana, recursos);
-	m_solapa3_opcion_entrada = new Lista_Opciones(500, 100, 200, 20, recursos);
-	m_solapa3_opcion_salida = new Lista_Opciones(500, 140, 200, 20, recursos);
-	m_solapa3_teclas_luminosas = new Lista_Opciones(500, 180, 200, 20, recursos);
+	m_solapa3_opcion_entrada = new Lista_Opciones(500, 100, 300, 20, true, recursos);
+	m_solapa3_opcion_salida = new Lista_Opciones(500, 140, 300, 20, true, recursos);
+	m_solapa3_teclas_luminosas = new Lista_Opciones(500, 180, 300, 20, true, recursos);
 	//Se agregan las opciones opciones_textos
 	m_solapa3_opcion_entrada->tipografia(recursos->tipografia(LetraMediana));
 	m_solapa3_opcion_entrada->opciones_textos(this->obtener_dispositivos(MidiCommIn::GetDeviceList()));
@@ -424,6 +424,9 @@ void VentanaConfiguracion::evento_pantalla(float ancho, float alto)
 	m_solapa2_eliminar->posicion(Pantalla::Ancho-160, Pantalla::Alto-80);
 
 	m_solapa3_titulo->dimension(Pantalla::Ancho-250, 40);
+	m_solapa3_opcion_entrada->dimension(ancho - 500, 20); //new Lista_Opciones(500, 100, 300, 20, true, recursos);
+	m_solapa3_opcion_salida->dimension(ancho - 500, 20);//new Lista_Opciones(500, 140, 300, 20, true, recursos);
+	m_solapa3_teclas_luminosas->dimension(ancho - 500, 20);//new Lista_Opciones(500, 180, 300, 20, true, recursos);
 
 	m_solapa4_titulo->dimension(Pantalla::Ancho-250, 40);
 	m_solapa4_casilla_pantalla_completa->dimension(Pantalla::Ancho-270, 30);

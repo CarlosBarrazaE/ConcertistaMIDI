@@ -51,12 +51,12 @@ void VentanaSeleccionPista::crear_configuracion(Administrador_Recursos *recursos
 		{
 			if(pista_actual.IsPercussion())
 			{
-				color_pista = Pista::Colores_pista[NUMERO_COLORES_PISTA];
+				color_pista = Pista::Colores_pista[0];
 				visible = false;
 			}
 			else
 			{
-				color_pista = Pista::Colores_pista[color_usado % NUMERO_COLORES_PISTA];
+				color_pista = Pista::Colores_pista[1+color_usado % NUMERO_COLORES_PISTA];
 				visible = true;
 				color_usado++;
 			}

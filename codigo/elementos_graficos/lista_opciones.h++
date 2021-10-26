@@ -3,8 +3,18 @@
 
 #include "elemento.h++"
 #include "etiqueta.h++"
+#include "boton.h++"
+#include "../recursos/textura_2d.h++"
 #include <vector>
 #include <string>
+
+enum Sentido
+{
+	NoCambia,
+	Anterior,
+	Siguiente,
+	Inicial,
+};
 
 class Lista_Opciones : public Elemento
 {
@@ -12,6 +22,12 @@ private:
 	//Recursos
 	Rectangulo *m_rectangulo;
 	Etiqueta m_texto_seleccion;
+	Boton *m_flecha_izquierda;
+	Boton *m_flecha_derecha;
+	Color m_color_actual;
+	Color m_color_normal;
+	Color m_color_sobre;
+	Color m_color_activado;
 
 	std::vector<std::string> m_opciones;
 	std::vector<Textura2D*> m_iconos;
@@ -19,16 +35,15 @@ private:
 
 	bool m_sobre_boton;
 	BotonRaton m_boton_pre_activado;
-	bool m_boton_izquierdo;
-	bool m_boton_central;
-	bool m_boton_derecho;
+	Sentido m_direccion;
 	bool m_cambio_opcion_seleccionada;
+	bool m_mostrar_flechas;
 
 	float m_centrado_icono;
 	float m_ancho_icono, m_alto_icono;
 	unsigned long int m_opcion_actual;
 public:
-	Lista_Opciones(float x, float y, float ancho, float alto, Administrador_Recursos *recursos);
+	Lista_Opciones(float x, float y, float ancho, float alto, bool mostrar_flechas, Administrador_Recursos *recursos);
 	~Lista_Opciones();
 
 	void actualizar(unsigned int diferencia_tiempo) override;
@@ -36,6 +51,7 @@ public:
 	void evento_raton(Raton *raton) override;
 
 	void posicion(float x, float y) override;
+	void dimension(float ancho, float alto) override;
 
 	void dimension_icono(float ancho, float alto);
 	void opciones_textos(std::vector<std::string> opciones);

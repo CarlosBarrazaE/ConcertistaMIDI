@@ -45,6 +45,8 @@ Administrador_Recursos::Administrador_Recursos()
 	m_archivo_texturas[T_CasillaInactiva] = "../texturas/casilla_verificacion_inactiva.tga";
 	m_archivo_texturas[T_CasillaActiva] = "../texturas/casilla_verificacion_activa.tga";
 	m_archivo_texturas[T_CasillaSombra] = "../texturas/casilla_verificacion_sombra.tga";
+	m_archivo_texturas[T_FlechaIzquierda] = "../texturas/flecha_izquierda.tga";
+	m_archivo_texturas[T_FlechaDerecha] = "../texturas/flecha_derecha.tga";
 
 	m_archivo_sombreador_vertice[S_Rectangulo] = "../sombreadores/rectangulo_sv.glsl";
 	m_archivo_sombreador_fragmento[S_Rectangulo] = "../sombreadores/rectangulo_sf.glsl";

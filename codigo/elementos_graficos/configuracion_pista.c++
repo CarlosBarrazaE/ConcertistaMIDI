@@ -1,7 +1,7 @@
 #include "configuracion_pista.h++"
 
 Configuracion_Pista::Configuracion_Pista(float x, float y, float ancho, float alto, Pista pista, Administrador_Recursos *recursos)
-: Elemento(x, y, ancho, alto), m_texto_instrumento(recursos), m_texto_datos(recursos), m_texto_sonido(recursos), m_seleccion_modo(20, 85, 70, 55, recursos), m_seleccion_color(137, 85, 70, 55, recursos), m_datos_pista(pista)
+: Elemento(x, y, ancho, alto), m_texto_instrumento(recursos), m_texto_datos(recursos), m_texto_sonido(recursos), m_seleccion_modo(20, 85, 70, 55, false, recursos), m_seleccion_color(137, 85, 70, 55, false, recursos), m_datos_pista(pista)
 {
 	m_rectangulo = recursos->figura(F_Rectangulo);
 
@@ -30,11 +30,12 @@ Configuracion_Pista::Configuracion_Pista(float x, float y, float ancho, float al
 	m_textura_sonido_desactivado = recursos->textura(T_SonidoDesactivado);
 
 	std::vector<std::string> opcion_modo;
+	opcion_modo.push_back("Fondo");
 	opcion_modo.push_back("Tocar");
 	opcion_modo.push_back("Aprender");
-	opcion_modo.push_back("Fondo");
 
 	std::vector<std::string> opcion_color;
+	opcion_color.push_back("Invisible");
 	opcion_color.push_back("Verde");
 	opcion_color.push_back("Azul");
 	opcion_color.push_back("Rosado");
@@ -44,14 +45,14 @@ Configuracion_Pista::Configuracion_Pista(float x, float y, float ancho, float al
 	opcion_color.push_back("Durazno");
 	opcion_color.push_back("Amarillo");
 	opcion_color.push_back("Lila");
-	opcion_color.push_back("Invisible");
 
 	std::vector<Textura2D*> icono_modos;
+	icono_modos.push_back(recursos->textura(T_MusicaFondo));
 	icono_modos.push_back(recursos->textura(T_Tocar));
 	icono_modos.push_back(recursos->textura(T_Aprender));
-	icono_modos.push_back(recursos->textura(T_MusicaFondo));
 
 	std::vector<Textura2D*> icono_color;
+	icono_color.push_back(recursos->textura(T_Color_Invisible));
 	icono_color.push_back(recursos->textura(T_Color_1));
 	icono_color.push_back(recursos->textura(T_Color_2));
 	icono_color.push_back(recursos->textura(T_Color_3));
@@ -61,20 +62,19 @@ Configuracion_Pista::Configuracion_Pista(float x, float y, float ancho, float al
 	icono_color.push_back(recursos->textura(T_Color_7));
 	icono_color.push_back(recursos->textura(T_Color_8));
 	icono_color.push_back(recursos->textura(T_Color_9));
-	icono_color.push_back(recursos->textura(T_Color_Invisible));
 
 	m_seleccion_modo.dimension_icono(40, 40);
 	m_seleccion_modo.opciones_textos(opcion_modo);
 	m_seleccion_modo.opciones_iconos(icono_modos);
 	m_seleccion_modo.color_texto(Color(1.0f, 1.0f, 1.0f));
 	m_seleccion_modo.tipografia(recursos->tipografia(LetraMuyChica));
-	m_seleccion_modo.opcion_predeterminada(2);
 
 	m_seleccion_color.dimension_icono(40, 40);
 	m_seleccion_color.opciones_textos(opcion_color);
 	m_seleccion_color.opciones_iconos(icono_color);
 	m_seleccion_color.color_texto(Color(1.0f, 1.0f, 1.0f));
 	m_seleccion_color.tipografia(recursos->tipografia(LetraMuyChica));
+	m_seleccion_color.opcion_predeterminada(1);
 
 	m_vista_previa = new Boton(300, 22, 30, 30, "", recursos);
 	m_vista_previa->color_boton(Color(1.0f, 1.0f, 1.0f));
@@ -95,11 +95,11 @@ Configuracion_Pista::Configuracion_Pista(float x, float y, float ancho, float al
 	}
 
 	//Se lee la configuracion del modo
-	if(m_datos_pista.modo() == Tocar)
+	if(m_datos_pista.modo() == Fondo)
 		m_seleccion_modo.opcion_predeterminada(0);
-	else if(m_datos_pista.modo() == Aprender)
+	else if(m_datos_pista.modo() == Tocar)
 		m_seleccion_modo.opcion_predeterminada(1);
-	else if(m_datos_pista.modo() == Fondo)
+	else if(m_datos_pista.modo() == Aprender)
 		m_seleccion_modo.opcion_predeterminada(2);
 
 	//Se lee la configuracion del sonido

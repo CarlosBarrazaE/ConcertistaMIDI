@@ -1,6 +1,6 @@
 #include "lista_opciones.h++"
 
-Lista_Opciones::Lista_Opciones(float x, float y, float ancho, float alto, Administrador_Recursos *recursos) : Elemento(x, y, ancho, alto), m_texto_seleccion(recursos)
+Lista_Opciones::Lista_Opciones(float x, float y, float ancho, float alto, bool mostrar_flechas, Administrador_Recursos *recursos) : Elemento(x, y, ancho, alto), m_texto_seleccion(recursos)
 {
 	m_rectangulo = recursos->figura(F_Rectangulo);
 	m_opcion_actual = 0;
@@ -8,12 +8,31 @@ Lista_Opciones::Lista_Opciones(float x, float y, float ancho, float alto, Admini
 	m_alto_icono = 10;
 	m_centrado_icono = (ancho - m_ancho_icono)/2;
 	m_cambio_opcion_seleccionada = false;
+	m_mostrar_flechas = mostrar_flechas;
+	if(m_mostrar_flechas)
+	{
+		float ancho_boton = this->alto();
+		m_flecha_izquierda = new Boton(this->x(), this->y(), ancho_boton, this->alto(), "", recursos);
+		m_flecha_izquierda->color_boton(Color(1.0f, 1.0f, 1.0f));
+		m_flecha_izquierda->textura(recursos->textura(T_FlechaIzquierda));
+
+		m_flecha_derecha = new Boton(this->x()+this->ancho()-ancho_boton, this->y(), ancho_boton, this->alto(), "", recursos);
+		m_flecha_derecha->color_boton(Color(1.0f, 1.0f, 1.0f));
+		m_flecha_derecha->textura(recursos->textura(T_FlechaDerecha));
+	}
 
 	m_texto_seleccion.tipografia(recursos->tipografia(LetraChica));
 	m_texto_seleccion.color(Color(0.0f, 0.0f, 0.0f));
 	m_texto_seleccion.posicion(x, y);
 	m_texto_seleccion.dimension(ancho, alto);
 	m_texto_seleccion.centrado(true);
+
+	Color color(1.0f, 1.0f, 1.0f);
+	m_color_normal = color;
+	m_color_actual = color;
+	m_color_sobre = color - 0.1f;
+	m_color_activado = color - 0.15f;
+	m_direccion = NoCambia;
 }
 
 Lista_Opciones::~Lista_Opciones()
@@ -27,15 +46,17 @@ void Lista_Opciones::actualizar(unsigned int /*diferencia_tiempo*/)
 
 void Lista_Opciones::dibujar()
 {
-	//m_rectangulo->textura(false);
-	//m_rectangulo->dibujar(this->x(), this->y(), this->ancho(), this->alto(), Color(1.0f, 0.0f, 1.0f, 0.5f));
-	//m_rectangulo->dibujar(this->x(), this->y(), m_ancho_icono, m_alto_icono, Color(0.0f, 1.0f, 1.0f, 0.5f));
+	m_rectangulo->textura(true);
 	if(m_usar_iconos)
 	{
 		//Dibuja el icono si existe
-		m_rectangulo->textura(true);
 		m_iconos[m_opcion_actual]->activar();
-		m_rectangulo->dibujar(this->x()+m_centrado_icono, this->y(), m_ancho_icono, m_alto_icono, Color(1.0f, 1.0f, 1.0f));
+		m_rectangulo->dibujar(this->x()+m_centrado_icono, this->y(), m_ancho_icono, m_alto_icono, m_color_actual);
+	}
+	if(m_mostrar_flechas && m_opciones.size() > 1)
+	{
+		m_flecha_izquierda->dibujar();
+		m_flecha_derecha->dibujar();
 	}
 	//Dibuja el texto
 	m_texto_seleccion.dibujar();
@@ -43,60 +64,80 @@ void Lista_Opciones::dibujar()
 
 void Lista_Opciones::evento_raton(Raton *raton)
 {
-	if(raton->esta_sobre(this->x(), this->y(), this->ancho(), this->alto()))
+	//Si no hay opciones o solo una se omite
+	if(m_opciones.size() <= 1)
+		return;
+
+	if(m_mostrar_flechas)
 	{
-		if((raton->activado(BotonIzquierdo) || raton->activado(BotonDerecho) || raton->activado(BotonCentral)) && m_sobre_boton)
-			m_boton_pre_activado = raton->boton_activado();
-		else if(!raton->activado(BotonIzquierdo) && !raton->activado(BotonCentral) && !raton->activado(BotonDerecho))
-		{
-			m_sobre_boton = true;
-			if(m_boton_pre_activado == BotonIzquierdo)
-			{
-				m_boton_izquierdo = true;
-				m_boton_pre_activado = Ninguno;
-			}
-			else if(m_boton_pre_activado == BotonCentral)
-			{
-				m_boton_central = true;
-				m_boton_pre_activado = Ninguno;
-			}
-			else if(m_boton_pre_activado == BotonDerecho)
-			{
-				m_boton_derecho = true;
-				m_boton_pre_activado = Ninguno;
-			}
-		}
+		m_flecha_izquierda->evento_raton(raton);
+		m_flecha_derecha->evento_raton(raton);
+
+		if(m_flecha_izquierda->esta_activado())
+			m_direccion = Anterior;
+		else if(m_flecha_derecha->esta_activado())
+			m_direccion = Siguiente;
 	}
 	else
 	{
-		m_sobre_boton = false;
-		m_boton_pre_activado = Ninguno;
-		m_boton_izquierdo = false;
-		m_boton_central = false;
-		m_boton_derecho = false;
+		if(raton->esta_sobre(this->x(), this->y(), this->ancho(), this->alto()))
+		{
+			m_color_actual = m_color_sobre;
+			if((raton->activado(BotonIzquierdo) || raton->activado(BotonDerecho) || raton->activado(BotonCentral)) && m_sobre_boton)
+			{
+					m_boton_pre_activado = raton->boton_activado();
+					m_color_actual = m_color_activado;
+			}
+			else if(!raton->activado(BotonIzquierdo) && !raton->activado(BotonCentral) && !raton->activado(BotonDerecho))
+			{
+				m_sobre_boton = true;
+				if(!m_mostrar_flechas)
+				{
+					//Cambio solo con los distintos botones
+					if(m_boton_pre_activado == BotonIzquierdo)
+					{
+						m_direccion = Siguiente;
+						m_boton_pre_activado = Ninguno;
+					}
+					else if(m_boton_pre_activado == BotonCentral)
+					{
+						m_direccion = Inicial;
+						m_boton_pre_activado = Ninguno;
+					}
+					else if(m_boton_pre_activado == BotonDerecho)
+					{
+						m_direccion = Anterior;
+						m_boton_pre_activado = Ninguno;
+					}
+				}
+			}
+		}
+		else
+		{
+			m_sobre_boton = false;
+			m_boton_pre_activado = Ninguno;
+			m_direccion = NoCambia;
+			m_color_actual = m_color_normal;
+		}
 	}
 
-	//Si no hay opciones se omite
-	if(m_opciones.size() == 0)
-		return;
-
-	if(m_boton_izquierdo)
+	if(m_direccion == Siguiente)
 	{
 		m_opcion_actual++;
 		if(m_opcion_actual >= m_opciones.size())
 			m_opcion_actual = 0;
 		m_texto_seleccion.texto(m_opciones[m_opcion_actual]);
 		m_cambio_opcion_seleccionada = true;
-		m_boton_izquierdo = false;
+		m_direccion = NoCambia;
 	}
-	else if(m_boton_central)
+	else if(m_direccion == Inicial)
 	{
-		m_opcion_actual = m_opciones.size()-1;
+		m_opcion_actual = 0;
 		m_texto_seleccion.texto(m_opciones[m_opcion_actual]);
 		m_cambio_opcion_seleccionada = true;
-		m_boton_central = false;
+		m_direccion = NoCambia;
 	}
-	else if(m_boton_derecho)
+	else if(m_direccion == Anterior)
 	{
 		if(m_opcion_actual == 0)
 			m_opcion_actual = m_opciones.size()-1;
@@ -104,7 +145,7 @@ void Lista_Opciones::evento_raton(Raton *raton)
 			m_opcion_actual--;
 		m_texto_seleccion.texto(m_opciones[m_opcion_actual]);
 		m_cambio_opcion_seleccionada = true;
-		m_boton_derecho = false;
+		m_direccion = NoCambia;
 	}
 }
 
@@ -115,6 +156,24 @@ void Lista_Opciones::posicion(float x, float y)
 		m_texto_seleccion.posicion(x, y+43);
 	else
 		m_texto_seleccion.posicion(x, y);
+
+	if(m_mostrar_flechas)
+	{
+		float ancho_boton = this->alto();
+		m_flecha_izquierda->posicion(this->x(), this->y());
+		m_flecha_derecha->posicion(this->x()+this->ancho()-ancho_boton, this->y());
+	}
+}
+
+void Lista_Opciones::dimension(float ancho, float alto)
+{
+	this->_dimension(ancho, alto);
+	float ancho_boton = this->alto();
+	if(m_mostrar_flechas && ancho > ancho_boton*2 + m_texto_seleccion.largo_texto() && alto > 0)
+	{
+		m_flecha_derecha->posicion(this->x()+this->ancho()-ancho_boton, this->y());
+		m_texto_seleccion.dimension(ancho, alto);
+	}
 }
 
 void Lista_Opciones::dimension_icono(float ancho, float alto)

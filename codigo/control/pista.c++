@@ -2,6 +2,7 @@
 
 //El ultimo color es para poner la pista invisible
 Color Pista::Colores_pista[NUMERO_COLORES_PISTA+1] = {
+	Color(0.5f, 0.5f, 0.5f),//127.5    127.5     127.5
 	Color(0.0f, 0.598f, 0.0f),//0     152.5     0
 	Color(0.0f, 0.598f, 1.0f),//0     152.5     255
 	Color(1.0f, 0.598f, 1.0f),//255   152.5     255
@@ -11,7 +12,6 @@ Color Pista::Colores_pista[NUMERO_COLORES_PISTA+1] = {
 	Color(1.0f, 0.761f, 0.609f),//255 194.1     155.3
 	Color(1.0f, 0.761f, 0.0f),//255   194.1     0
 	Color(0.407f, 0.348f, 1.0f),//103,8   88,7    255
-	Color(0.5f, 0.5f, 0.5f)//127.5    127.5     127.5
 };
 
 Pista::Pista(std::string instrumento, unsigned long int numero_notas, unsigned char canal, Color color, Modo modo, bool visible, bool sonido)
