@@ -73,18 +73,28 @@ MidiTrack MidiTrack::ReadFromStream(std::istream &stream)
 std::vector<MidiTrack> MidiTrack::DividirPistas(MidiTrack pista_dividir)
 {
 	std::vector<MidiTrack> pistas_nuevas;
-	std::map<unsigned char, unsigned int> id_pistas;
+	std::map<unsigned int, unsigned int> id_pistas;
+	std::map<unsigned char, int> programa_canal;//Almacena el ultimo programa por canal
 
 	unsigned int contador_pistas = 0;
-	unsigned char canal = 0;
+	unsigned int programaycanal = 0;
+	unsigned char canal_actual;
+
 	for(unsigned int x = 0; x<pista_dividir.m_events.size(); x++)
 	{
-		//Se dividen las pistas por canal
-		canal = pista_dividir.m_events[x].Channel();
-		if(id_pistas.count(canal) == 0)
+		//Se dividen las pistas por canal y por programa
+		//Pueden haber varios cambios de programa en el mismo canal
+		canal_actual = pista_dividir.m_events[x].Channel();
+		if(pista_dividir.m_events[x].Type() == MidiEventType_ProgramChange && pista_dividir.m_events[x].ProgramNumber() != programa_canal[canal_actual])
+			programa_canal[canal_actual] = pista_dividir.m_events[x].ProgramNumber();
+
+		//programaycanal se almacena de la siguiente manera ppcc donde p es el programa y c el canal
+		//por ese motivo se multiplica por 100, para dejar los primeros 2 digitos para el canal
+		programaycanal = (static_cast<unsigned int>(programa_canal[canal_actual]) * 100) + canal_actual;
+		if(id_pistas.count(programaycanal) == 0)
 		{
 			//Se guarda el id de la pista nueva
-			id_pistas[canal] = contador_pistas;
+			id_pistas[programaycanal] = contador_pistas;
 
 			//Se crea una nueva pista
 			MidiTrack p;
@@ -99,7 +109,7 @@ std::vector<MidiTrack> MidiTrack::DividirPistas(MidiTrack pista_dividir)
 		else
 		{
 			//Se inserta en la pista existente
-			unsigned int numero_pista = id_pistas[canal];
+			unsigned int numero_pista = id_pistas[programaycanal];
 			pistas_nuevas[numero_pista].m_events.push_back(pista_dividir.m_events[x]);
 			pistas_nuevas[numero_pista].m_event_pulses.push_back(pista_dividir.m_event_pulses[x]);
 		}
