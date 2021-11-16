@@ -7,6 +7,7 @@
 #include "../util/octava.h++"
 #include "../control/pista.h++"
 #include "../control/teclado_organo.h++"
+#include "../control/tiempos_nota.h++"
 #include "../libmidi/Midi.h++"
 
 #include <vector>
@@ -36,6 +37,7 @@ private:
 
 	std::vector<unsigned int> m_ultima_nota;//Ultima nota por cada pista
 	std::vector<Pista> *m_pistas;
+	std::map<unsigned long int, std::vector<Tiempos_Nota>> *m_evaluacion;
 
 	Direccion m_desplazamiento;
 
@@ -48,7 +50,7 @@ private:
 	void dibujar_notas_subir(unsigned int pista);
 
 public:
-	Tablero_Notas(float x, float y, float alto, float ancho, Teclado_Organo *teclado, Administrador_Recursos *recursos);
+	Tablero_Notas(float x, float y, float alto, float ancho, Teclado_Organo *teclado, std::map<unsigned long int, std::vector<Tiempos_Nota>> *evaluacion, Administrador_Recursos *recursos);
 	~Tablero_Notas();
 
 	void actualizar(unsigned int diferencia_tiempo) override;

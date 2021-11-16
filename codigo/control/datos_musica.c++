@@ -20,6 +20,7 @@ bool Datos_Musica::cargar_midi(std::string direccion)
 		if(m_musica != NULL)
 			delete m_musica;
 		m_musica = new Midi(Midi::ReadFromFile(direccion));
+		m_evaluacion.clear();
 	}
 	catch(const MidiError &e)
 	{
@@ -36,6 +37,11 @@ bool Datos_Musica::cargar_midi(std::string direccion)
 void Datos_Musica::pistas(std::vector<Pista> pistas)
 {
 	m_pistas = pistas;
+}
+
+std::map<unsigned long int, std::vector<Tiempos_Nota>> *Datos_Musica::evaluacion()
+{
+	return &m_evaluacion;
 }
 
 void Datos_Musica::nombre_musica(std::string nombre)

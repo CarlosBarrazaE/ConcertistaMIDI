@@ -1,10 +1,11 @@
 #include "tablero_notas.h++"
 
-Tablero_Notas::Tablero_Notas(float x, float y, float ancho, float alto, Teclado_Organo *teclado, Administrador_Recursos *recursos)
+Tablero_Notas::Tablero_Notas(float x, float y, float ancho, float alto, Teclado_Organo *teclado, std::map<unsigned long int, std::vector<Tiempos_Nota>> *evaluacion, Administrador_Recursos *recursos)
 : Elemento(x, y, ancho, alto)
 {
 	m_duracion_nota = 6500;
 	m_teclado = teclado;
+	m_evaluacion = evaluacion;
 	this->calcular_tamannos();
 
 	m_textura_nota = recursos->textura(T_Nota);
@@ -211,6 +212,27 @@ void Tablero_Notas::dibujar_notas_bajar(unsigned int pista)
 
 		m_textura_nota->activar();
 		m_rectangulo->dibujar_estirable(this->x() + static_cast<float>(numero_blancas) * m_ancho_blanca + ajuste_negra, this->y()+this->alto()+posicion_y-largo_nota, ancho_tecla, largo_nota, 0, 10);
+/*
+		//Muestra el rango de deteccion
+		m_rectangulo->color(Color(0.0f, 0.7f, 0.2f, 0.5f));
+		float posicion_y_d = static_cast<float>(m_tiempo_actual_midi - (m_notas[pista][n].start-330000)) / static_cast<float>(m_duracion_nota);
+		float largo_nota_d = static_cast<float>(330000*2) / static_cast<float>(m_duracion_nota);
+		m_rectangulo->dibujar_estirable(this->x() + static_cast<float>(numero_blancas) * m_ancho_blanca + ajuste_negra, this->y()+this->alto()+posicion_y_d-largo_nota_d, ancho_tecla, largo_nota_d, 0, 10);
+*/
+		if(m_pistas->at(pista).modo() != Fondo)
+		{
+			microseconds_t inicio_tocado = (*m_evaluacion)[pista][n].inicio_tocado;
+			microseconds_t fin_tocado = (*m_evaluacion)[pista][n].fin_tocado;
+
+			if(inicio_tocado > 0 || fin_tocado > 0)
+			{
+				//Dibuja de otro color lo tocado por el jugador
+				m_rectangulo->color(Color(color_nota_actual.rojo(), color_nota_actual.verde(), color_nota_actual.azul(), 0.5f));
+				float posicion_y_tocado = static_cast<float>(m_tiempo_actual_midi - inicio_tocado) / static_cast<float>(m_duracion_nota);
+				float largo_nota_tocado = static_cast<float>(fin_tocado - inicio_tocado) / static_cast<float>(m_duracion_nota);
+				m_rectangulo->dibujar_estirable(this->x() + static_cast<float>(numero_blancas) * m_ancho_blanca + ajuste_negra, this->y()+this->alto()+posicion_y_tocado-largo_nota_tocado, ancho_tecla, largo_nota_tocado, 0, 10);
+			}
+		}
 	}
 }
 

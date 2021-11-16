@@ -20,7 +20,12 @@ Concertista MIDI es un juego para aprender a tocar piano facilmente usando el te
 * Teclado midi completo de 128 teclas
 	* Teclado de 37, 49, 61, 76, 88 teclas
 	* Teclado personalisable
-* Entrada desde teclado y raton
+* Entrada
+	* Organo MIDI
+	* Teclado y raton
+* Control de teclas luminosas
+	* Canal MIDI 1-16
+	* Casio LK-S250 SysEx
 * Musica de entrenamiento ([de linthesia](https://github.com/linthesia/linthesia/tree/master/music/Learning))
 * Reproduccion de karaoke (.kar)
 * Configuración
@@ -57,6 +62,9 @@ Concertista MIDI es un juego para aprender a tocar piano facilmente usando el te
 |Suprimir              |Desplazar Organo a la Izquierda                          |
 |Re Pág                |Agregar una tecla al organo                              |
 |Av Pág                |Eliminar una tecla al organo                             |
+|Sumar (+)             |Subir volumen                                            |
+|Resta (-)             |Bajar volumen                                            |
+|M                     |Silencio                                                 |
 |Espacio               |Pausar                                                   |
 |Escape                |Atras o Salir                                            |
 |Enter                 |Entrar o Continuar                                       |
@@ -129,7 +137,7 @@ Ejecuta el siguiente comando y no cierres el terminal.
 
 Ahora se puede ejecutar concertista midi, debes asegurarte que en la configuracion de Concertista MIDI este seleccionado el dispositivo de salida correcto en este caso **TiMidity port 0**.
 
-Para la entrada puedes configurar el Teclado y Raton para tocar, es compatible con teclado MIDI Casio LK-S250 (no compatible con las teclas luminosas).
+Para la entrada puedes configurar el **Teclado y Raton** para tocar, es compatible con el teclado MIDI Casio LK-S250.
 
 -----------
 

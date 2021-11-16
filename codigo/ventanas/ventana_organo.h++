@@ -1,7 +1,7 @@
 #ifndef VENTANAORGANO_H
 #define VENTANAORGANO_H
 
-#define TIEMPO_DETECCION 165000
+#define TIEMPO_DETECCION 330000
 
 #include "ventana.h++"
 #include "../elementos_graficos/barra_progreso.h++"
@@ -60,9 +60,9 @@ private:
 	NotasPistas m_notas;
 	std::string m_subtitulo_texto;
 	std::map<unsigned int, Nota_Activa*> m_notas_activas;
+	std::map<unsigned long int, std::vector<Tiempos_Nota>> *m_evaluacion;
 	std::array<Color, 128> m_color_teclas;
 	std::array<float, 128> m_tiempo_espera;
-	std::vector<unsigned int> m_notas_correctas;
 	std::map<unsigned int, Color> m_notas_requeridas;
 	std::vector<unsigned int> m_primera_nota;//Ultima nota por cada pista
 	std::vector<Pista> *m_pistas;
@@ -75,9 +75,8 @@ private:
 
 	void calcular_teclas_activas(unsigned int diferencia_tiempo);
 	void reiniciar();
-	void insertar_nota_activa(unsigned int id_nota, unsigned char canal, Color color, bool sonido, bool correcta);
-	bool esta_tocada(unsigned int id_nota);
-	void eliminar_nota_tocada(unsigned int id_nota);
+	void insertar_nota_activa(unsigned int id_nota, unsigned char canal, unsigned long int pista, unsigned long int posicion, Color color, bool sonido, bool correcta);
+	bool fue_tocada(unsigned int id_nota);
 
 	void agregar_nota_requerida(unsigned int id_nota, const Color &color);
 	void borrar_notas_requeridas();
