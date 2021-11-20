@@ -389,7 +389,9 @@ void VentanaOrgano::escuchar_eventos()
 								posicion_encontrada = n;//Guarda la posicion
 							}
 						}
+						break;//Termina la pista actual porque ya encontro la mas cercana
 					}
+
 				}
 			}
 

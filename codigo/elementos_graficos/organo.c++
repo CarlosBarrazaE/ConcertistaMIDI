@@ -55,7 +55,8 @@ void Organo::dibujar_blancas(float x, float y, unsigned int tecla_inicial, unsig
 			m_rectangulo->color(color_actual);
 
 			//Se agregan las particulas del mismo color que la nota
-			m_generador_particulas->agregar_particulas(desplazamiento + m_ancho_tecla_blanca/2.0f - m_ancho_tecla_blanca/2.0f, y, m_numero_particulas, color_actual);
+			if(color_actual != Pista::Colores_pista[0])//No se generan particulas para notas erroneas
+				m_generador_particulas->agregar_particulas(desplazamiento + m_ancho_tecla_blanca/2.0f - m_ancho_tecla_blanca/2.0f, y, m_numero_particulas, color_actual);
 			m_notas_activas->at(n) = Color(0.0f, 0.0f, 0.0f);
 
 			//Cambia el efectos de sombra
@@ -117,7 +118,8 @@ void Organo::dibujar_negras(float x, float y, unsigned int tecla_inicial, unsign
 			//La tecla es tocada, se cambia de color
 			m_rectangulo->color(color_actual);
 			m_tecla_negra_presionada->activar();
-			m_generador_particulas->agregar_particulas(desplazamiento + m_ancho_tecla_negra/2.0f - m_ancho_tecla_blanca/2.0f, y, m_numero_particulas, color_actual);
+			if(color_actual != Pista::Colores_pista[0])//No se generan particulas para notas erroneas
+				m_generador_particulas->agregar_particulas(desplazamiento + m_ancho_tecla_negra/2.0f - m_ancho_tecla_blanca/2.0f, y, m_numero_particulas, color_actual);
 			m_notas_activas->at(n) = Color(0.0f, 0.0f, 0.0f);
 		}
 		else
