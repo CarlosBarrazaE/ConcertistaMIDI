@@ -78,6 +78,7 @@ private:
 	void reiniciar();
 	void insertar_nota_activa(unsigned int id_nota, unsigned char canal, unsigned long int pista, unsigned long int posicion, Color color, bool sonido, bool correcta);
 
+	bool hay_nota_nueva(unsigned int id_nota);
 	unsigned long int encontrar_nota_tocada(unsigned long int pista, unsigned int id_nota);
 	void bloquear_nota(unsigned long int pista, unsigned long int numero_nota);
 	void desbloquear_nota(unsigned long int pista, unsigned long int numero_nota);

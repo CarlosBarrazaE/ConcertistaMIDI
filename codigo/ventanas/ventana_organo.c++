@@ -131,9 +131,7 @@ void VentanaOrgano::actualizar(unsigned int diferencia_tiempo)
 
 	//Agregar al organo el color de las teclas presionada
 	for(std::pair<unsigned int, Nota_Activa*> valor : m_notas_activas)
-	{
 		m_color_teclas[valor.second->id_nota] = valor.second->color;
-	}
 
 	//Actualiza la etiqueta de combos
 	if(m_puntaje->combo() > COMBO_MINIMO_MOSTRAR)
@@ -280,11 +278,14 @@ void VentanaOrgano::reproducir_eventos(unsigned int microsegundos_actualizar)
 					if(nota_tocada < ULONG_MAX)
 					{
 						//Verifica si se paso de largo en una nota tocada correctamente
-						std::map<unsigned int, Nota_Activa*>::iterator nota = m_notas_activas.find(i->second.NoteNumber());
-						if(nota != m_notas_activas.end() && nota->second->correcta)
+						if(!this->hay_nota_nueva(i->second.NoteNumber()))
 						{
-							nota->second->color = Pista::Colores_pista[0];
-							nota->second->correcta = false;
+							std::map<unsigned int, Nota_Activa*>::iterator nota = m_notas_activas.find(i->second.NoteNumber());
+							if(nota != m_notas_activas.end() && nota->second->correcta)
+							{
+								nota->second->color = Pista::Colores_pista[0];
+								nota->second->correcta = false;
+							}
 						}
 						this->desbloquear_nota(i->first, nota_tocada);
 					}
@@ -452,8 +453,14 @@ void VentanaOrgano::escuchar_eventos()
 				{
 					//Guarda el tiempo en el que se solto la nota para evaluar solo en modo tocar o aprender
 					Tiempos_Nota &nota_evaluada = (*m_evaluacion)[nota_encendida->second->pista][nota_encendida->second->posicion];
-					if(m_pistas->at(nota_encendida->second->pista).modo() != Fondo && nota_evaluada.fin_tocado == 0)
+					if(nota_encendida->second->correcta && m_pistas->at(nota_encendida->second->pista).modo() != Fondo && nota_evaluada.fin_tocado == 0)
+					{
 						nota_evaluada.fin_tocado = m_tiempo_actual_midi;
+
+						//Desbloquea la nota, cuando se pasa de largo
+						if(nota_evaluada.tocada && nota_evaluada.fin_tocado >= nota_evaluada.fin)
+							this->desbloquear_nota(nota_encendida->second->pista, nota_encendida->second->posicion);
+					}
 
 					//Se selecciona el canal
 					evento.SetChannel(nota_encendida->second->canal);
@@ -650,9 +657,31 @@ void VentanaOrgano::insertar_nota_activa(unsigned int id_nota, unsigned char can
 		nota_nueva->contador_clic++;
 }
 
+bool VentanaOrgano::hay_nota_nueva(unsigned int id_nota)
+{
+	for(unsigned long int pista = 0; pista < m_pistas->size(); pista++)
+	{
+		if(m_pistas->at(pista).modo() == Fondo)
+			continue;
+
+		std::vector<Tiempos_Nota> &pista_actual = (*m_evaluacion)[pista];
+		for(unsigned long int n=m_primera_nota[pista]; n<pista_actual.size(); n++)
+		{
+			if(pista_actual[n].tocada && pista_actual[n].id_nota == id_nota && pista_actual[n].fin_tocado == 0 && pista_actual[n].fin > m_tiempo_actual_midi)
+				return true;
+
+			//Detiene el ciclo porque las notas aun no llegan
+			if(pista_actual[n].inicio - TIEMPO_DETECCION > m_tiempo_actual_midi)
+				break;
+		}
+	}
+	return false;
+}
+
 unsigned long int VentanaOrgano::encontrar_nota_tocada(unsigned long int pista, unsigned int id_nota)
 {
-	//Retorna la posicion de la nota, si no la encuentra retorna -1
+	//Retorna la posicion de las nota que estan bloqueadas y pasaron de largo
+	//Si no la encuentra retorna -1
 	//Las pista modo Fondo no se pueden tocar
 	if(m_pistas->at(pista).modo() == Fondo)
 		return ULONG_MAX;
@@ -660,7 +689,7 @@ unsigned long int VentanaOrgano::encontrar_nota_tocada(unsigned long int pista, 
 	std::vector<Tiempos_Nota> &pista_actual = (*m_evaluacion)[pista];
 	for(unsigned long int n=m_primera_nota[pista]; n<pista_actual.size(); n++)
 	{
-		if(pista_actual[n].tocada && pista_actual[n].id_nota == id_nota)
+		if(pista_actual[n].tocada && pista_actual[n].id_nota == id_nota && pista_actual[n].fin <= m_tiempo_actual_midi)
 			return n;
 
 		//Detiene el ciclo porque las notas aun no llegan
