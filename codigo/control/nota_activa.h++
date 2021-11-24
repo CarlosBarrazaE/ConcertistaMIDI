@@ -14,7 +14,6 @@ struct Nota_Activa
 	Color color;
 	bool sonido = false;
 	bool correcta = false;
-	bool visible = true;
 };
 
 #endif

@@ -61,10 +61,11 @@ private:
 	std::string m_subtitulo_texto;
 	std::map<unsigned int, Nota_Activa*> m_notas_activas;
 	std::map<unsigned long int, std::vector<Tiempos_Nota>> *m_evaluacion;
+	unsigned int m_notas_bloqueadas;
 	std::array<Color, 128> m_color_teclas;
 	std::array<float, 128> m_tiempo_espera;
 	std::map<unsigned int, Color> m_notas_requeridas;
-	std::vector<unsigned int> m_primera_nota;//Ultima nota por cada pista
+	std::vector<unsigned long int> m_primera_nota;//Ultima nota por cada pista
 	std::vector<Pista> *m_pistas;
 	microseconds_t m_tiempo_actual_midi;
 
@@ -76,7 +77,11 @@ private:
 	void calcular_teclas_activas(unsigned int diferencia_tiempo);
 	void reiniciar();
 	void insertar_nota_activa(unsigned int id_nota, unsigned char canal, unsigned long int pista, unsigned long int posicion, Color color, bool sonido, bool correcta);
-	bool fue_tocada(unsigned int id_nota);
+
+	unsigned long int encontrar_nota_tocada(unsigned long int pista, unsigned int id_nota);
+	void bloquear_nota(unsigned long int pista, unsigned long int numero_nota);
+	void desbloquear_nota(unsigned long int pista, unsigned long int numero_nota);
+	void desbloquear_notas();
 
 	void agregar_nota_requerida(unsigned int id_nota, const Color &color);
 	void borrar_notas_requeridas();

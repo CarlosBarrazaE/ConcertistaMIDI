@@ -132,8 +132,7 @@ void VentanaOrgano::actualizar(unsigned int diferencia_tiempo)
 	//Agregar al organo el color de las teclas presionada
 	for(std::pair<unsigned int, Nota_Activa*> valor : m_notas_activas)
 	{
-		if(valor.second->visible)
-			m_color_teclas[valor.second->id_nota] = valor.second->color;
+		m_color_teclas[valor.second->id_nota] = valor.second->color;
 	}
 
 	//Actualiza la etiqueta de combos
@@ -212,12 +211,14 @@ void VentanaOrgano::inicializar()
 					notas_jugables ++;
 
 				Tiempos_Nota nota_nueva;
+				nota_nueva.id_nota = m_notas[i][j].note_id;
 				nota_nueva.inicio = m_notas[i][j].start;
 				nota_nueva.fin = m_notas[i][j].end;
 				(*m_evaluacion)[i].push_back(nota_nueva);
 			}
 		}
 	}
+	m_notas_bloqueadas = 0;
 	m_puntaje->notas_totales(notas_jugables);
 }
 
@@ -275,26 +276,21 @@ void VentanaOrgano::reproducir_eventos(unsigned int microsegundos_actualizar)
 			{
 				if(m_pistas->at(i->first).modo() != Fondo)
 				{
-					std::map<unsigned int, Nota_Activa*>::iterator nota = m_notas_activas.find(i->second.NoteNumber());
-					if(nota != m_notas_activas.end())
+					unsigned long int nota_tocada = this->encontrar_nota_tocada(i->first, i->second.NoteNumber());
+					if(nota_tocada < ULONG_MAX)
 					{
-						if(nota->second->correcta && nota->second->visible)
+						//Verifica si se paso de largo en una nota tocada correctamente
+						std::map<unsigned int, Nota_Activa*>::iterator nota = m_notas_activas.find(i->second.NoteNumber());
+						if(nota != m_notas_activas.end() && nota->second->correcta)
 						{
-							//La nota si fue tocada correctamente pero ahora se paso de largo
 							nota->second->color = Pista::Colores_pista[0];
 							nota->second->correcta = false;
 						}
-						else if(nota->second->correcta && !nota->second->visible)
-						{
-							//Borra la nota que fue tocada correctamente pero ahora es invisible
-							//porque el jugador solto la tecla antes que terminara
-							unsigned int nota_a_borrar = nota->second->id_nota;
-							delete nota->second;
-							m_notas_activas.erase(nota_a_borrar);
-						}
+						this->desbloquear_nota(i->first, nota_tocada);
 					}
 					else
-						m_puntaje->reiniciar_combo();//No toco la nota por lo que pierde el combo
+						//No toco la nota por lo que pierde el combo
+						m_puntaje->reiniciar_combo();
 				}
 				if(m_pistas->at(i->first).modo() != Aprender && m_pistas->at(i->first).visible())
 					m_teclas_luminosas->apagar(i->second.NoteNumber(), m_configuracion->dispositivo_salida());
@@ -350,13 +346,13 @@ void VentanaOrgano::escuchar_eventos()
 			TranslatedNote *nota_encontrada = NULL;
 			unsigned long int pista_encontrada = 0;
 			unsigned long int posicion_encontrada = 0;
-			for(unsigned long int pista = 0; pista < m_notas.size(); pista++)
+			for(unsigned long int pista = 0; pista < m_pistas->size(); pista++)
 			{
-				//Se salta las pistas que no corresponde tocar
+				//Se salta las pistas que no toca el jugador
 				if(m_pistas->at(pista).modo() == Fondo)
 					continue;
 
-				for(unsigned int n=m_primera_nota[pista]; n<m_notas[pista].size(); n++)
+				for(unsigned long int n=m_primera_nota[pista]; n<m_notas[pista].size(); n++)
 				{
 					TranslatedNote *nota_actual = &m_notas[pista][n];
 					microseconds_t tiempo_inicio = nota_actual->start - TIEMPO_DETECCION;
@@ -395,18 +391,18 @@ void VentanaOrgano::escuchar_eventos()
 				}
 			}
 
+			Tiempos_Nota &nota_evaluada = (*m_evaluacion)[pista_encontrada][posicion_encontrada];
 			//Se guarda la nota tocada por el jugador
-			if(nota_encontrada != NULL && !m_pausa && !this->fue_tocada(nota_encontrada->note_id))
+			//En el modo aprender no importa si estan bloqueadas o no las notas, es solo para el modo Tocar
+			if(nota_encontrada != NULL && !m_pausa && (!nota_evaluada.tocada || m_pistas->at(pista_encontrada).modo() == Aprender))
 			{
 				//Nota correcta
 				this->insertar_nota_activa(nota_encontrada->note_id, nota_encontrada->channel, pista_encontrada, posicion_encontrada, m_pistas->at(pista_encontrada).color(), m_pistas->at(pista_encontrada).sonido(), true);
-				//Se cambia el canal
-				evento.SetChannel(nota_encontrada->channel);
-				//Escala el volumen
-				evento.SetVelocity(static_cast<int>(evento.NoteVelocity() * m_volumen));
 
 				//Guarda el tiempo en el que se toco la nota para evaluar
-				(*m_evaluacion)[pista_encontrada][posicion_encontrada].inicio_tocado = m_tiempo_actual_midi;
+				nota_evaluada.inicio_tocado = m_tiempo_actual_midi;
+				nota_evaluada.fin_tocado = 0;
+				this->bloquear_nota(pista_encontrada, posicion_encontrada);
 
 				//Aumenta el contador de combos
 				//El modo aprender cuenta el puntaje cuando todas las notas son tocadas correctamente
@@ -418,6 +414,10 @@ void VentanaOrgano::escuchar_eventos()
 				}
 
 				nuevas_notas_tocadas = true;
+
+				//Se cambia el canal y escala el volumen
+				evento.SetChannel(nota_encontrada->channel);
+				evento.SetVelocity(static_cast<int>(evento.NoteVelocity() * m_volumen));
 
 				//Se envia el evento
 				if(m_configuracion->dispositivo_salida() != NULL && m_pistas->at(pista_encontrada).sonido())
@@ -450,27 +450,22 @@ void VentanaOrgano::escuchar_eventos()
 			{
 				if(nota_encendida->second->contador_clic == 0)
 				{
+					//Guarda el tiempo en el que se solto la nota para evaluar solo en modo tocar o aprender
+					Tiempos_Nota &nota_evaluada = (*m_evaluacion)[nota_encendida->second->pista][nota_encendida->second->posicion];
+					if(m_pistas->at(nota_encendida->second->pista).modo() != Fondo && nota_evaluada.fin_tocado == 0)
+						nota_evaluada.fin_tocado = m_tiempo_actual_midi;
+
 					//Se selecciona el canal
 					evento.SetChannel(nota_encendida->second->canal);
-					//nota_encendida->second-> = m_musica->musica()->GetSongPositionInMicroseconds();
 
 					//Se envia el evento de apagado
 					if(m_configuracion->dispositivo_salida() != NULL && nota_encendida->second->sonido)
 						m_configuracion->dispositivo_salida()->Write(evento);
 
-					//Guarda el tiempo en el que se solto la nota para evaluar
-					//solo en modo tocar o aprender
-					if(m_pistas->at(nota_encendida->second->pista).modo() != Fondo && nota_encendida->second->visible)
-						(*m_evaluacion)[nota_encendida->second->pista][nota_encendida->second->posicion].fin_tocado = m_tiempo_actual_midi;
-					nota_encendida->second->visible = false;
-
-					//Borra la nota solo si es incorrecta
-					if(!nota_encendida->second->correcta)
-					{
-						unsigned int nota_a_borrar = nota_encendida->second->id_nota;
-						delete nota_encendida->second;
-						m_notas_activas.erase(nota_a_borrar);
-					}
+					//Borra la nota
+					unsigned int nota_a_borrar = nota_encendida->second->id_nota;
+					delete nota_encendida->second;
+					m_notas_activas.erase(nota_a_borrar);
 				}
 				//Se puede activar dos veces (o mas) la misma tecla por ejemplo con el teclado y el raton
 				//no se borrara la nota hasta que se reciban la misma cantidad de NoteOff que NoteOn
@@ -551,7 +546,7 @@ void VentanaOrgano::calcular_teclas_activas(unsigned int diferencia_tiempo)
 		//Dibuja solo las pistas que tienen notas, hay pistas vacias
 		if(m_notas[pista].size() > 0 && m_pistas->at(pista).visible())
 		{
-			for(unsigned int n=m_primera_nota[pista]; n<m_notas[pista].size(); n++)
+			for(unsigned long int n=m_primera_nota[pista]; n<m_notas[pista].size(); n++)
 			{
 				//Numero_nota incluye blancas y negras
 				numero_nota = m_notas[pista][n].note_id;
@@ -617,8 +612,11 @@ void VentanaOrgano::reiniciar()
 	//Elimina todas las notas requeridas
 	m_notas_requeridas.clear();
 
+	//Desbloquea las notas que puedan haber quedado como tocadas
+	this->desbloquear_notas();
+
 	//Reinicia la primera nota de cada pista a 0
-	for(unsigned int i=0; i<m_primera_nota.size(); i++)
+	for(unsigned long int i=0; i<m_primera_nota.size(); i++)
 		m_primera_nota[i] = 0;
 
 	//Reinicia las luces
@@ -652,15 +650,65 @@ void VentanaOrgano::insertar_nota_activa(unsigned int id_nota, unsigned char can
 		nota_nueva->contador_clic++;
 }
 
-bool VentanaOrgano::fue_tocada(unsigned int id_nota)
+unsigned long int VentanaOrgano::encontrar_nota_tocada(unsigned long int pista, unsigned int id_nota)
 {
-	std::map<unsigned int, Nota_Activa*>::iterator nota = m_notas_activas.find(id_nota);
-	if(nota != m_notas_activas.end())
+	//Retorna la posicion de la nota, si no la encuentra retorna -1
+	//Las pista modo Fondo no se pueden tocar
+	if(m_pistas->at(pista).modo() == Fondo)
+		return ULONG_MAX;
+
+	std::vector<Tiempos_Nota> &pista_actual = (*m_evaluacion)[pista];
+	for(unsigned long int n=m_primera_nota[pista]; n<pista_actual.size(); n++)
 	{
-		if(nota->second->correcta)
-			return true;
+		if(pista_actual[n].tocada && pista_actual[n].id_nota == id_nota)
+			return n;
+
+		//Detiene el ciclo porque las notas aun no llegan
+		if(pista_actual[n].inicio > m_tiempo_actual_midi)
+			break;
 	}
-	return false;
+	return ULONG_MAX;//No encontrado
+}
+
+void VentanaOrgano::bloquear_nota(unsigned long int pista, unsigned long int numero_nota)
+{
+	if(!(*m_evaluacion)[pista][numero_nota].tocada)
+	{
+		(*m_evaluacion)[pista][numero_nota].tocada = true;
+		m_notas_bloqueadas++;
+	}
+}
+
+void VentanaOrgano::desbloquear_nota(unsigned long int pista, unsigned long int numero_nota)
+{
+	if((*m_evaluacion)[pista][numero_nota].tocada)
+	{
+		(*m_evaluacion)[pista][numero_nota].tocada = false;
+		m_notas_bloqueadas--;
+	}
+}
+
+void VentanaOrgano::desbloquear_notas()
+{
+	if(m_notas_bloqueadas > 0)
+	{
+		for(unsigned long int pista = 0; pista < m_pistas->size(); pista++)
+		{
+			//Se salta las pistas que no toca el jugador
+			if(m_pistas->at(pista).modo() == Fondo)
+				continue;
+
+			std::vector<Tiempos_Nota> &pista_actual = (*m_evaluacion)[pista];
+			for(unsigned long int n = 0; n < pista_actual.size(); n++)
+			{
+				if(pista_actual[n].tocada)
+				{
+					pista_actual[n].tocada = false;
+					m_notas_bloqueadas--;
+				}
+			}
+		}
+	}
 }
 
 void VentanaOrgano::agregar_nota_requerida(unsigned int id_nota, const Color &color)
