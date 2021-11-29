@@ -82,7 +82,7 @@ private:
 	unsigned long int encontrar_nota_tocada(unsigned long int pista, unsigned int id_nota);
 	void bloquear_nota(unsigned long int pista, unsigned long int numero_nota);
 	void desbloquear_nota(unsigned long int pista, unsigned long int numero_nota);
-	void desbloquear_notas();
+	void desbloquear_notas(bool desbloquear_todas);
 
 	void agregar_nota_requerida(unsigned int id_nota, const Color &color);
 	void borrar_notas_requeridas();
