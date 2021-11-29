@@ -76,7 +76,7 @@ Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL), m_teclas_lumin
 	this->volumen(m_volumen_original);
 	this->velocidad(m_velocidad_original);
 	this->duracion_nota(m_duracion_nota_original);
-	m_subtitulos_original = m_subtitulos;
+	m_subtitulos = m_subtitulos_original;
 	m_teclado_visible = m_teclado_visible_original;
 	m_teclado_util = m_teclado_util_original;
 }
@@ -167,9 +167,9 @@ void Configuracion::guardar_configuracion()
 	if(m_subtitulos_original != m_subtitulos)
 	{
 		if(m_subtitulos)
-			m_datos.escribir_configuracion("pantalla_completa", "verdadero");
+			m_datos.escribir_configuracion("subtitulos", "verdadero");
 		else
-			m_datos.escribir_configuracion("pantalla_completa", "falso");
+			m_datos.escribir_configuracion("subtitulos", "falso");
 	}
 	if(m_teclado_visible_original != m_teclado_visible)
 		m_datos.escribir_configuracion("teclado_visible", m_teclado_visible.texto());
