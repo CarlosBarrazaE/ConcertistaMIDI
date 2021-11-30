@@ -68,19 +68,15 @@ void TeclasLuminosas::actualizar(unsigned int diferencia_tiempo, MidiCommOut *di
 
 void TeclasLuminosas::encender(unsigned int id_nota, MidiCommOut *dispositivo_salida)
 {
-	if(dispositivo_salida == NULL)
-		return;
-
-	this->encender_virtual(id_nota, dispositivo_salida);
+	if(dispositivo_salida != NULL)
+		this->encender_virtual(id_nota, dispositivo_salida);
 	m_luces_encendidas.push_back(id_nota);
 }
 
 void TeclasLuminosas::apagar(unsigned int id_nota, MidiCommOut *dispositivo_salida)
 {
-	if(dispositivo_salida == NULL)
-		return;
-
-	this->apagar_virtual(id_nota, dispositivo_salida);
+	if(dispositivo_salida != NULL)
+		this->apagar_virtual(id_nota, dispositivo_salida);
 
 	//Se borra de la lista
 	bool borrado = false;
@@ -103,10 +99,10 @@ unsigned int TeclasLuminosas::identificador()
 
 void TeclasLuminosas::reiniciar(MidiCommOut *dispositivo_salida)
 {
-	if(dispositivo_salida == NULL)
-		return;
-
-	for(unsigned int x=0; x<m_luces_encendidas.size(); x++)
-		this->apagar(m_luces_encendidas[x], dispositivo_salida);
+	if(dispositivo_salida != NULL)
+	{
+		for(unsigned int x=0; x<m_luces_encendidas.size(); x++)
+			this->apagar_virtual(m_luces_encendidas[x], dispositivo_salida);
+	}
 	m_luces_encendidas.clear();
 }
