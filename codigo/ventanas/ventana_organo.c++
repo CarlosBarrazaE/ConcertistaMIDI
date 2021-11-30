@@ -25,7 +25,7 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 
 	m_barra = new Barra_Progreso(0, 40, Pantalla::Ancho, 40, m_musica->musica()->GetSongLengthInMicroseconds(), m_musica->musica()->GetBarLines(), recursos);
 	m_organo = new Organo(0, Pantalla::Alto, Pantalla::Ancho, &m_teclado_visible, &m_teclado_util, recursos);
-	m_tablero = new Tablero_Notas(0, m_barra->alto()+40, Pantalla::Ancho, Pantalla::Alto - (m_organo->alto() + m_barra->alto() + 40), &m_teclado_visible, m_evaluacion, recursos);
+	m_tablero = new Tablero_Notas(0, m_barra->alto()+40, Pantalla::Ancho, Pantalla::Alto - (m_organo->alto() + m_barra->alto() + 40), &m_teclado_visible, &m_teclado_util, m_evaluacion, recursos);
 
 	m_titulo_musica = new Titulo(0, m_barra->alto()+40, Pantalla::Ancho, Pantalla::Alto - (m_organo->alto() + m_barra->alto() + 40), recursos);
 	m_titulo_musica->datos(musica);
@@ -360,8 +360,8 @@ void VentanaOrgano::escuchar_eventos()
 				for(unsigned long int n=m_primera_nota[pista]; n<m_notas[pista].size() && !detener_proximo_ciclo; n++)
 				{
 					TranslatedNote *nota_actual = &m_notas[pista][n];
-					microseconds_t tiempo_inicio = nota_actual->start - TIEMPO_DETECCION;
-					microseconds_t tiempo_final = nota_actual->start + TIEMPO_DETECCION;
+					microseconds_t tiempo_inicio = nota_actual->start - TIEMPO_DETECCION_INICIAL;
+					microseconds_t tiempo_final = nota_actual->start + TIEMPO_DETECCION_FINAL;
 
 					//El tiempo de deteccion no debe superar el largo de la nota
 					if(tiempo_final > nota_actual->end)
@@ -371,6 +371,11 @@ void VentanaOrgano::escuchar_eventos()
 					if(tiempo_inicio > m_tiempo_actual_midi)
 						break;
 
+					//Se salta alas notas fuera del teclado
+					if(nota_actual->note_id < m_teclado_util.tecla_inicial() ||
+						nota_actual->note_id > m_teclado_util.tecla_final())
+						continue;
+
 					//Nota dentro del rango para tocar y que no se haya tocado anteriormente
 					Tiempos_Nota &nota = (*m_evaluacion)[pista][n];
 					if(tiempo_final > m_tiempo_actual_midi && !nota.tocada)
@@ -378,8 +383,9 @@ void VentanaOrgano::escuchar_eventos()
 						//Se queda con el tiempo de la primera nota que aun no se ha tocado
 						if(menor_tiempo == LLONG_MAX)
 							menor_tiempo = nota_actual->start;
-						//Verifica que sea la primera que debe tocarse, para que no se salte notas
-						else if(menor_tiempo < nota_actual->start)
+						//Verifica que sea la primera que debe tocarse, para que no se salte notas con una pequeña tolerancia
+						//para que no sea tan dificial con muchas notas cortas simultaneas
+						else if(menor_tiempo < nota_actual->start && menor_tiempo+TIEMPO_TOLERANCIA < nota_actual->start)
 							break;
 
 						//Nota correcta
@@ -420,7 +426,7 @@ void VentanaOrgano::escuchar_eventos()
 
 				//Guarda el tiempo en el que se toco la nota para evaluar
 				nota_evaluada.inicio_tocado = m_tiempo_actual_midi;
-				nota_evaluada.fin_tocado = 0;
+				nota_evaluada.fin_tocado = LLONG_MIN;
 				this->bloquear_nota(pista_encontrada, posicion_encontrada);
 
 				//Aumenta el contador de combos
@@ -473,7 +479,7 @@ void VentanaOrgano::escuchar_eventos()
 					Tiempos_Nota &nota_evaluada = (*m_evaluacion)[nota_encendida->second->pista][nota_encendida->second->posicion];
 					if(m_pistas->at(nota_encendida->second->pista).modo() != Fondo &&
 						(nota_encendida->second->correcta || (!nota_encendida->second->correcta && nota_evaluada.fin < m_tiempo_actual_midi)) &&
-						nota_evaluada.fin_tocado == 0)
+						nota_evaluada.fin_tocado == LLONG_MIN)
 					{
 						nota_evaluada.fin_tocado = m_tiempo_actual_midi;
 
@@ -679,6 +685,7 @@ void VentanaOrgano::insertar_nota_activa(unsigned int id_nota, unsigned char can
 
 bool VentanaOrgano::hay_nota_nueva(unsigned int id_nota)
 {
+	//Retorna verdadero si hay una nota activa en la posición id_nota
 	for(unsigned long int pista = 0; pista < m_pistas->size(); pista++)
 	{
 		if(m_pistas->at(pista).modo() == Fondo)
@@ -687,11 +694,11 @@ bool VentanaOrgano::hay_nota_nueva(unsigned int id_nota)
 		std::vector<Tiempos_Nota> &pista_actual = (*m_evaluacion)[pista];
 		for(unsigned long int n=m_primera_nota[pista]; n<pista_actual.size(); n++)
 		{
-			if(pista_actual[n].tocada && pista_actual[n].id_nota == id_nota && pista_actual[n].fin_tocado == 0 && pista_actual[n].fin > m_tiempo_actual_midi)
+			if(pista_actual[n].tocada && pista_actual[n].id_nota == id_nota && pista_actual[n].fin_tocado == LLONG_MIN && pista_actual[n].fin > m_tiempo_actual_midi)
 				return true;
 
 			//Detiene el ciclo porque las notas aun no llegan
-			if(pista_actual[n].inicio - TIEMPO_DETECCION > m_tiempo_actual_midi)
+			if(pista_actual[n].inicio - TIEMPO_DETECCION_INICIAL > m_tiempo_actual_midi)
 				break;
 		}
 	}
@@ -772,7 +779,7 @@ void VentanaOrgano::desbloquear_notas(bool desbloquear_todas)
 					{
 						//Se desbloquea solo si es requerida
 						std::map<unsigned int, Color>::iterator resultado = m_notas_requeridas.find(pista_actual[n].id_nota);
-						if(pista_actual[n].fin_tocado > 0 && resultado != m_notas_requeridas.end())
+						if(pista_actual[n].fin_tocado > LLONG_MIN && resultado != m_notas_requeridas.end())
 						{
 							pista_actual[n].tocada = false;
 							m_notas_bloqueadas--;

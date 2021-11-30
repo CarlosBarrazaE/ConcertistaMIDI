@@ -1,8 +1,6 @@
 #ifndef VENTANAORGANO_H
 #define VENTANAORGANO_H
 
-#define TIEMPO_DETECCION 330000
-
 #include "ventana.h++"
 #include "../elementos_graficos/barra_progreso.h++"
 #include "../elementos_graficos/etiqueta.h++"
