@@ -1,29 +1,37 @@
 #include "registro.h++"
-#include <GL/glew.h>
+
 void Registro::Escribir_registro(CodigoEstado estado, std::string texto)
 {
-	//TODO agregar despues de un \n la etiqueta que corresponda [Error / Aviso / Dato]
 	std::ofstream archivo;
-	archivo.open(ARCHIVO_REGISTRO, std::ios::app);
-	if(estado == EstadoError)
-		archivo << "[ERROR] " << texto << "\n";
-	else if(estado == EstadoAviso && NIVEL_REGISTRO >= 1)
-		archivo << "[AVISO] " << texto << "\n";
-	else if(estado == EstadoNota && NIVEL_REGISTRO >= 2)
-		archivo << "[NOTA] " << texto << "\n";
-	else if(estado == EstadoDepurar && NIVEL_REGISTRO >= 3)
-		archivo << "[DEPURAR] " << texto << "\n";
+	archivo.open(Usuario::carpeta_personal() + ".registros_concertista_midi.txt", std::ios::app);
 
-	if(IMPRIMIR_TERMINAL)
+	std::vector<std::string> lineas;
+	if(Texto::contiene_caracter(texto, '\n'))
+		lineas = Texto::dividir_texto(texto, '\n');
+	else
+		lineas.push_back(texto);
+	for(unsigned long int x=0; x<lineas.size(); x++)
 	{
 		if(estado == EstadoError)
-			std::cout << "\033[31m[ERROR]\033[0m " << texto << "\n" << std::flush;
+		{
+			archivo << "[ERROR] " << lineas[x] << "\n";
+			std::cout << "\033[31m[ERROR]\033[0m " << lineas[x] << "\n" << std::flush;
+		}
 		else if(estado == EstadoAviso && NIVEL_REGISTRO >= 1)
-			std::cout << "\033[33m[AVISO]\033[0m " << texto << "\n" << std::flush;
+		{
+			archivo << "[AVISO] " << lineas[x] << "\n";
+			std::cout << "\033[33m[AVISO]\033[0m " << lineas[x] << "\n" << std::flush;
+		}
 		else if(estado == EstadoNota && NIVEL_REGISTRO >= 2)
-			std::cout << "\033[32m[NOTA]\033[0m " << texto << "\n" << std::flush;
+		{
+			archivo << "[NOTA] " << lineas[x] << "\n";
+			std::cout << "\033[32m[NOTA]\033[0m " << lineas[x] << "\n" << std::flush;
+		}
 		else if(estado == EstadoDepurar && NIVEL_REGISTRO >= 3)
-			std::cout << "\033[34m[DEPURAR]\033[0m " << texto << "\n" << std::flush;
+		{
+			archivo << "[DEPURAR] " << lineas[x] << "\n";
+			std::cout << "\033[34m[DEPURAR]\033[0m " << lineas[x] << "\n" << std::flush;
+		}
 	}
 }
 

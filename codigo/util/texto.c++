@@ -103,4 +103,14 @@ namespace Texto
 		texto.erase(texto.find_last_not_of(" \t\n\r")+1);//Limpia el final
 		return texto;
 	}
+
+	bool contiene_caracter(const std::string &texto, char caracter)
+	{
+		for(unsigned long int x = 0; x<texto.length(); x++)
+		{
+			if(texto[x] == caracter)
+				return true;
+		}
+		return false;
+	}
 }

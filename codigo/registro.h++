@@ -1,11 +1,13 @@
 #ifndef REGISTRO_H
 #define REGISTRO_H
 
+#include "util/usuario.h++"
+#include "util/texto.h++"
+
 #include <iostream>
 #include <fstream>
+#include <GL/glew.h>
 
-#define ARCHIVO_REGISTRO "../registros.txt"
-#define IMPRIMIR_TERMINAL 1
 #define NIVEL_REGISTRO 3
 
 enum CodigoEstado
