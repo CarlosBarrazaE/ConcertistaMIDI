@@ -190,7 +190,7 @@ void Configuracion::dispositivo_entrada(unsigned int id_entrada)
 		if(id_entrada < dispositivos_entrada.size())
 			m_id_entrada = id_entrada;
 
-		Registro::Aviso("Conectado al dispositivo de entrada: " + dispositivos_entrada[m_id_entrada].name);
+		Registro::Nota("Conectado al dispositivo de entrada: " + dispositivos_entrada[m_id_entrada].name);
 		if(m_entrada != NULL)
 			delete m_entrada;
 		m_entrada = new MidiCommIn(m_id_entrada);
@@ -210,7 +210,7 @@ void Configuracion::dispositivo_salida(unsigned int id_salida)
 		if(id_salida < dispositivos_salida.size())
 			m_id_salida = id_salida;
 
-		Registro::Aviso("Conectado al dispositivo de salida: " + dispositivos_salida[m_id_salida].name);
+		Registro::Nota("Conectado al dispositivo de salida: " + dispositivos_salida[m_id_salida].name);
 		if(m_salida != NULL)
 			delete m_salida;
 		m_salida = new MidiCommOut(m_id_salida);
