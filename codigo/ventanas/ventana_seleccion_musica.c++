@@ -181,7 +181,7 @@ void VentanaSeleccionMusica::crear_tabla(std::string ruta_abrir)
 		this->cargar_contenido_carpeta(ruta_abrir);
 	}
 	else if(ruta_abrir != "-")
-		Notificacion::Error("La carpeta: \"" + ruta_abrir + "\" no existe", 5);
+		Notificacion::Aviso("La carpeta no existe", 5);
 	else
 	{
 		Registro::Depurar("Mostrando la lista de carpetas");
@@ -204,7 +204,7 @@ void VentanaSeleccionMusica::crear_tabla(std::string ruta_abrir)
 		if(m_es_carpeta_inicial)
 		{
 			Notificacion::Aviso("No hay carpetas donde buscar archivos MIDI", 5);
-			Notificacion::Nota("Agregue carpetas en la configuración", 15);
+			Notificacion::Nota("Agrega carpetas en la configuración", 15);
 		}
 		else
 			Notificacion::Aviso("Esta carpeta no contiene archivos MIDI", 5);

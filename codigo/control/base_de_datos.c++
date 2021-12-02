@@ -179,7 +179,7 @@ void Base_de_Datos::actualizar()
 		{
 			this->consulta("CREATE TABLE seleccion (ruta TEXT NOT NULL PRIMARY KEY, seleccion INT DEFAULT 0, ruta_seleccion TEXT)");
 		}
-		Registro::Aviso("Base de datos actualizada de la versión: " + version + " a la versión " + VERSION_BASE_DE_DATOS);
+		Registro::Nota("Base de datos actualizada de la versión: " + version + " a la versión " + VERSION_BASE_DE_DATOS);
 	}
 }
 

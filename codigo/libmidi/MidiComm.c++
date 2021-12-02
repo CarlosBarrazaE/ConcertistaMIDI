@@ -28,7 +28,7 @@ void midiInit()
 	if (err < 0)
 	{
 		alsa_seq = NULL;
-		Notificacion::Error("No se puede abrir el secuensiador MIDI. MIDI no disponible", 10);
+		Notificacion::Error("No se puede abrir el secuensiador MIDI.", 10);
 		return;
 	}
 
@@ -73,7 +73,8 @@ void midiInit()
 	if (err<0)
 	{
 		std::string texto = snd_strerror(err);
-		Notificacion::Error("No se puede suscribir puerto de anuncio: " + texto, 10);
+		Notificacion::Error("No se puede suscribir puerto de anuncio", 10);
+		Registro::Error(texto);
 		return;
 	}
 
@@ -164,7 +165,8 @@ MidiCommIn::MidiCommIn(unsigned int device_id)
 	int res = snd_seq_connect_from(alsa_seq, local_in, m_description.client, m_description.port);
 	if (res < 0)
 	{
-		Notificacion::Error("No se puede conectar al dispositivo de entrada: '" + m_description.name + "'", 10);
+		Notificacion::Error("No se puede conectar al dispositivo de entrada", 10);
+		Registro::Error(m_description.name);
 		Registro::Error(snd_strerror(res));
 	}
 
@@ -247,7 +249,8 @@ MidiEvent MidiCommIn::Read()
 			int port = snd_seq_port_info_get_port(pinfo);
 			int client = snd_seq_port_info_get_client(pinfo);
 			Registro::Depurar("Informacion puerto cliente: " + std::to_string(client) + " puerto: " + std::to_string(port));
-			Notificacion::Aviso("Nuevo dispositivo MIDI: " + std::string(snd_seq_port_info_get_name(pinfo)), 10);
+			Notificacion::Nota("Nuevo dispositivo MIDI detectado", 10);
+			Registro::Nota(std::string(snd_seq_port_info_get_name(pinfo)));
 
 			MidiCommIn::UpdateDeviceList();
 			MidiCommOut::UpdateDeviceList();
@@ -298,7 +301,8 @@ MidiCommOut::MidiCommOut(unsigned int device_id)
 	int res = snd_seq_connect_to(alsa_seq, local_out, m_description.client, m_description.port);
 	if (res < 0)
 	{
-		Notificacion::Error("No se puede conectar al dispositivo de salida: '" + m_description.name + "'", 10);
+		Notificacion::Error("No se puede conectar al dispositivo de salida", 10);
+		Registro::Error(m_description.name);
 		Registro::Error(snd_strerror(res));
 	}
 }

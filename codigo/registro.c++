@@ -2,6 +2,11 @@
 
 void Registro::Escribir_registro(CodigoEstado estado, std::string texto)
 {
+	if((estado == EstadoAviso && NIVEL_REGISTRO < 1) ||
+		(estado == EstadoNota && NIVEL_REGISTRO < 2) ||
+		(estado == EstadoDepurar && NIVEL_REGISTRO < 3))
+		return;
+
 	std::ofstream archivo;
 	archivo.open(Usuario::carpeta_personal() + ".registros_concertista_midi.txt", std::ios::app);
 
