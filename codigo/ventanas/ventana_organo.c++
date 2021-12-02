@@ -261,7 +261,7 @@ void VentanaOrgano::reproducir_eventos(unsigned int microsegundos_actualizar)
 					this->agregar_nota_requerida(i->second.NoteNumber(), m_pistas->at(i->first).color());
 					notas_requeridas_nuevas = true;
 				}
-				else if(m_pistas->at(i->first).visible())
+				else if(m_pistas->at(i->first).modo() == Tocar)
 				{
 					//Activa la nota luminosa
 					m_teclas_luminosas->encender(i->second.NoteNumber(), m_configuracion->dispositivo_salida());
@@ -295,7 +295,7 @@ void VentanaOrgano::reproducir_eventos(unsigned int microsegundos_actualizar)
 						//No toco la nota por lo que pierde el combo
 						m_puntaje->reiniciar_combo();
 				}
-				if(m_pistas->at(i->first).modo() != Aprender && m_pistas->at(i->first).visible())
+				if(m_pistas->at(i->first).modo() == Tocar)
 					m_teclas_luminosas->apagar(i->second.NoteNumber(), m_configuracion->dispositivo_salida());
 			}
 		}
