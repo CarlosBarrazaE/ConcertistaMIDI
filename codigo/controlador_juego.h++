@@ -40,12 +40,13 @@ private:
 	bool m_fps_reducido;
 	float m_contador_inactividad;
 
-
 	//Control
 	bool m_depurar;
 	bool m_pantalla_completa;
 	bool m_modo_alambre;
 	bool m_finalizar;
+	bool m_aviso_fps_mostrado;
+	float m_tiempo_espera_aviso;
 	std::set<unsigned int> m_teclas_pulsadas;
 
 	//Eventos

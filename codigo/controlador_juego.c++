@@ -27,6 +27,8 @@ Controlador_Juego::Controlador_Juego(Administrador_Recursos *recursos) : m_texto
 	m_modo_alambre = false;
 	m_finalizar = false;
 
+	m_aviso_fps_mostrado = false;
+
 	m_pantalla_completa = m_configuracion.pantalla_completa();
 }
 
@@ -158,6 +160,15 @@ void Controlador_Juego::actualizar()
 	{
 		if(m_depurar)
 			m_depurar = false;
+	}
+
+	if(!m_fps_dinamico && m_tiempo_espera_aviso < 5)
+		m_tiempo_espera_aviso += (static_cast<float>(diferencia_tiempo)/1000000000.0f);
+	if(!m_fps_dinamico && !m_aviso_fps_mostrado && Fps::Actualizar_fps() && fps < 30 && m_tiempo_espera_aviso >= 5)
+	{
+		Notificacion::Aviso("Hay " + std::to_string(fps) + " fps actualmente", 5);
+		Notificacion::Aviso("Pueden haber problemas con la reproducción", 5);
+		m_aviso_fps_mostrado = true;
 	}
 
 	if(cambio_ventana)
