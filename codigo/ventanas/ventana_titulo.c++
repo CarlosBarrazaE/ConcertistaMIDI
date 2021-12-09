@@ -1,6 +1,6 @@
 #include "ventana_titulo.h++"
 
-VentanaTitulo::VentanaTitulo(Administrador_Recursos *recursos) : Ventana(), m_texto_version(recursos)
+VentanaTitulo::VentanaTitulo(Configuracion *configuracion, Administrador_Recursos *recursos) : Ventana(), m_texto_dispositivo_entrada(recursos), m_texto_dispositivo_salida(recursos), m_texto_version(recursos)
 {
 	m_rectangulo = recursos->figura(F_Rectangulo);
 
@@ -25,10 +25,30 @@ VentanaTitulo::VentanaTitulo(Administrador_Recursos *recursos) : Ventana(), m_te
 	m_boton_salir->color_boton(Color(0.9f, 0.9f, 0.9f));
 	m_boton_salir->centrado(true);
 
+	std::string entrada = "No conectado";
+	MidiCommDescriptionList lista_entrada = MidiCommIn::GetDeviceList();
+	if(configuracion->id_dispositivo_entrada() < lista_entrada.size())
+		entrada = lista_entrada[configuracion->id_dispositivo_entrada()].name;
+
+	std::string salida = "No conectado";
+	MidiCommDescriptionList lista_salida = MidiCommOut::GetDeviceList();
+	if(configuracion->id_dispositivo_salida() < lista_salida.size())
+		salida = lista_salida[configuracion->id_dispositivo_salida()].name;
+
+	m_texto_dispositivo_entrada.texto("Entrada: " + entrada);
+	m_texto_dispositivo_entrada.tipografia(recursos->tipografia(LetraChica));
+	m_texto_dispositivo_entrada.color(Color(1.0f, 1.0f, 1.0f));
+	m_texto_dispositivo_entrada.posicion(20, Pantalla::Alto - 35);
+
+	m_texto_dispositivo_salida.texto("Salida: " + salida);
+	m_texto_dispositivo_salida.tipografia(recursos->tipografia(LetraChica));
+	m_texto_dispositivo_salida.color(Color(1.0f, 1.0f, 1.0f));
+	m_texto_dispositivo_salida.posicion(20, Pantalla::Alto - 17);
+
 	m_texto_version.texto("Versión: " + std::string(VERSION));
 	m_texto_version.tipografia(recursos->tipografia(LetraChica));
 	m_texto_version.color(Color(1.0f, 1.0f, 1.0f));
-	m_texto_version.posicion(20, Pantalla::Alto - 26);
+	m_texto_version.posicion(Pantalla::Ancho - (m_texto_version.largo_texto()+20), Pantalla::Alto - 26);
 }
 
 VentanaTitulo::~VentanaTitulo()
@@ -63,6 +83,8 @@ void VentanaTitulo::dibujar()
 	m_boton_configurar->dibujar();
 	m_boton_salir->dibujar();
 
+	m_texto_dispositivo_entrada.dibujar();
+	m_texto_dispositivo_salida.dibujar();
 	m_texto_version.dibujar();
 }
 
@@ -91,11 +113,13 @@ void VentanaTitulo::evento_teclado(Tecla tecla, bool estado)
 		m_accion = CambiarASeleccionMusica;
 }
 
-void VentanaTitulo::evento_pantalla(float /*ancho*/, float alto)
+void VentanaTitulo::evento_pantalla(float ancho, float alto)
 {
 	m_boton_tocar_cancion->posicion(Pantalla::Centro_horizontal(), m_boton_tocar_cancion->y());
 	m_boton_tocar->posicion(Pantalla::Centro_horizontal(), m_boton_tocar->y());
 	m_boton_configurar->posicion(Pantalla::Centro_horizontal(), m_boton_configurar->y());
 	m_boton_salir->posicion(Pantalla::Centro_horizontal(), m_boton_salir->y());
-	m_texto_version.posicion(20, alto - 26);
+	m_texto_dispositivo_entrada.posicion(20, alto - 35);
+	m_texto_dispositivo_salida.posicion(20, alto - 17);
+	m_texto_version.posicion(ancho - (m_texto_version.largo_texto()+20), alto - 26);
 }

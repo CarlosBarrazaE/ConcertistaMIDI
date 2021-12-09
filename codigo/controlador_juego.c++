@@ -13,7 +13,7 @@ Controlador_Juego::Controlador_Juego(Administrador_Recursos *recursos) : m_texto
 
 	m_informacion.tipografia(recursos->tipografia(LetraChica));
 
-	m_ventana_actual = new VentanaTitulo(recursos);
+	m_ventana_actual = new VentanaTitulo(&m_configuracion, recursos);
 
 	//Control dinamico de fps
 	m_fps_dinamico = true;
@@ -87,7 +87,7 @@ void Controlador_Juego::actualizar()
 	{
 		delete m_ventana_actual;
 		m_fps_dinamico = true;
-		m_ventana_actual = new VentanaTitulo(m_recursos);
+		m_ventana_actual = new VentanaTitulo(&m_configuracion, m_recursos);
 		cambio_ventana = true;
 	}
 	else if(accion_actual == CambiarASeleccionMusica)
