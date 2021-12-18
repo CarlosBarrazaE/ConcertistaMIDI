@@ -40,7 +40,7 @@ int main (int /*n*/, char **/*argumentos*/)
 		return 0;
 	}
 
-	Registro::Nota("Consertista MIDI " + std::string(VERSION));
+	Registro::Nota("Concertista MIDI " + std::to_string(CONCERTISTAMIDI_VERSION_MAYOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_MENOR));
 	Registro::Mostrar_detalles();
 
 	configurar_gl();

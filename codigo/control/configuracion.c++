@@ -196,7 +196,7 @@ void Configuracion::dispositivo_entrada(unsigned int id_entrada)
 		m_entrada = new MidiCommIn(m_id_entrada);
 	}
 	else
-		Notificacion::Error("No se pudo conectar al dispositivo MIDI de entrada", 10);
+		Notificacion::Error("No existen dispositivos MIDI de entrada", 10);
 }
 
 void Configuracion::dispositivo_salida(unsigned int id_salida)
@@ -216,7 +216,7 @@ void Configuracion::dispositivo_salida(unsigned int id_salida)
 		m_salida = new MidiCommOut(m_id_salida);
 	}
 	else
-		Notificacion::Error("No se pudo conectar al dispositivo MIDI de salida", 10);
+		Notificacion::Error("No existen al dispositivos MIDI de salida", 10);
 }
 
 void Configuracion::teclas_luminosas(unsigned int identificador)

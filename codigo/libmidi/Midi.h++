@@ -23,6 +23,7 @@ typedef std::vector<MidiTrack> MidiTrackList;
 typedef std::vector<MidiEvent> MidiEventList;
 typedef std::vector<std::pair<size_t, MidiEvent> > MidiEventListWithTrackId;
 
+
 // NOTE: This library's MIDI loading and handling is destructive.  Perfect
 //       1:1 serialization routines will not be possible without quite a
 //       bit of additional work.

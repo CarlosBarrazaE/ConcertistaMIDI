@@ -5,7 +5,7 @@
 #include "../elementos_graficos/etiqueta.h++"
 #include "../elementos_graficos/boton.h++"
 #include "../control/configuracion.h++"
-#include "../version.h++"
+#include "version.h++"
 #include <vector>
 
 class VentanaTitulo : public Ventana

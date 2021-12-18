@@ -410,7 +410,7 @@ unsigned long MidiEvent::GetTempoInUsPerQn() const
 	return m_tempo_uspqn;
 }
 
-unsigned char MidiEvent::NumeradorComas()
+unsigned char MidiEvent::NumeradorCompas()
 {
 	if (Type() != MidiEventType_Meta ||
 		MetaType() != MidiMetaEvent_TimeSignature)

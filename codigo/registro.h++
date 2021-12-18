@@ -3,12 +3,11 @@
 
 #include "util/usuario.h++"
 #include "util/texto.h++"
+#include "configuracion_cmake.h++"
 
 #include <iostream>
 #include <fstream>
 #include <GL/glew.h>
-
-#define NIVEL_REGISTRO 3
 
 enum CodigoEstado
 {

@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "../registro.h++"
-#include "../version.h++"
+#include "version.h++"
 
 class Base_de_Datos
 {

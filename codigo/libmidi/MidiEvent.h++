@@ -76,7 +76,7 @@ public:
 	unsigned long GetTempoInUsPerQn() const;
 
 	//Recupera el indicador de compas
-	unsigned char NumeradorComas();
+	unsigned char NumeradorCompas();
 	unsigned char DenominadorCompas();
 
 	// Convenience function: Is this the special End-Of-Track event

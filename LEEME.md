@@ -1,10 +1,11 @@
 # Concertista MIDI
 
-Concertista MIDI es un juego para aprender a tocar piano facilmente usando el teclado o el ratón de tu computador (Tambien deberia funciona con un teclado MIDI pero no ha sido probado), Concertista MIDI utiliza la libreria midi ([libmidi](https://github.com/linthesia/linthesia/tree/master/src/libmidi)) de linthesia para reproducir archivos y dispositivos MIDI pero incluye varias mejoras como:
+Concertista MIDI es un juego para aprender a tocar piano facilmente usando el teclado o el ratón de tu computador y también funciona con tecladod MIDI, Concertista MIDI utiliza la libreria midi ([libmidi](https://github.com/linthesia/linthesia/tree/master/src/libmidi)) de linthesia para reproducir archivos y dispositivos MIDI pero incluye varias mejoras como:
 
 * Pistas independientes para archivos MIDI formato 0
 * Se implemento el evento MidiMetaEvent_TimeSignature para representar correctamente canciones en compas distinto de 4/4
 * El texto de los archivos midi es leido con la codificación **windows-1252** para poder representar correctamente caracteres del español como eñes y acentos
+* Soporte para enviar eventos SysEx
 * Varias correcciones de errores.
 
 ### Caracteristicas
@@ -102,8 +103,16 @@ Se requieren los siguientes paquetes para compilar concertista midi.
 
 	mkdir binario
 	cd binario
-	cmake ..
+	cmake .. -DTIPO_CONSTRUCCION=Liberar
 	make
+
+### Opciones Adicionales
+
+|Opción                      | Descripción                               |
+|:---------------------------|:------------------------------------------|
+|-DTIPO_CONSTRUCCION=Depurar |Permite construir la versión de depuración habilitando advertencias y la informacion de depuración para usarla con gdb o valgrind|
+|-DOPTIMIZAR_NATIVO=1        |Habilita la optimización -march=native     |
+
 
 --------------
 
@@ -111,9 +120,11 @@ Se requieren los siguientes paquetes para compilar concertista midi.
 
 Ya es posible ejecutar concertista midi con:
 
-	./concertistamidi
+	./ConcertistaMidi
 
 pero si tu computador no tiene una tarjeta de sonido con un sintetizador midi incluido (que es lo mas probable) no escucharas nada, para reproducir sonido es necesario instalar un sintetizador midi, hay varios disponibles para linux como timidity y musescore.
+
+En linux existe un dispositivo ficticio llamado **Midi Through Port-0** que no produce sonido (lo puedes encontrar en el nucleo como SND_SEQ_DUMMY)
 
 ### Instalar Timidity en Ubuntu
 
@@ -129,7 +140,6 @@ Agrega lo siguiente:
 	dir /usr/share/sounds/sf2
 	soundfont FluidR3_GM.sf2
 
-
 ### Ejecutar Timidity
 Ejecuta el siguiente comando y no cierres el terminal.
 
@@ -139,10 +149,19 @@ Ahora se puede ejecutar concertista midi, debes asegurarte que en la configuraci
 
 Para la entrada puedes configurar el **Teclado y Raton** para tocar, es compatible con el teclado MIDI Casio LK-S250.
 
+
 -----------
 
-## Licencia
+## Creditos
 
-Este proyecto esta diponible bajo la licencia GNU General Public License v2.0
+### Concertista Midi
+
+	Carlos Barraza Autor
+
+### libmidi
+
+	Nicholas Piegdon Autor
+	Oscar Aceña Adaptación a Linux
+	Carlos Barraza Nuevas Características
 
 -----------

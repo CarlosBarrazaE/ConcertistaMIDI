@@ -291,7 +291,7 @@ void Midi::BuildTempoTrack()
 			}
 			else if (ev.Type() == MidiEventType_Meta && ev.MetaType() == MidiMetaEvent_TimeSignature)
 			{
-				NumeradorCompas = ev.NumeradorComas();
+				NumeradorCompas = ev.NumeradorCompas();
 				DenominadorCompas = ev.DenominadorCompas();
 			}
 		}
