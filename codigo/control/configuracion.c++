@@ -8,6 +8,8 @@ Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL), m_teclas_lumin
 	m_id_entrada_original = 0;
 	m_id_salida_original = 0;
 	m_id_teclas_luminosas_original = 0;
+	m_entrada_notificacion = false;
+	m_salida_notificacion = false;
 
 	//Configuracion General
 	m_pantalla_completa_original = false;
@@ -196,7 +198,13 @@ void Configuracion::dispositivo_entrada(unsigned int id_entrada)
 		m_entrada = new MidiCommIn(m_id_entrada);
 	}
 	else
-		Notificacion::Error("No existen dispositivos MIDI de entrada", 10);
+	{
+		if(!m_entrada_notificacion)
+		{
+			Notificacion::Error("No existen dispositivos MIDI de entrada", 10);
+			m_entrada_notificacion = true;
+		}
+	}
 }
 
 void Configuracion::dispositivo_salida(unsigned int id_salida)
@@ -216,7 +224,13 @@ void Configuracion::dispositivo_salida(unsigned int id_salida)
 		m_salida = new MidiCommOut(m_id_salida);
 	}
 	else
-		Notificacion::Error("No existen al dispositivos MIDI de salida", 10);
+	{
+		if(!m_salida_notificacion)
+		{
+			Notificacion::Error("No existen al dispositivos MIDI de salida", 10);
+			m_salida_notificacion = true;
+		}
+	}
 }
 
 void Configuracion::teclas_luminosas(unsigned int identificador)

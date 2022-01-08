@@ -22,6 +22,7 @@ private:
 	unsigned int m_id_entrada, m_id_entrada_original;
 	unsigned int m_id_salida, m_id_salida_original;
 	unsigned int m_id_teclas_luminosas_original;
+	bool m_entrada_notificacion, m_salida_notificacion;
 
 	//Configuracion General
 	bool m_pantalla_completa, m_pantalla_completa_original;
