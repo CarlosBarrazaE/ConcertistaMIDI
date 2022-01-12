@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.7 FATAL_ERROR)
 
-project(ConcertistaMidi VERSION 1.1)
+project(concertistamidi VERSION 1.1)
 configure_file(codigo/version.h++.in version.h++)
 
 #Se requiere C++17 para utilizar std::filesystem

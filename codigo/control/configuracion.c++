@@ -227,7 +227,7 @@ void Configuracion::dispositivo_salida(unsigned int id_salida)
 	{
 		if(!m_salida_notificacion)
 		{
-			Notificacion::Error("No existen al dispositivos MIDI de salida", 10);
+			Notificacion::Error("No existen dispositivos MIDI de salida", 10);
 			m_salida_notificacion = true;
 		}
 	}

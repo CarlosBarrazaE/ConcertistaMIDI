@@ -3,9 +3,11 @@
 
 #include "recursos/administrador_recursos.h++"
 #include "dispositivos/pantalla.h++"
+#include "archivos/imagen_tga.h++"
 #include "controlador_juego.h++"
 
 #include "registro.h++"
+#include "version.h++"
 
 #define ANCHO 800
 #define ALTO 600
@@ -28,7 +30,14 @@ int main (int /*n*/, char **/*argumentos*/)
 	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");//No suspende el compositor de ventana (No funciona en devuan mate)
 	//error: ‘SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR’ was not declared in this scope (devuan mate)
 	SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
-	SDL_Window *ventana = SDL_CreateWindow("Concertista Midi", 0, 0, ANCHO, ALTO, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	std::string nombre_ventana = "Concertista MIDI " + std::to_string(CONCERTISTAMIDI_VERSION_MAYOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_MENOR);
+	SDL_Window *ventana = SDL_CreateWindow(nombre_ventana.c_str(), 0, 0, ANCHO, ALTO, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+
+	//Se carga el icono
+	Archivo::Tga icono_tga("../icono.tga");
+	SDL_Surface *icono = SDL_CreateRGBSurfaceFrom(icono_tga.imagen(), icono_tga.ancho(), icono_tga.alto(), icono_tga.bytes(), icono_tga.ancho()*4, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+	SDL_SetWindowIcon(ventana, icono);
+
 	/*SDL_GLContext contexto = */SDL_GL_CreateContext(ventana);
 	SDL_GL_SetSwapInterval(1);//Limita a 60 fps
 

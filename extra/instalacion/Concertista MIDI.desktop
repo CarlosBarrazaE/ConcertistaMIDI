@@ -1,0 +1,14 @@
+[Desktop Entry]
+Encoding=UTF-8
+Icon=concertistamidi
+Exec=concertistamidi
+Name[es]=Concertista MIDI
+Name=Concertista MIDI
+GenericName[es]=Juego para tocar piano
+GenericName=Juego para tocar piano
+Comment[es]=Juego para aprender a tocar piano
+Comment=Juego para aprender a tocar piano
+StartupNotify=true
+Terminal=false
+Type=Application
+Categories=;Game;Education;Audio;
