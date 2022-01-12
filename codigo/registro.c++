@@ -8,7 +8,7 @@ void Registro::Escribir_registro(CodigoEstado estado, std::string texto)
 		return;
 
 	std::ofstream archivo;
-	archivo.open(Usuario::carpeta_personal() + ".registros_concertista_midi.txt", std::ios::app);
+	archivo.open(Usuario::carpeta_juego() + "registro.txt", std::ios::app);
 
 	std::vector<std::string> lineas;
 	if(Texto::contiene_caracter(texto, '\n'))

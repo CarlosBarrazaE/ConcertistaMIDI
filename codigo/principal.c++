@@ -4,6 +4,7 @@
 #include "recursos/administrador_recursos.h++"
 #include "dispositivos/pantalla.h++"
 #include "archivos/imagen_tga.h++"
+#include "util/usuario.h++"
 #include "controlador_juego.h++"
 
 #include "registro.h++"
@@ -19,6 +20,7 @@ void eventos_raton_botones(Controlador_Juego *controlador, int boton, int accion
 void eventos_raton_posicion(Controlador_Juego *controlador, int x, int y);
 void eventos_taclado(Controlador_Juego *controlador, int tecla, bool estado);
 void controlar_eventos(Controlador_Juego *controlador, SDL_Event *evento);
+void crear_carpeta_configuracion();
 
 int main (int /*n*/, char **/*argumentos*/)
 {
@@ -40,6 +42,8 @@ int main (int /*n*/, char **/*argumentos*/)
 
 	/*SDL_GLContext contexto = */SDL_GL_CreateContext(ventana);
 	SDL_GL_SetSwapInterval(1);//Limita a 60 fps
+
+	crear_carpeta_configuracion();
 
 	glewExperimental = GL_TRUE;
 	GLenum estado = glewInit();
@@ -254,5 +258,25 @@ void eventos_taclado(Controlador_Juego *controlador, int tecla, bool estado)
 		case SDLK_PAGEUP: controlador->eventos_teclado(TECLA_REPAG, estado); break;
 		case SDLK_PAGEDOWN: controlador->eventos_teclado(TECLA_AVPAG, estado); break;
 		default: return;
+	}
+}
+
+void crear_carpeta_configuracion()
+{
+	//Crear carpetas de datos si no existe
+	if(!std::filesystem::exists(Usuario::carpeta_juego()))
+	{
+		bool carpeta_creada = std::filesystem::create_directories(Usuario::carpeta_juego());
+		if(!carpeta_creada)
+			Registro::Error("No se puede crear la carpeta \"" + Usuario::carpeta_juego() + "\", no se guardara la configuracion ni el registro");
+	}
+
+	//Mueve los archivos de configuración a la nueva posicion
+	if(std::filesystem::exists(Usuario::carpeta_juego()))
+	{
+		if(std::filesystem::exists(Usuario::carpeta_personal() + ".concertista.db"))
+			std::filesystem::rename(Usuario::carpeta_personal() + ".concertista.db", Usuario::carpeta_juego() + "concertista.db");
+		if(std::filesystem::exists(Usuario::carpeta_personal() + ".registros_concertista_midi.txt"))
+			std::filesystem::rename(Usuario::carpeta_personal() + ".registros_concertista_midi.txt", Usuario::carpeta_juego() + "registro.txt");
 	}
 }

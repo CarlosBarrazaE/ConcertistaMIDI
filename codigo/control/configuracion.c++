@@ -26,7 +26,7 @@ Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL), m_teclas_lumin
 	m_teclado_visible_original.cambiar(21, 88);
 	m_teclado_util_original.cambiar(21, 88);
 
-	std::string ruta_base_de_datos = Usuario::carpeta_personal() + ".concertista.db";
+	std::string ruta_base_de_datos = Usuario::carpeta_juego() + "concertista.db";
 	if(std::ifstream(ruta_base_de_datos))
 	{
 		//Se abre la base de datos existente

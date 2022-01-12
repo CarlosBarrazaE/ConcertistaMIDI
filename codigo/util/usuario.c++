@@ -23,4 +23,14 @@ namespace Usuario
 		return std::string("");
 	#endif
 	}
+
+	std::string carpeta_juego()
+	{
+	#ifdef __linux__
+		return carpeta_personal() + ".local/share/concertistamidi/";
+	#elif _WIN32
+		return carpeta_personal() + "";
+	#endif
+	}
+
 }
