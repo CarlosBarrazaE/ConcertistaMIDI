@@ -3,12 +3,14 @@
 
 #include "recursos/administrador_recursos.h++"
 #include "dispositivos/pantalla.h++"
+#include "dispositivos/sintetizador_midi.h++"
 #include "archivos/imagen_tga.h++"
 #include "util/usuario.h++"
 #include "controlador_juego.h++"
 
 #include "registro.h++"
 #include "version.h++"
+#include "configuracion_cmake.h++"
 
 #define ANCHO 800
 #define ALTO 600
@@ -24,6 +26,12 @@ void crear_carpeta_configuracion();
 
 int main (int /*n*/, char **/*argumentos*/)
 {
+	Registro::Nota("Concertista MIDI " + std::to_string(CONCERTISTAMIDI_VERSION_MAYOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_MENOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_PARCHE));
+
+	//Inicia el sintetizador midi lo antes posible
+	Sintetizador_Midi sintetizador;
+	sintetizador.iniciar();
+
 	Pantalla::Ancho = ANCHO;
 	Pantalla::Alto = ALTO;
 
@@ -32,12 +40,12 @@ int main (int /*n*/, char **/*argumentos*/)
 	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");//No suspende el compositor de ventana (No funciona en devuan mate)
 	//error: ‘SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR’ was not declared in this scope (devuan mate)
 	SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
-	std::string nombre_ventana = "Concertista MIDI " + std::to_string(CONCERTISTAMIDI_VERSION_MAYOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_MENOR);
+	std::string nombre_ventana = "Concertista MIDI " + std::to_string(CONCERTISTAMIDI_VERSION_MAYOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_MENOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_PARCHE);
 	SDL_Window *ventana = SDL_CreateWindow(nombre_ventana.c_str(), 0, 0, ANCHO, ALTO, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
 	//Se carga el icono
-	Archivo::Tga icono_tga("../icono.tga");
-	SDL_Surface *icono = SDL_CreateRGBSurfaceFrom(icono_tga.imagen(), icono_tga.ancho(), icono_tga.alto(), icono_tga.bytes(), icono_tga.ancho()*4, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+	Archivo::Tga icono_tga(std::string(RUTA_ARCHIVOS) + "/texturas/icono.tga");
+	SDL_Surface *icono = SDL_CreateRGBSurfaceFrom(icono_tga.imagen(), static_cast<int>(icono_tga.ancho()), static_cast<int>(icono_tga.alto()), static_cast<int>(icono_tga.bytes()), static_cast<int>(icono_tga.ancho())*4, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
 	SDL_SetWindowIcon(ventana, icono);
 
 	/*SDL_GLContext contexto = */SDL_GL_CreateContext(ventana);
@@ -53,12 +61,12 @@ int main (int /*n*/, char **/*argumentos*/)
 		return 0;
 	}
 
-	Registro::Nota("Concertista MIDI " + std::to_string(CONCERTISTAMIDI_VERSION_MAYOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_MENOR));
 	Registro::Mostrar_detalles();
-
 	configurar_gl();
 
 	Administrador_Recursos recursos;
+	//Espera a que termine de iniciar el sintetizador midi
+	sintetizador.esperar_conexion();
 	Controlador_Juego controlador(&recursos);
 
 	while (!controlador.terminar())
@@ -98,6 +106,7 @@ int main (int /*n*/, char **/*argumentos*/)
 		SDL_GL_SwapWindow(ventana);
 	}
 
+	sintetizador.detener();
 	SDL_DestroyWindow(ventana);
 	SDL_Quit();
 
