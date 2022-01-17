@@ -45,7 +45,7 @@ VentanaTitulo::VentanaTitulo(Configuracion *configuracion, Administrador_Recurso
 	m_texto_dispositivo_salida.color(Color(1.0f, 1.0f, 1.0f));
 	m_texto_dispositivo_salida.posicion(20, Pantalla::Alto - 17);
 
-	m_texto_version.texto("Versión: " + std::to_string(CONCERTISTAMIDI_VERSION_MAYOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_MENOR));
+	m_texto_version.texto("Versión: " + std::to_string(CONCERTISTAMIDI_VERSION_MAYOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_MENOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_PARCHE));
 	m_texto_version.tipografia(recursos->tipografia(LetraChica));
 	m_texto_version.color(Color(1.0f, 1.0f, 1.0f));
 	m_texto_version.posicion(Pantalla::Ancho - (m_texto_version.largo_texto()+20), Pantalla::Alto - 26);

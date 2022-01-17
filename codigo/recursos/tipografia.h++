@@ -12,6 +12,7 @@
 #include "textura_2d.h++"
 
 #include "../registro.h++"
+#include "configuracion_cmake.h++"
 
 enum Formato
 {

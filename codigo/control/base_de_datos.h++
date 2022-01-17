@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "../registro.h++"
+#include "configuracion_cmake.h++"
 #include "version.h++"
 
 class Base_de_Datos

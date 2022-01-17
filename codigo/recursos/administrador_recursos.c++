@@ -6,56 +6,57 @@ Administrador_Recursos::Administrador_Recursos()
 	m_alto = 600;
 	m_matriz_proyeccion = glm::ortho(0.0f, m_ancho, m_alto, 0.0f, -1.0f, 1.0f);
 
-	m_archivo_texturas[T_FondoTitulo] = "../texturas/fondo_titulo.tga";
-	m_archivo_texturas[T_Titulo] = "../texturas/titulo.tga";
-	m_archivo_texturas[T_Boton] = "../texturas/boton.tga";
-	m_archivo_texturas[T_TeclaBlanca] = "../texturas/tecla_blanca.tga";
-	m_archivo_texturas[T_TeclaNegra] = "../texturas/tecla_negra.tga";
-	m_archivo_texturas[T_TeclaBlancaPresionada] = "../texturas/tecla_blanca_presionada.tga";
-	m_archivo_texturas[T_TeclaBlancaPresionadaDoble] = "../texturas/tecla_blanca_presionada_doble.tga";
-	m_archivo_texturas[T_TeclaNegraPresionada] = "../texturas/tecla_negra_presionada.tga";
-	m_archivo_texturas[T_Circulo] = "../texturas/circulo.tga";
-	m_archivo_texturas[T_BordeOrganoRojo] = "../texturas/borde_organo_rojo.tga";
-	m_archivo_texturas[T_BordeOrganoNegro] = "../texturas/borde_organo_negro.tga";
-	m_archivo_texturas[T_Nota] = "../texturas/nota.tga";
-	m_archivo_texturas[T_NotaResaltada] = "../texturas/nota_resaltada.tga";
-	m_archivo_texturas[T_Sombra] = "../texturas/sombra.tga";
-	m_archivo_texturas[T_FrenteBarraProgreso] = "../texturas/frente_barra_progreso.tga";
-	m_archivo_texturas[T_ParticulaNota] = "../texturas/particula_nota.tga";
-	m_archivo_texturas[T_Barra] = "../texturas/barra.tga";
-	m_archivo_texturas[T_ConfiguracionPista] = "../texturas/configuracion_pista.tga";
-	m_archivo_texturas[T_SonidoActivado] = "../texturas/sonido_activado.tga";
-	m_archivo_texturas[T_SonidoDesactivado] = "../texturas/sonido_desactivado.tga";
-	m_archivo_texturas[T_Reproducir] = "../texturas/reproducir.tga";
-	m_archivo_texturas[T_Pausar] = "../texturas/pausar.tga";
-	m_archivo_texturas[T_TituloMusica] = "../texturas/titulo_musica.tga";
-	m_archivo_texturas[T_Color_1] = "../texturas/color_1.tga";
-	m_archivo_texturas[T_Color_2] = "../texturas/color_2.tga";
-	m_archivo_texturas[T_Color_3] = "../texturas/color_3.tga";
-	m_archivo_texturas[T_Color_4] = "../texturas/color_4.tga";
-	m_archivo_texturas[T_Color_5] = "../texturas/color_5.tga";
-	m_archivo_texturas[T_Color_6] = "../texturas/color_6.tga";
-	m_archivo_texturas[T_Color_7] = "../texturas/color_7.tga";
-	m_archivo_texturas[T_Color_8] = "../texturas/color_8.tga";
-	m_archivo_texturas[T_Color_9] = "../texturas/color_9.tga";
-	m_archivo_texturas[T_Color_Invisible] = "../texturas/color_invisible.tga";
-	m_archivo_texturas[T_Tocar] = "../texturas/tocar.tga";
-	m_archivo_texturas[T_Aprender] = "../texturas/aprender.tga";
-	m_archivo_texturas[T_MusicaFondo] = "../texturas/musica_fondo.tga";
-	m_archivo_texturas[T_CasillaInactiva] = "../texturas/casilla_verificacion_inactiva.tga";
-	m_archivo_texturas[T_CasillaActiva] = "../texturas/casilla_verificacion_activa.tga";
-	m_archivo_texturas[T_CasillaSombra] = "../texturas/casilla_verificacion_sombra.tga";
-	m_archivo_texturas[T_FlechaIzquierda] = "../texturas/flecha_izquierda.tga";
-	m_archivo_texturas[T_FlechaDerecha] = "../texturas/flecha_derecha.tga";
+	std::string ruta = RUTA_ARCHIVOS;
+	m_archivo_texturas[T_FondoTitulo] = ruta + "/texturas/fondo_titulo.tga";
+	m_archivo_texturas[T_Titulo] = ruta + "/texturas/titulo.tga";
+	m_archivo_texturas[T_Boton] = ruta + "/texturas/boton.tga";
+	m_archivo_texturas[T_TeclaBlanca] = ruta + "/texturas/tecla_blanca.tga";
+	m_archivo_texturas[T_TeclaNegra] = ruta + "/texturas/tecla_negra.tga";
+	m_archivo_texturas[T_TeclaBlancaPresionada] = ruta + "/texturas/tecla_blanca_presionada.tga";
+	m_archivo_texturas[T_TeclaBlancaPresionadaDoble] = ruta + "/texturas/tecla_blanca_presionada_doble.tga";
+	m_archivo_texturas[T_TeclaNegraPresionada] = ruta + "/texturas/tecla_negra_presionada.tga";
+	m_archivo_texturas[T_Circulo] = ruta + "/texturas/circulo.tga";
+	m_archivo_texturas[T_BordeOrganoRojo] = ruta + "/texturas/borde_organo_rojo.tga";
+	m_archivo_texturas[T_BordeOrganoNegro] = ruta + "/texturas/borde_organo_negro.tga";
+	m_archivo_texturas[T_Nota] = ruta + "/texturas/nota.tga";
+	m_archivo_texturas[T_NotaResaltada] = ruta + "/texturas/nota_resaltada.tga";
+	m_archivo_texturas[T_Sombra] = ruta + "/texturas/sombra.tga";
+	m_archivo_texturas[T_FrenteBarraProgreso] = ruta + "/texturas/frente_barra_progreso.tga";
+	m_archivo_texturas[T_ParticulaNota] = ruta + "/texturas/particula_nota.tga";
+	m_archivo_texturas[T_Barra] = ruta + "/texturas/barra.tga";
+	m_archivo_texturas[T_ConfiguracionPista] = ruta + "/texturas/configuracion_pista.tga";
+	m_archivo_texturas[T_SonidoActivado] = ruta + "/texturas/sonido_activado.tga";
+	m_archivo_texturas[T_SonidoDesactivado] = ruta + "/texturas/sonido_desactivado.tga";
+	m_archivo_texturas[T_Reproducir] = ruta + "/texturas/reproducir.tga";
+	m_archivo_texturas[T_Pausar] = ruta + "/texturas/pausar.tga";
+	m_archivo_texturas[T_TituloMusica] = ruta + "/texturas/titulo_musica.tga";
+	m_archivo_texturas[T_Color_1] = ruta + "/texturas/color_1.tga";
+	m_archivo_texturas[T_Color_2] = ruta + "/texturas/color_2.tga";
+	m_archivo_texturas[T_Color_3] = ruta + "/texturas/color_3.tga";
+	m_archivo_texturas[T_Color_4] = ruta + "/texturas/color_4.tga";
+	m_archivo_texturas[T_Color_5] = ruta + "/texturas/color_5.tga";
+	m_archivo_texturas[T_Color_6] = ruta + "/texturas/color_6.tga";
+	m_archivo_texturas[T_Color_7] = ruta + "/texturas/color_7.tga";
+	m_archivo_texturas[T_Color_8] = ruta + "/texturas/color_8.tga";
+	m_archivo_texturas[T_Color_9] = ruta + "/texturas/color_9.tga";
+	m_archivo_texturas[T_Color_Invisible] = ruta + "/texturas/color_invisible.tga";
+	m_archivo_texturas[T_Tocar] = ruta + "/texturas/tocar.tga";
+	m_archivo_texturas[T_Aprender] = ruta + "/texturas/aprender.tga";
+	m_archivo_texturas[T_MusicaFondo] = ruta + "/texturas/musica_fondo.tga";
+	m_archivo_texturas[T_CasillaInactiva] = ruta + "/texturas/casilla_verificacion_inactiva.tga";
+	m_archivo_texturas[T_CasillaActiva] = ruta + "/texturas/casilla_verificacion_activa.tga";
+	m_archivo_texturas[T_CasillaSombra] = ruta + "/texturas/casilla_verificacion_sombra.tga";
+	m_archivo_texturas[T_FlechaIzquierda] = ruta + "/texturas/flecha_izquierda.tga";
+	m_archivo_texturas[T_FlechaDerecha] = ruta + "/texturas/flecha_derecha.tga";
 
-	m_archivo_sombreador_vertice[S_Rectangulo] = "../sombreadores/rectangulo_sv.glsl";
-	m_archivo_sombreador_fragmento[S_Rectangulo] = "../sombreadores/rectangulo_sf.glsl";
+	m_archivo_sombreador_vertice[S_Rectangulo] = ruta + "/sombreadores/rectangulo_sv.glsl";
+	m_archivo_sombreador_fragmento[S_Rectangulo] = ruta + "/sombreadores/rectangulo_sf.glsl";
 
-	m_archivo_sombreador_vertice[S_Texto] = "../sombreadores/texto_sv.glsl";
-	m_archivo_sombreador_fragmento[S_Texto] = "../sombreadores/texto_sf.glsl";
+	m_archivo_sombreador_vertice[S_Texto] = ruta + "/sombreadores/texto_sv.glsl";
+	m_archivo_sombreador_fragmento[S_Texto] = ruta + "/sombreadores/texto_sf.glsl";
 
-	m_archivo_sombreador_vertice[S_Particula] = "../sombreadores/particula_sv.glsl";
-	m_archivo_sombreador_fragmento[S_Particula] = "../sombreadores/particula_sf.glsl";
+	m_archivo_sombreador_vertice[S_Particula] = ruta + "/sombreadores/particula_sv.glsl";
+	m_archivo_sombreador_fragmento[S_Particula] = ruta + "/sombreadores/particula_sf.glsl";
 
 	m_lista_figuras[F_Rectangulo] = new Rectangulo(this->sombreador(S_Rectangulo));
 
@@ -115,8 +116,8 @@ Sombreador *Administrador_Recursos::sombreador(SombreadorVF valor)
 	Sombreador *temporal = m_lista_sombreadores[valor];
 	if(!temporal)
 	{
-		std::string texto_vertice = Archivo::leer_archivo(m_archivo_sombreador_vertice[valor]);
-		std::string texto_fragmento = Archivo::leer_archivo(m_archivo_sombreador_fragmento[valor]);
+		std::string texto_vertice = Archivo::leer_archivo(m_archivo_sombreador_vertice[valor].c_str());
+		std::string texto_fragmento = Archivo::leer_archivo(m_archivo_sombreador_fragmento[valor].c_str());
 
 		const char* codigo_vertice = texto_vertice.c_str();
 		const char* codigo_fragmento = texto_fragmento.c_str();

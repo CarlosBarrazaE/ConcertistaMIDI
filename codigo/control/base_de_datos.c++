@@ -164,7 +164,8 @@ void Base_de_Datos::crear()
 	this->consulta("CREATE TABLE archivos (ruta TEXT NOT NULL PRIMARY KEY, visitas INT DEFAULT 0, duracion BIGINT DEFAULT 0, ultimo_acceso DATETIME)");
 
 	this->escribir_configuracion("version_base_de_datos", VERSION_BASE_DE_DATOS);
-	this->agregar_carpeta("Canciones", "../musica/");
+	this->escribir_configuracion("ruta_instalacion", RUTA_ARCHIVOS);
+	this->agregar_carpeta("Canciones", std::string(RUTA_ARCHIVOS) + "/musica/");
 }
 
 void Base_de_Datos::actualizar()
@@ -174,12 +175,36 @@ void Base_de_Datos::actualizar()
 	Registro::Nota("Versión de la base de datos: " + version);
 	if(version != VERSION_BASE_DE_DATOS)
 	{
+		Registro::Nota("Actualizando la base de datos de la versión: " + version + " a la versión " + VERSION_BASE_DE_DATOS);
 		this->escribir_configuracion("version_base_de_datos", VERSION_BASE_DE_DATOS);
 		if(version == "1.0")
 		{
 			this->consulta("CREATE TABLE seleccion (ruta TEXT NOT NULL PRIMARY KEY, seleccion INT DEFAULT 0, ruta_seleccion TEXT)");
+			version = "1.1";
 		}
-		Registro::Nota("Base de datos actualizada de la versión: " + version + " a la versión " + VERSION_BASE_DE_DATOS);
+		if(version == "1.1")
+		{
+			//No existia ruta de instalacion
+			this->escribir_configuracion("ruta_instalacion", "..");
+			version = "1.2";
+		}
+	}
+
+	//Cambia la ruta de instalacion de la carpeta musica
+	std::string ruta_actual = this->leer_configuracion("ruta_instalacion");
+	std::string ruta_nueva = RUTA_ARCHIVOS;
+	if(ruta_actual != ruta_nueva)
+	{
+		this->iniciar_transaccion();
+		this->consulta("UPDATE carpetas SET ruta='"+ruta_nueva+"' || substr(ruta, length('"+ruta_actual+"')+1) WHERE ruta = '"+ruta_actual+"/musica/'");
+		this->consulta("UPDATE archivos SET ruta='"+ruta_nueva+"' || substr(ruta, length('"+ruta_actual+"')+1) WHERE ruta LIKE '"+ruta_actual+"/musica/%'");
+		this->consulta("UPDATE configuracion SET valor='"+ruta_nueva+"' || substr(valor, length('"+ruta_actual+"')+1) WHERE valor LIKE '"+ruta_actual+"/musica/%'");
+		this->consulta("UPDATE seleccion SET ruta='"+ruta_nueva+"' || substr(ruta, length('"+ruta_actual+"')+1) WHERE ruta LIKE '"+ruta_actual+"/musica/%'");
+		this->consulta("UPDATE seleccion SET ruta_seleccion='"+ruta_nueva+"' || substr(ruta_seleccion, length('"+ruta_actual+"')+1) WHERE ruta_seleccion LIKE '"+ruta_actual+"/musica/%'");
+		this->finalizar_transaccion();
+		//Ruta actualizada
+		this->escribir_configuracion("ruta_instalacion", ruta_nueva);
+		Registro::Nota("Ruta de instalación actualizada a: " + ruta_nueva);
 	}
 }
 

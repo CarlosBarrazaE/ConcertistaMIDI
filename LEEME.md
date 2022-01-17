@@ -1,6 +1,6 @@
 # Concertista MIDI
 
-Concertista MIDI es un juego para aprender a tocar piano facilmente usando el teclado o el ratón de tu computador y también funciona con teclado MIDI, Concertista MIDI utiliza la libreria midi ([libmidi](https://github.com/linthesia/linthesia/tree/master/src/libmidi)) de linthesia para reproducir archivos y dispositivos MIDI pero incluye varias mejoras como:
+Concertista MIDI es un juego para aprender a tocar piano facilmente usando el teclado o el ratón de tu computador y también funciona con teclado MIDI, Concertista MIDI utiliza la libreria midi ([libmidi](https://github.com/linthesia/linthesia/tree/master/src/libmidi)) de linthesia para reproducir archivos y conectarse con dispositivos MIDI pero incluye varias mejoras como:
 
 * Pistas independientes para archivos MIDI formato 0
 * Se implemento el evento MidiMetaEvent_TimeSignature para representar correctamente canciones en compas distinto de 4/4
@@ -80,7 +80,6 @@ Se requieren los siguientes paquetes para compilar concertista midi.
 |Libreria    | Uso                                   |
 |:-----------|:--------------------------------------|
 |cmake       |Construccion                           |
-|pkg-config  |Busqueda de bibliotecas                |
 |g++         |Compilación                            |
 |glew        |Opengl                                 |
 |libsdl2     |Sdl2 para OpenGl                       |
@@ -91,11 +90,26 @@ Se requieren los siguientes paquetes para compilar concertista midi.
 
 ### Instalar paquetes en Ubuntu
 
-	sudo apt install cmake pkg-config libglew-dev libsdl2-dev libglm-dev libfreetype6-dev libicu-dev libsqlite3-dev
+	sudo apt install g++ cmake libglew-dev libsdl2-dev libglm-dev libfreetype6-dev libicu-dev libsqlite3-dev timidity
+
+### Instalar paquete en Fedora
+
+	sudo yum install g++ cmake glew-devel SDL2-devel glm-devel alsa-lib-devel freetype-devel libicu-devel sqlite-devel timidity++
 
 ### Instalar paquetes en Gentoo
 
-	emerge --ask media-libs/glew media-libs/libsdl2 media-libs/glm media-libs/freetype dev-libs/icu dev-db/sqlite
+	emerge --ask media-libs/glew media-libs/libsdl2 media-libs/glm media-libs/freetype dev-libs/icu dev-db/sqlite media-sound/timidity++ media-sound/fluid-soundfont
+
+#### Configura Timidity en Gentoo
+
+Edita el archivo
+
+	nano /etc/timidity.cfg
+
+Agrega lo siguiente:
+
+	dir /usr/share/sounds/sf2
+	soundfont FluidR3_GM.sf2
 
 -----------------
 
@@ -106,13 +120,18 @@ Se requieren los siguientes paquetes para compilar concertista midi.
 	cmake .. -DTIPO_CONSTRUCCION=Liberar
 	make
 
+## Instalación
+
+	sudo make install
+
 ### Opciones Adicionales
 
 |Opción                      | Descripción                               |
 |:---------------------------|:------------------------------------------|
 |-DTIPO_CONSTRUCCION=Depurar |Permite construir la versión de depuración habilitando advertencias y la informacion de depuración para usarla con gdb o valgrind|
 |-DOPTIMIZAR_NATIVO=1        |Habilita la optimización -march=native     |
-
+|-DCONSTRUCCION_LOCAL=false  |Habilita la construccion local (no puede instalarse)|
+|-PREFIJO_INSTALACION=/usr   |Cambia la ruta de instalación              |
 
 --------------
 
@@ -120,35 +139,11 @@ Se requieren los siguientes paquetes para compilar concertista midi.
 
 Ya es posible ejecutar concertista midi con:
 
-	./ConcertistaMidi
+	./concertistamidi
 
-pero si tu computador no tiene una tarjeta de sonido con un sintetizador midi incluido (que es lo mas probable) no escucharas nada, para reproducir sonido es necesario instalar un sintetizador midi, hay varios disponibles para linux como timidity y musescore.
-
-En linux existe un dispositivo ficticio llamado **Midi Through Port-0** que no produce sonido (lo puedes encontrar en el nucleo como SND_SEQ_DUMMY)
-
-### Instalar Timidity en Ubuntu
-
-	sudo apt install timidity
-
-### Instalar Timidity en Gentoo
-
-	emerge --ask media-sound/timidity++ media-sound/fluid-soundfont
-	nano /etc/timidity.cfg
-
-Agrega lo siguiente:
-
-	dir /usr/share/sounds/sf2
-	soundfont FluidR3_GM.sf2
-
-### Ejecutar Timidity
-Ejecuta el siguiente comando y no cierres el terminal.
-
-	timidity -iA -B2,8 -Os1l -s 44100
-
-Ahora se puede ejecutar concertista midi, debes asegurarte que en la configuracion de Concertista MIDI este seleccionado el dispositivo de salida correcto en este caso **TiMidity port 0**.
+En linux existe un dispositivo ficticio llamado **Midi Through Port-0** que no produce sonido (lo puedes encontrar en el nucleo como SND_SEQ_DUMMY), debes asegurarte que en la configuracion de Concertista MIDI este seleccionado el dispositivo de salida correcto en este caso **TiMidity port 0**.
 
 Para la entrada puedes configurar el **Teclado y Raton** para tocar, es compatible con el teclado MIDI Casio LK-S250.
-
 
 -----------
 

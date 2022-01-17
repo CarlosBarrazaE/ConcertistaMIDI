@@ -15,6 +15,7 @@
 #include "../archivos/imagen_tga.h++"
 
 #include "../registro.h++"
+#include "configuracion_cmake.h++"
 
 enum Textura
 {
@@ -90,9 +91,9 @@ private:
 	std::map<SombreadorVF, Sombreador*> m_lista_sombreadores;
 	std::map<FiguraGeometrica, Rectangulo*> m_lista_figuras;
 
-	std::map<Textura, const char*> m_archivo_texturas;
-	std::map<SombreadorVF, const char*> m_archivo_sombreador_vertice;
-	std::map<SombreadorVF, const char*> m_archivo_sombreador_fragmento;
+	std::map<Textura, std::string> m_archivo_texturas;
+	std::map<SombreadorVF, std::string> m_archivo_sombreador_vertice;
+	std::map<SombreadorVF, std::string> m_archivo_sombreador_fragmento;
 
 	std::map<ModeloLetra, Tipografia*> m_formato_letras;
 

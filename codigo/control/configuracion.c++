@@ -60,6 +60,30 @@ Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL), m_teclas_lumin
 		Registro::Depurar("Creando la base de datos en: " + ruta_base_de_datos);
 		m_datos.abrir(ruta_base_de_datos);
 		m_datos.crear();
+
+		//Busca el Teclado y Ratón para el dispositivo de entrada predeterminado
+		MidiCommDescriptionList lista_entrada = MidiCommIn::GetDeviceList();
+		for(unsigned long int e=0; e<lista_entrada.size(); e++)
+		{
+			if(lista_entrada[e].name == "Teclado y Ratón")
+			{
+				m_id_entrada_original = e;
+				m_datos.escribir_configuracion("dispositivo_entrada", std::to_string(m_id_entrada_original));
+				e = lista_entrada.size();//Termina la busqueda
+			}
+		}
+
+		//Busca TiMidity port 0 para el dispositivo de salida predeterminado
+		MidiCommDescriptionList lista_salida = MidiCommOut::GetDeviceList();
+		for(unsigned long int e=0; e<lista_salida.size(); e++)
+		{
+			if(lista_salida[e].name == "TiMidity port 0")
+			{
+				m_id_salida_original = e;
+				m_datos.escribir_configuracion("dispositivo_salida", std::to_string(m_id_salida_original));
+				e = lista_salida.size();//Termina la busqueda
+			}
+		}
 	}
 	//Configuracion Midi
 	this->dispositivo_entrada(m_id_entrada_original);

@@ -5,15 +5,15 @@ Tipografia::Tipografia(Formato formato, int tamanno_letra)
 	if(FT_Init_FreeType(&m_libreria))
 		Registro::Error("La libreria Freetype fallo al iniciar.");
 
-	std::string ruta_tipografia = "";
+	std::string ruta_tipografia = RUTA_ARCHIVOS;
 	if(formato == Normal)
-		ruta_tipografia = "../tipografias/NotoSans-Regular.ttf";
+		ruta_tipografia += "/tipografias/NotoSans-Regular.ttf";
 	else if(formato == Negrita)
-		ruta_tipografia = "../tipografias/NotoSans-Black.ttf";
+		ruta_tipografia += "/tipografias/NotoSans-Black.ttf";
 	else if(formato == Cursiva)
-		ruta_tipografia = "../tipografias/NotoSans-Italic.ttf";
+		ruta_tipografia += "/tipografias/NotoSans-Italic.ttf";
 	else if(formato == CursivaNegrita)
-		ruta_tipografia = "../tipografias/NotoSans-BlackItalic.ttf";
+		ruta_tipografia += "/tipografias/NotoSans-BlackItalic.ttf";
 
 	if(FT_New_Face(m_libreria, ruta_tipografia.c_str(), 0, &m_tipografia))
 		Registro::Error("Freetype fallo al cargar la tipografia del archivo: " + ruta_tipografia);
