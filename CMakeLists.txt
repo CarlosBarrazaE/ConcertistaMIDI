@@ -107,7 +107,6 @@ if(NOT CONSTRUCCION_LOCAL)
 	set(CPACK_PACKAGE_DESCRIPTION "Concertista MIDI es un juego para aprender a tocar piano facilmente usando el teclado, el raton o teclados MIDI, ahora incluso puede controlar las teclas luminosas del organo Casio LK-S250 y posiblemente muchos otros. Concertista MIDI utiliza la libreria midi de linthesia para reproducir archivos y conectarse con dispositivos MIDI pero incluye muchas mejoras.")
 	set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/CarlosBarrazaE/ConcertistaMIDI")
 	set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/varios/concertista_128.png")
-	set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/Licencia.txt")#"${PROJECT_SOURCE_DIR}/codigo/libmidi/COPYING"
 	set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/LEEME.md")
 	set(CPACK_PACKAGE_VENDOR "Carlos Barraza")
 	set(CPACK_PACKAGE_CONTACT, "carlosbarrazaes@gmail.com")
@@ -117,5 +116,19 @@ if(NOT CONSTRUCCION_LOCAL)
 	#set(CPACK_DEBIAN_PACKAGE_DEPENDS "libopengl0,libglew2.1,libsdl2-2.0-0,libfreetype6,libicu66,libsqlite3-0,libasound2,timidity")#ubuntu 20.04
 	set(CPACK_DEBIAN_PACKAGE_DEPENDS "libopengl0,libglew2.1,libsdl2-2.0-0,libfreetype6,libicu67,libsqlite3-0,libasound2,timidity")#debian 11, ubuntu 21.10
 	set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Carlos Barraza <carlosbarrazaes@gmail.com>")
+
+	#cpack -G RPM instalar rpm-build
+	set(
+		CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
+		/usr/share/icons
+		/usr/share/icons/hicolor
+		/usr/share/icons/hicolor/128x128
+		/usr/share/icons/hicolor/128x128/apps
+		/usr/share/applications
+	)
+	set(CPACK_RPM_PACKAGE_NAME ${CPACK_PACKAGE_NAME})
+	set(CPACK_RPM_PACKAGE_REQUIRES "libglvnd-opengl,libGLEW,SDL2,freetype,libicu,sqlite-libs,alsa-lib,timidity++")#fluid-soundfont-lite-patches
+	set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION})
+	set(CPACK_RPM_PACKAGE_LICENSE "MIT")
 	include(CPack)
 endif()
