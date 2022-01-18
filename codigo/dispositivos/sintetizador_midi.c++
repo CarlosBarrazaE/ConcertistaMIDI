@@ -13,7 +13,7 @@ void Sintetizador_Midi::iniciar()
 		argumentos[3] = strdup("--output-mode=s1l");
 		argumentos[4] = strdup("--sampling-freq=44100");
 		argumentos[5] = NULL;
-		if(execvp(argumentos[0], argumentos) == -1);
+		if(execvp(argumentos[0], argumentos) == -1)
 		{
 			Registro::Error("Error al iniciar el sintetizador MIDI");
 		}

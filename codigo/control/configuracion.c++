@@ -67,7 +67,7 @@ Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL), m_teclas_lumin
 		{
 			if(lista_entrada[e].name == "Teclado y Ratón")
 			{
-				m_id_entrada_original = e;
+				m_id_entrada_original = static_cast<unsigned int>(e);
 				m_datos.escribir_configuracion("dispositivo_entrada", std::to_string(m_id_entrada_original));
 				e = lista_entrada.size();//Termina la busqueda
 			}
@@ -79,7 +79,7 @@ Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL), m_teclas_lumin
 		{
 			if(lista_salida[e].name == "TiMidity port 0")
 			{
-				m_id_salida_original = e;
+				m_id_salida_original = static_cast<unsigned int>(e);
 				m_datos.escribir_configuracion("dispositivo_salida", std::to_string(m_id_salida_original));
 				e = lista_salida.size();//Termina la busqueda
 			}
