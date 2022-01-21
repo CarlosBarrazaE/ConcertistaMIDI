@@ -92,9 +92,10 @@ Se requieren los siguientes paquetes para compilar concertista midi.
 
 	sudo apt install g++ cmake libglew-dev libsdl2-dev libglm-dev libfreetype6-dev libicu-dev libsqlite3-dev timidity
 
-### Instalar paquete en Fedora
+### Instalar paquetes en Fedora
 
 	sudo yum install g++ cmake glew-devel SDL2-devel glm-devel alsa-lib-devel freetype-devel libicu-devel sqlite-devel
+
 ### Instalar paquetes en Gentoo
 
 	emerge --ask media-libs/glew media-libs/libsdl2 media-libs/glm media-libs/freetype dev-libs/icu dev-db/sqlite media-sound/timidity++ media-sound/fluid-soundfont
