@@ -48,7 +48,6 @@ private:
 	int m_tamanno_letra;
 
 	void generar_caracteres();
-	Caracter *obtener_caracter(unsigned int caracter);
 public:
 	Tipografia(Formato formato, int tamanno_letra);
 	~Tipografia();

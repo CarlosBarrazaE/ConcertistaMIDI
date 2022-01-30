@@ -129,11 +129,6 @@ void Tipografia::generar_caracteres()
 	}
 }
 
-Caracter *Tipografia::obtener_caracter(unsigned int caracter)
-{
-	return m_caracteres[caracter];
-}
-
 int Tipografia::crear_texto(icu::UnicodeString texto, unsigned int *indice_objeto)
 {
 	long int x=0, y=0;
@@ -161,7 +156,7 @@ int Tipografia::crear_texto(icu::UnicodeString texto, unsigned int *indice_objet
 
 	for(int n=0; n<texto.length(); n++)
 	{
-		letra = obtener_caracter(static_cast<unsigned int>(texto[n]));
+		letra = m_caracteres[static_cast<unsigned int>(texto[n])];
 
 		if(!letra)
 			continue;
