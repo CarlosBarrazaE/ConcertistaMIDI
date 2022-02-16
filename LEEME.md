@@ -141,7 +141,7 @@ Ya es posible ejecutar concertista midi con:
 
 	./concertistamidi
 
-En linux existe un dispositivo ficticio llamado **Midi Through Port-0** que no produce sonido (lo puedes encontrar en el nucleo como SND_SEQ_DUMMY), debes asegurarte que en la configuracion de Concertista MIDI este seleccionado el dispositivo de salida correcto en este caso **TiMidity port 0**.
+En linux existe un dispositivo llamado **Midi Through** que no produce sonido (lo puedes encontrar en el nucleo como SND_SEQ_DUMMY), debes asegurarte que en la configuracion de Concertista MIDI este seleccionado el dispositivo de salida correcto en este caso **TiMidity**.
 
 Para la entrada puedes configurar el **Teclado y Raton** para tocar, es compatible con el teclado MIDI Casio LK-S250.
 

@@ -6,8 +6,9 @@ unsigned int Controlador_Midi::Bandera_salida = SND_SEQ_PORT_CAP_WRITE | SND_SEQ
 Controlador_Midi::Controlador_Midi()
 {
 	m_estado = snd_seq_open(&m_secuenciador_alsa, "default", SND_SEQ_OPEN_DUPLEX, 0);
+	m_estado = snd_config_update_free_global();//Libera memoria de la configuración
+
 	m_cliente = snd_seq_client_id(m_secuenciador_alsa);
-	snd_config_update_free_global();//Libera memoria
 
 	if(m_estado < 0)
 		m_secuenciador_alsa = NULL;
@@ -38,6 +39,9 @@ Controlador_Midi::Controlador_Midi()
 Controlador_Midi::~Controlador_Midi()
 {
 	snd_seq_close(m_secuenciador_alsa);
+
+	for(unsigned long int x=0; x<m_dispositivos.size(); x++)
+		delete m_dispositivos[x];
 }
 
 void Controlador_Midi::suscribir_puerto(int cliente_origen, int puerto_origen, int cliente_destino, int puerto_destino)
@@ -104,13 +108,13 @@ void Controlador_Midi::crear_lista_dispositivos()
 				if(cliente != m_cliente)
 				{
 					nombre = snd_seq_client_info_get_name(informacion_cliente);
-					m_dispositivos.push_back(Dispositivo_Midi(cliente, puerto, capacidad_dispositivo, nombre, true));
+					m_dispositivos.push_back(new Dispositivo_Midi(cliente, puerto, capacidad_dispositivo, nombre, true));
 				}
 				else
 				{
 					//Caso espcial, para el teclado y raton el nombre esta en el puerto
 					nombre = snd_seq_port_info_get_name(informacion_puerto);
-					m_dispositivos.push_back(Dispositivo_Midi(cliente, puerto, capacidad_dispositivo, nombre, true));
+					m_dispositivos.push_back(new Dispositivo_Midi(cliente, puerto, capacidad_dispositivo, nombre, true));
 				}
 			}
 		}
@@ -142,7 +146,7 @@ void Controlador_Midi::agregar_nuevo_dispositivo(int cliente, int puerto)
 	{
 		std::string nombre_cliente = snd_seq_client_info_get_name(informacion_cliente);
 		std::string nombre_puerto = snd_seq_port_info_get_name(informacion_puerto);
-		m_dispositivos.push_back(Dispositivo_Midi(cliente, puerto, capacidad_dispositivo, nombre_cliente, true));
+		m_dispositivos.push_back(new Dispositivo_Midi(cliente, puerto, capacidad_dispositivo, nombre_cliente, true));
 	}
 
 	free(informacion_cliente);
@@ -208,24 +212,24 @@ Dispositivo_Midi *Controlador_Midi::dispositivo(int cliente, int puerto, bool co
 	for(unsigned long int x=0; x<m_dispositivos.size(); x++)
 	{
 		//El estado de conexion tiene que ser lo pedido
-		if(m_dispositivos[x].conectado() != conectado)
+		if(m_dispositivos[x]->conectado() != conectado)
 			continue;
 
-		if(	(habilitado == Activo && !m_dispositivos[x].habilitado()) ||
-			(habilitado == Inactivo && m_dispositivos[x].habilitado()))
+		if(	(habilitado == Activo && !m_dispositivos[x]->habilitado()) ||
+			(habilitado == Inactivo && m_dispositivos[x]->habilitado()))
 			continue;
 
 		//Si ya lo encotro lo retorna, usado al desconectar cuando no se tiene el nombre
-		if(exacto && m_dispositivos[x].cliente() == cliente && m_dispositivos[x].puerto() == puerto)
-			return &m_dispositivos[x];
+		if(exacto && m_dispositivos[x]->cliente() == cliente && m_dispositivos[x]->puerto() == puerto)
+			return m_dispositivos[x];
 
 		//Aunque no se pida, se encontro el mismo y se retorna de inmediato
 		//Usado al conectar, se tiene el nombre y puede haber otro dispositivo en su lugar
-		if(!exacto && m_dispositivos[x].cliente() == cliente && m_dispositivos[x].puerto() == puerto && m_dispositivos[x].nombre() == nombre)
-			return &m_dispositivos[x];
+		if(!exacto && m_dispositivos[x]->cliente() == cliente && m_dispositivos[x]->puerto() == puerto && m_dispositivos[x]->nombre() == nombre)
+			return m_dispositivos[x];
 
-		if(!exacto && m_dispositivos[x].puerto() == puerto && m_dispositivos[x].nombre() == nombre)
-			dispositivo = &m_dispositivos[x];
+		if(!exacto && m_dispositivos[x]->puerto() == puerto && m_dispositivos[x]->nombre() == nombre)
+			dispositivo = m_dispositivos[x];
 	}
 	if(dispositivo != NULL)
 		return dispositivo;
@@ -305,16 +309,16 @@ Evento_Midi Controlador_Midi::leer()
 	else if(evento->type == SND_SEQ_EVENT_CLIENT_START)
 	{
 		m_cambio_dispositivos = true;
-		m_mensajes.push_back("Dispositivo " + nombre_dispositivo(evento->data.addr.client, evento->data.addr.port) + " conectado");
+		m_mensajes.push_back(nombre_dispositivo(evento->data.addr.client, evento->data.addr.port) + " - conectado");
 	}
 	else if(evento->type == SND_SEQ_EVENT_CLIENT_EXIT)
 	{
 		m_cambio_dispositivos = true;
 		Dispositivo_Midi *nuevo = dispositivo(evento->data.addr.client, evento->data.addr.port, false, Indeterminado, true);
 		if(nuevo != NULL)
-			m_mensajes.push_back("Dispositivo " + nuevo->nombre() + " desconectado");
+			m_mensajes.push_back(nuevo->nombre() + " - desconectado");
 		else
-			m_mensajes.push_back("Desconectado desconocido");
+			m_mensajes.push_back(" - desconectado");
 	}
 	else if(evento->type == SND_SEQ_EVENT_PORT_START)
 	{
@@ -609,30 +613,30 @@ void Controlador_Midi::detener_eventos()
 
 Dispositivo_Midi *Controlador_Midi::configurar_dispositivo(int cliente, int puerto, unsigned char capacidad, const std::string &nombre)
 {
-	Dispositivo_Midi *dispositivo_encontrado = NULL;
+	Dispositivo_Midi *dispositivo = NULL;
 	for(unsigned long int x=0; x<m_dispositivos.size(); x++)//Salida
 	{
-		if(m_dispositivos[x].nombre() == nombre)
+		if(m_dispositivos[x]->nombre() == nombre)
 		{
 			//Coincide al menos en el nombre
-			dispositivo_encontrado = &m_dispositivos[x];
+			dispositivo = m_dispositivos[x];
 
 			//Se es exactamente el mismo lo retorna
-			if(	m_dispositivos[x].cliente() == cliente &&
-				m_dispositivos[x].puerto() == puerto)
-				return dispositivo_encontrado;
+			if(	m_dispositivos[x]->cliente() == cliente &&
+				m_dispositivos[x]->puerto() == puerto)
+				return dispositivo;
 		}
 	}
 	//Retorna el dispositivo que coincide por nombre
 	//pero esta en otro cliente o puerto
-	if(dispositivo_encontrado != NULL)
-		return dispositivo_encontrado;
+	if(dispositivo != NULL)
+		return dispositivo;
 	else
 	{
 		//Crea un dispositivo para guardar los datos
-		m_dispositivos.push_back(Dispositivo_Midi(cliente, puerto, capacidad, nombre, false));
-		dispositivo_encontrado = &m_dispositivos[m_dispositivos.size()-1];
-		return dispositivo_encontrado;
+		dispositivo = new Dispositivo_Midi(cliente, puerto, capacidad, nombre, false);
+		m_dispositivos.push_back(dispositivo);
+		return dispositivo;
 	}
 }
 

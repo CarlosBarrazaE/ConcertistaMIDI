@@ -28,7 +28,7 @@ class Controlador_Midi
 private:
 	static unsigned int Bandera_entrada, Bandera_salida;
 
-	std::vector<Dispositivo_Midi> m_dispositivos;
+	std::vector<Dispositivo_Midi*> m_dispositivos;
 	std::vector<Dispositivo_Midi*> m_entrada;
 	std::vector<Dispositivo_Midi*> m_salida;
 	std::map<unsigned char, unsigned char> m_ultimo_programa;//canal,programa
