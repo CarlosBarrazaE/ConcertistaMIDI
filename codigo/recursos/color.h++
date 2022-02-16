@@ -14,7 +14,7 @@ private:
 	bool comparar(float valor_1, float valor_2) const;
 public:
 	Color();
-	Color(const Color&);
+	Color(const Color &color);
 	Color(int rojo, int verde, int azul);
 	Color(float rojo, float verde, float azul);
 
