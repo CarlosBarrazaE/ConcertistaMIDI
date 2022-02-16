@@ -86,6 +86,11 @@ VentanaOrgano::~VentanaOrgano()
 {
 	m_controlador_midi->reiniciar();
 
+	//Borra las notas que quedaron encendidas al salir
+	for(std::map<unsigned int, Nota_Activa*>::iterator n=m_notas_activas.begin(); n != m_notas_activas.end(); n++)
+		delete n->second;
+	m_notas_activas.clear();
+
 	delete m_barra;
 	delete m_tablero;
 	delete m_organo;

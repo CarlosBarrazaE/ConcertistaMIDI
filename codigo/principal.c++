@@ -47,6 +47,8 @@ int main (int /*n*/, char **/*argumentos*/)
 	Archivo::Tga *icono_tga = new Archivo::Tga(std::string(RUTA_ARCHIVOS) + "/texturas/icono.tga");
 	SDL_Surface *icono = SDL_CreateRGBSurfaceFrom(icono_tga->imagen(), static_cast<int>(icono_tga->ancho()), static_cast<int>(icono_tga->alto()), static_cast<int>(icono_tga->bytes()), static_cast<int>(icono_tga->ancho())*4, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
 	SDL_SetWindowIcon(ventana, icono);
+
+	SDL_FreeSurface(icono);
 	delete icono_tga;
 
 	/*SDL_GLContext contexto = */SDL_GL_CreateContext(ventana);

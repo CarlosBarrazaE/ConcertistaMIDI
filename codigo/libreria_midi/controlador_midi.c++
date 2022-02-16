@@ -7,6 +7,7 @@ Controlador_Midi::Controlador_Midi()
 {
 	m_estado = snd_seq_open(&m_secuenciador_alsa, "default", SND_SEQ_OPEN_DUPLEX, 0);
 	m_cliente = snd_seq_client_id(m_secuenciador_alsa);
+	snd_config_update_free_global();//Libera memoria
 
 	if(m_estado < 0)
 		m_secuenciador_alsa = NULL;
@@ -54,6 +55,7 @@ void Controlador_Midi::suscribir_puerto(int cliente_origen, int puerto_origen, i
 	snd_seq_port_subscribe_set_sender(suscripcion, &origen);//Establece Origen
 	snd_seq_port_subscribe_set_dest(suscripcion, &destino);//Establece Destino
 	m_estado = snd_seq_subscribe_port(m_secuenciador_alsa, suscripcion);//Se suscribe al puerto de anuncio
+	free(suscripcion);
 }
 
 void Controlador_Midi::crear_lista_dispositivos()
@@ -113,6 +115,8 @@ void Controlador_Midi::crear_lista_dispositivos()
 			}
 		}
 	}
+	free(informacion_cliente);
+	free(informacion_puerto);
 }
 
 void Controlador_Midi::agregar_nuevo_dispositivo(int cliente, int puerto)
@@ -140,6 +144,9 @@ void Controlador_Midi::agregar_nuevo_dispositivo(int cliente, int puerto)
 		std::string nombre_puerto = snd_seq_port_info_get_name(informacion_puerto);
 		m_dispositivos.push_back(Dispositivo_Midi(cliente, puerto, capacidad_dispositivo, nombre_cliente, true));
 	}
+
+	free(informacion_cliente);
+	free(informacion_puerto);
 }
 
 bool Controlador_Midi::hay_eventos()
@@ -158,6 +165,7 @@ std::string Controlador_Midi::nombre_dispositivo(int cliente, int puerto) const
 		/*int estado = */snd_seq_client_info_malloc(&informacion_cliente);
 		snd_seq_get_any_client_info(m_secuenciador_alsa, cliente, informacion_cliente);
 		nombre = snd_seq_client_info_get_name(informacion_cliente);
+		free(informacion_cliente);
 	}
 	else
 	{
@@ -166,6 +174,7 @@ std::string Controlador_Midi::nombre_dispositivo(int cliente, int puerto) const
 		/*int estado = */snd_seq_port_info_malloc(&informacion_puerto);
 		snd_seq_get_any_port_info(m_secuenciador_alsa, cliente, puerto, informacion_puerto);
 		nombre = snd_seq_port_info_get_name(informacion_puerto);
+		free(informacion_puerto);
 	}
 
 	return nombre;
