@@ -3,6 +3,7 @@ add_subdirectory(control)
 add_subdirectory(dispositivos)
 add_subdirectory(elementos_graficos)
 add_subdirectory(libmidi)
+add_subdirectory(libreria_midi)
 add_subdirectory(recursos)
 add_subdirectory(util)
 add_subdirectory(ventanas)
@@ -13,6 +14,7 @@ set(codigo
 	${dispositivos}
 	${elementos_graficos}
 	${libmidi}
+	${libreria_midi}
 	${recursos}
 	${util}
 	${ventanas}

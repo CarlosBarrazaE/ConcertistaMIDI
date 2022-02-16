@@ -1,13 +1,12 @@
 #ifndef CONFIGURACION_H
 #define CONFIGURACION_H
 
-#include "../libmidi/MidiComm.h++"
-
 #include "base_de_datos.h++"
-#include "../dispositivos/teclas_luminosas.h++"
 #include "../util/usuario.h++"
 #include "../control/teclado_organo.h++"
 #include "../elementos_graficos/notificacion.h++"
+#include "../libreria_midi/controlador_midi.h++"
+#include "../libreria_midi/teclas_luminosas.h++"
 
 class Configuracion
 {
@@ -16,13 +15,7 @@ private:
 	Base_de_Datos m_datos;
 
 	//Configuracion MIDI
-	MidiCommIn *m_entrada;
-	MidiCommOut *m_salida;
-	TeclasLuminosas* m_teclas_luminosas;
-	unsigned int m_id_entrada, m_id_entrada_original;
-	unsigned int m_id_salida, m_id_salida_original;
-	unsigned int m_id_teclas_luminosas_original;
-	bool m_entrada_notificacion, m_salida_notificacion;
+	Controlador_Midi m_controlador_midi;
 
 	//Configuracion General
 	bool m_pantalla_completa, m_pantalla_completa_original;
@@ -55,16 +48,7 @@ public:
 	void guardar_configuracion();
 
 	//Configuracion MIDI
-	void dispositivo_entrada(unsigned int id_entrada);
-	void dispositivo_salida(unsigned int id_salida);
-	void teclas_luminosas(unsigned int identificador);
-
-	unsigned int id_dispositivo_entrada();
-	unsigned int id_dispositivo_salida();
-
-	MidiCommIn *dispositivo_entrada();
-	MidiCommOut *dispositivo_salida();
-	TeclasLuminosas *teclas_luminosas();
+	Controlador_Midi *controlador_midi();
 
 	//Configuracion General
 	void pantalla_completa(bool estado);

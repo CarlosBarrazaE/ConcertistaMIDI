@@ -2,9 +2,5 @@ set(dispositivos
 	${CMAKE_CURRENT_SOURCE_DIR}/pantalla.c++
 	${CMAKE_CURRENT_SOURCE_DIR}/raton.c++
 	${CMAKE_CURRENT_SOURCE_DIR}/teclado.c++
-	${CMAKE_CURRENT_SOURCE_DIR}/teclas_luminosas.c++
-	${CMAKE_CURRENT_SOURCE_DIR}/organo_generico.c++
-	${CMAKE_CURRENT_SOURCE_DIR}/casio_lks250.c++
-	${CMAKE_CURRENT_SOURCE_DIR}/sintetizador_midi.c++
 	PARENT_SCOPE
 )

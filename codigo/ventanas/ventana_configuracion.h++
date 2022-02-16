@@ -8,7 +8,6 @@
 #include "../elementos_graficos/lista_opciones.h++"
 #include "../elementos_graficos/tabla.h++"
 #include "../elementos_graficos/selector_archivos.h++"
-#include "../dispositivos/teclas_luminosas.h++"
 #include "../control/configuracion.h++"
 #include "../util/usuario.h++"
 
@@ -48,7 +47,6 @@ private:
 	//Datos
 	Configuracion *m_configuracion;
 
-	std::vector<std::string> obtener_dispositivos(MidiCommDescriptionList lista);
 	void cargar_tabla_carpetas();
 	unsigned int limpiar_base_de_datos();
 

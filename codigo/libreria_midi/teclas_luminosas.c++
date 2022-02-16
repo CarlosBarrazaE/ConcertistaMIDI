@@ -3,7 +3,7 @@
 #include "organo_generico.h++"
 #include "casio_lks250.h++"
 
-std::vector<std::string> TeclasLuminosas::Lista
+std::vector<std::string> Teclas_Luminosas::Lista
 {
 	"Desactivado",
 	"Generico - Canal 1",
@@ -25,7 +25,7 @@ std::vector<std::string> TeclasLuminosas::Lista
 	"Casio LK-S250 - SysEx",
 };
 
-TeclasLuminosas *TeclasLuminosas::Cargar_tecla_luminosa(unsigned int identificador)
+Teclas_Luminosas *Teclas_Luminosas::Cargar_tecla_luminosa(unsigned int identificador)
 {
 	switch(identificador)
 	{
@@ -46,38 +46,32 @@ TeclasLuminosas *TeclasLuminosas::Cargar_tecla_luminosa(unsigned int identificad
 		case 15: return new OrganoGenerico(14, 15);	//Generico - Canal 15
 		case 16: return new OrganoGenerico(15, 16);	//Generico - Canal 16
 		case 17: return new CasioLks250(17);
-		default: return new OrganoGenerico(0, 0);	//Desactivado
+		default: return NULL;
 	}
 }
 
-TeclasLuminosas::TeclasLuminosas(unsigned int identificador)
+Teclas_Luminosas::Teclas_Luminosas(unsigned int identificador)
 {
 	m_identificador = identificador;
 }
 
-TeclasLuminosas::~TeclasLuminosas()
+Teclas_Luminosas::~Teclas_Luminosas()
 {
 }
 
-void TeclasLuminosas::actualizar(unsigned int diferencia_tiempo, MidiCommOut *dispositivo_salida)
+Evento_Midi Teclas_Luminosas::actualizar(unsigned int diferencia_tiempo)
 {
-	if(dispositivo_salida == NULL)
-		return;
-	this->actualizar_virtual(diferencia_tiempo, dispositivo_salida);
+	return this->actualizar_virtual(diferencia_tiempo);
 }
 
-void TeclasLuminosas::encender(unsigned int id_nota, MidiCommOut *dispositivo_salida)
+Evento_Midi Teclas_Luminosas::encender(unsigned char id_nota)
 {
-	if(dispositivo_salida != NULL)
-		this->encender_virtual(id_nota, dispositivo_salida);
 	m_luces_encendidas.push_back(id_nota);
+	return this->encender_virtual(id_nota);
 }
 
-void TeclasLuminosas::apagar(unsigned int id_nota, MidiCommOut *dispositivo_salida)
+Evento_Midi Teclas_Luminosas::apagar(unsigned char id_nota)
 {
-	if(dispositivo_salida != NULL)
-		this->apagar_virtual(id_nota, dispositivo_salida);
-
 	//Se borra de la lista
 	bool borrado = false;
 	for(unsigned int x=0; x<m_luces_encendidas.size() && !borrado; x++)
@@ -90,19 +84,30 @@ void TeclasLuminosas::apagar(unsigned int id_nota, MidiCommOut *dispositivo_sali
 			borrado = true;
 		}
 	}
+
+	return this->apagar_virtual(id_nota);
 }
 
-unsigned int TeclasLuminosas::identificador()
+unsigned int Teclas_Luminosas::identificador()
 {
 	return m_identificador;
 }
 
-void TeclasLuminosas::reiniciar(MidiCommOut *dispositivo_salida)
+bool Teclas_Luminosas::quedan_luces_activas()
 {
-	if(dispositivo_salida != NULL)
+	if(m_luces_encendidas.size() > 0)
+		return true;
+	return false;
+}
+
+Evento_Midi Teclas_Luminosas::apagar_siguiente()
+{
+	if(m_luces_encendidas.size() > 0)
 	{
-		for(unsigned int x=0; x<m_luces_encendidas.size(); x++)
-			this->apagar_virtual(m_luces_encendidas[x], dispositivo_salida);
+		Evento_Midi evento = this->apagar_virtual(m_luces_encendidas[m_luces_encendidas.size()-1]);
+		m_luces_encendidas.pop_back();//Borra el ultimo
+		return evento;
 	}
-	m_luces_encendidas.clear();
+
+	return Evento_Midi();
 }

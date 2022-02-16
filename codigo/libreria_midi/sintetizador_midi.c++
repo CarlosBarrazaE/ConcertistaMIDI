@@ -15,13 +15,9 @@ void Sintetizador_Midi::iniciar()
 		argumentos[5] = NULL;
 		if(execvp(argumentos[0], argumentos) == -1)
 		{
-			Registro::Error("Error al iniciar el sintetizador MIDI");
+			//Error
 		}
 		_exit(0);
-	}
-	else
-	{
-		Registro::Nota("Iniciando sintetizador MIDI en PID: " + std::to_string(m_pid));
 	}
 }
 
@@ -30,6 +26,7 @@ void Sintetizador_Midi::esperar_conexion()
 	bool finalizado = false;
 	bool cerrado = false;
 	int limite = 0;
+	int falta_aqui;
 	while(!finalizado && !cerrado && limite < 100)
 	{
 		//Si hay error termina
@@ -37,9 +34,9 @@ void Sintetizador_Midi::esperar_conexion()
 			cerrado = true;
 		else
 		{
-			MidiCommOut::UpdateDeviceList();
+			//MidiCommOut::UpdateDeviceList();
 			//Timidity crea 4 puertos y probablemente ya existe el puerto falso de linux
-			if(MidiCommOut::GetDeviceList().size() > 1)
+			if(true/*MidiCommOut::GetDeviceList().size() > 1*/)
 				finalizado = true;
 			else
 			{
@@ -48,8 +45,6 @@ void Sintetizador_Midi::esperar_conexion()
 			}
 		}
 	}
-	if(!cerrado)
-		Registro::Nota("Sintetizador MIDI esperado por: " + std::to_string(limite*10) + " milisegundos");
 }
 
 void Sintetizador_Midi::detener()
@@ -57,18 +52,17 @@ void Sintetizador_Midi::detener()
 	if(m_pid <= 0)
 		return;
 
-	for(unsigned int x=0; x<500; x++)
+	for(unsigned int x=0; x<100; x++)
 	{
 		kill(m_pid, SIGTERM);
 		if(waitpid(m_pid, nullptr, WNOHANG))
 		{
-			Registro::Nota("Sintetizador MIDI detenido al intento: " + std::to_string(x));
 			m_pid = -1;
 			return;
 		}
 		usleep(10000);
 	}
-	Registro::Aviso("El sintetizador MIDI no se ha podido detener, apagando a la fuerza.");
+
 	kill(m_pid, SIGKILL);
 	waitpid(m_pid, nullptr, 0);
 }

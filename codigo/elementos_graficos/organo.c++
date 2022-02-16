@@ -243,16 +243,16 @@ void Organo::evento_raton(Raton *raton)
 		if(m_nota_enviada_anterior != nota_enviar)
 		{
 			//Apaga la nota anterior si se habia enviado una
-			if(m_nota_enviada_anterior != SIN_NOTA)
-				sendNote(m_nota_enviada_anterior, false);
+			//if(m_nota_enviada_anterior != SIN_NOTA)
+			//	sendNote(m_nota_enviada_anterior, false);
 			//Envia la nueva nota
-			sendNote(nota_enviar, true);
+			//sendNote(nota_enviar, true);
 			m_nota_enviada_anterior = nota_enviar;
 		}
 	}
 	else if(m_nota_enviada_anterior != SIN_NOTA)
 	{
-		sendNote(m_nota_enviada_anterior, false);
+		//sendNote(m_nota_enviada_anterior, false);
 		m_nota_enviada_anterior = SIN_NOTA;
 	}
 }

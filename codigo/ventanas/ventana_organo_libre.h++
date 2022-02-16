@@ -26,6 +26,7 @@ private:
 
 	//Datos
 	Configuracion *m_configuracion;
+	Controlador_Midi *m_controlador_midi;
 	Teclado_Organo m_teclado_visible, m_teclado_util;
 	std::array<Color, 128> m_color_teclas;
 	std::map<unsigned int, Nota_Activa*> m_notas_activas;

@@ -49,12 +49,14 @@ void midiInit()
 										SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE,
 										SND_SEQ_PORT_TYPE_MIDI_GENERIC);
 
+	//Permite detectar nuevos dispositivos midi
 	anon_in = snd_seq_create_simple_port(alsa_seq, "Concertista MIDI Anuncio",
 										SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_NO_EXPORT,
 										SND_SEQ_PORT_TYPE_MIDI_GENERIC | SND_SEQ_PORT_TYPE_APPLICATION);
 
 	if (anon_in < 0)
 		return; // handle error
+
 
 	// Subscribe on port opening
 	snd_seq_port_subscribe_t *sub;
@@ -64,12 +66,12 @@ void midiInit()
 	// Receive events from annoncer's port
 	sender.client = SND_SEQ_CLIENT_SYSTEM;
 	sender.port = SND_SEQ_PORT_SYSTEM_ANNOUNCE;
-	snd_seq_port_subscribe_set_sender(sub, &sender);
+	snd_seq_port_subscribe_set_sender(sub, &sender);//Recive eventos de nuevos puertos midi
 	// Forward them to our port
 	dest.client = static_cast<unsigned char>(ownid);
 	dest.port = static_cast<unsigned char>(anon_in);
-	snd_seq_port_subscribe_set_dest(sub, &dest);
-	err = snd_seq_subscribe_port(alsa_seq, sub);
+	snd_seq_port_subscribe_set_dest(sub, &dest);//Los eventos recividos se pasa aqui como destino
+	err = snd_seq_subscribe_port(alsa_seq, sub);//Y se establece como puerto de suscripcion
 	if (err<0)
 	{
 		std::string texto = snd_strerror(err);
@@ -77,7 +79,6 @@ void midiInit()
 		Registro::Error(texto);
 		return;
 	}
-
 }
 
 void midiStop()
@@ -358,7 +359,18 @@ void MidiCommOut::Write(const MidiEvent &out)
 	{
 		unsigned int ch = out.Channel();
 		unsigned int note = out.NoteNumber();
+		/*
+		 (ev, c, p) ((ev)->dest.cliente = (c), (ev)->dest.puerto = (p))
+		 https://www-alsa--project-org.translate.goog/alsa-doc/alsa-lib/group___seq_middle.html?_x_tr_sl=en&_x_tr_tl=es&_x_tr_hl=es-419&_x_tr_pto=sc
+		 */
 		snd_seq_ev_set_noteon(&ev, static_cast<unsigned char>(ch), static_cast<unsigned char>(note), static_cast<unsigned char>(out.NoteVelocity()));
+		/*
+		 ( (ev)->type = SND_SEQ_EVENT_NOTEON,\
+		 snd_seq_ev_set_fixed(ev),\
+		 (ev)->data.note.channel = (ch),\
+		 (ev)->data.note.note = (key),\
+		 (ev)->data.note.velocity = (vel))
+		 */
 
 		// save for reset
 		m_notes_on.push_back(std::pair<int,int>(ch,  note));

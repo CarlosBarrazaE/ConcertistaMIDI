@@ -1,8 +1,6 @@
 #ifndef SINTETIZADOR_MIDI
 #define SINTETIZADOR_MIDI
 
-#include "../libmidi/MidiComm.h++"
-#include "../registro.h++"
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>

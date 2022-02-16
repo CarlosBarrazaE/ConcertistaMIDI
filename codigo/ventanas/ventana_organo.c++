@@ -9,7 +9,7 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 	m_rectangulo = recursos->figura(F_Rectangulo);
 	m_textura_subtitulo = recursos->textura(T_Nota);
 
-	m_teclas_luminosas = m_configuracion->teclas_luminosas();
+	m_controlador_midi = m_configuracion->controlador_midi();
 
 	m_volumen = m_configuracion->volumen();
 	m_velocidad_musica = m_configuracion->velocidad();
@@ -71,8 +71,7 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 	m_organo->notas_requeridas(&m_notas_requeridas);
 
 	//Elimina las notas tocadas antes de esta ventana
-	if(m_configuracion->dispositivo_entrada() != NULL)
-		m_configuracion->dispositivo_entrada()->Reset();
+	m_controlador_midi->reiniciar();
 
 	m_cambio_velocidad = false;
 	m_pausa = false;
@@ -85,12 +84,7 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 
 VentanaOrgano::~VentanaOrgano()
 {
-	m_teclas_luminosas->reiniciar(m_configuracion->dispositivo_salida());
-
-	if(m_configuracion->dispositivo_entrada() != NULL)
-		m_configuracion->dispositivo_entrada()->Reset();
-	if(m_configuracion->dispositivo_salida() != NULL)
-		m_configuracion->dispositivo_salida()->Reset();
+	m_controlador_midi->reiniciar();
 
 	delete m_barra;
 	delete m_tablero;
@@ -117,9 +111,6 @@ void VentanaOrgano::actualizar(unsigned int diferencia_tiempo)
 		m_tiempo_actual_midi = cambio_tiempo;
 		this->reiniciar();
 	}
-
-	//Se actualizan las teclas luminosas
-	m_teclas_luminosas->actualizar(diferencia_tiempo, m_configuracion->dispositivo_salida());
 
 	//Se calculan los microsegundos entre fotogramas para actualizar el midi
 	unsigned int microsegundos_actualizar = static_cast<unsigned int>((static_cast<double>(diferencia_tiempo) / 1000.0) * m_velocidad_musica);
@@ -264,7 +255,7 @@ void VentanaOrgano::reproducir_eventos(unsigned int microsegundos_actualizar)
 				else if(m_pistas->at(i->first).modo() == Tocar)
 				{
 					//Activa la nota luminosa
-					m_teclas_luminosas->encender(i->second.NoteNumber(), m_configuracion->dispositivo_salida());
+					m_controlador_midi->tecla_luninosa(i->second.NoteNumber(), true);
 				}
 			}
 		}
@@ -296,21 +287,18 @@ void VentanaOrgano::reproducir_eventos(unsigned int microsegundos_actualizar)
 						m_puntaje->reiniciar_combo();
 				}
 				if(m_pistas->at(i->first).modo() == Tocar)
-					m_teclas_luminosas->apagar(i->second.NoteNumber(), m_configuracion->dispositivo_salida());
+					m_controlador_midi->tecla_luninosa(i->second.NoteNumber(), false);
 			}
 		}
 
 		//Omite los eventos si la pista esta en silencio
 		if(reproducir_evento && m_pistas->at(i->first).sonido())
 		{
-			if(m_configuracion->dispositivo_salida() != NULL)
-			{
-				//Se copia el evento para poder editarlo
-				MidiEvent evento_salida = i->second;
-				//Escala el volumen
-				evento_salida.SetVelocity(static_cast<int>(evento_salida.NoteVelocity() * m_volumen));
-				m_configuracion->dispositivo_salida()->Write(evento_salida);
-			}
+			//Se copia el evento para poder editarlo
+			MidiEvent evento_salida = i->second;
+			//Escala el volumen
+			evento_salida.SetVelocity(static_cast<int>(evento_salida.NoteVelocity() * m_volumen));
+			m_controlador_midi->escribir(evento_salida);
 		}
 	}
 	//Borra las notas requeridas si todas son tocadas a la vez
@@ -320,15 +308,11 @@ void VentanaOrgano::reproducir_eventos(unsigned int microsegundos_actualizar)
 
 void VentanaOrgano::escuchar_eventos()
 {
-	//No hay nada que hacer si no hay dispositivo de entrada
-	if(m_configuracion->dispositivo_entrada() == NULL)
-		return;
-
 	//Lee todos los eventos
 	bool nuevas_notas_tocadas = false;
-	while(m_configuracion->dispositivo_entrada()->KeepReading())
+	while(m_controlador_midi->hay_eventos())
 	{
-		MidiEvent evento = m_configuracion->dispositivo_entrada()->Read();
+		Evento_Midi evento = m_controlador_midi->leer();
 		/*Registro::Aviso("Evento capturado: " + GetMidiEventTypeDescription(evento.Type()));
 		if(evento.Type() == MidiEventType_Meta)
 		{
@@ -340,10 +324,10 @@ void VentanaOrgano::escuchar_eventos()
 		}*/
 
 		//Omitir eventos que no son NoteOn o NoteOff
-		if(evento.Type() != MidiEventType_NoteOn && evento.Type() != MidiEventType_NoteOff)
+		if(evento.tipo_evento() != EventoMidi_NotaEncendida && evento.tipo_evento() != EventoMidi_NotaApagada)
 			continue;
 
-		if(evento.Type() == MidiEventType_NoteOn && evento.NoteVelocity() > 0)
+		if(evento.tipo_evento() == EventoMidi_NotaEncendida && evento.velocidad() > 0)
 		{
 			//Eventos NoteOn
 			TranslatedNote *nota_encontrada = NULL;
@@ -389,7 +373,7 @@ void VentanaOrgano::escuchar_eventos()
 							break;
 
 						//Nota correcta
-						if(nota_actual->note_id == evento.NoteNumber())
+						if(nota_actual->note_id == evento.id_nota())
 						{
 							//Primera coincidencia detectada
 							if(nota_encontrada == NULL)
@@ -441,25 +425,22 @@ void VentanaOrgano::escuchar_eventos()
 				nuevas_notas_tocadas = true;
 
 				//Se cambia el canal y escala el volumen
-				evento.SetChannel(nota_encontrada->channel);
-				evento.SetVelocity(static_cast<int>(evento.NoteVelocity() * m_volumen));
+				evento.canal(nota_encontrada->channel);
+				evento.velocidad(static_cast<unsigned char>(evento.velocidad() * m_volumen));
 
 				//Se envia el evento
-				if(m_configuracion->dispositivo_salida() != NULL && m_pistas->at(pista_encontrada).sonido())
-					m_configuracion->dispositivo_salida()->Write(evento);
+				if(m_pistas->at(pista_encontrada).sonido())
+					m_controlador_midi->escribir(evento);
 			}
 			else
 			{
 				//Notas plomas son notas erroneas
-				this->insertar_nota_activa(evento.NoteNumber(), evento.Channel(), 0, 0, Pista::Colores_pista[0], true, false);
+				this->insertar_nota_activa(evento.id_nota(), evento.canal(), 0, 0, Pista::Colores_pista[0], true, false);
 
+				//Escala el volumen
+				evento.velocidad(static_cast<unsigned char>(evento.velocidad() * m_volumen));
 				//Se envia el evento
-				if(m_configuracion->dispositivo_salida() != NULL)
-				{
-					//Escala el volumen
-					evento.SetVelocity(static_cast<int>(evento.NoteVelocity() * m_volumen));
-					m_configuracion->dispositivo_salida()->Write(evento);
-				}
+				m_controlador_midi->escribir(evento);
 
 				//Pierde el combo
 				m_puntaje->reiniciar_combo();
@@ -470,7 +451,7 @@ void VentanaOrgano::escuchar_eventos()
 		else
 		{
 			//Eventos NoteOff
-			std::map<unsigned int, Nota_Activa*>::iterator nota_encendida = m_notas_activas.find(evento.NoteNumber());
+			std::map<unsigned int, Nota_Activa*>::iterator nota_encendida = m_notas_activas.find(evento.id_nota());
 			if(nota_encendida != m_notas_activas.end())
 			{
 				if(nota_encendida->second->contador_clic == 0)
@@ -489,11 +470,11 @@ void VentanaOrgano::escuchar_eventos()
 					}
 
 					//Se selecciona el canal
-					evento.SetChannel(nota_encendida->second->canal);
+					evento.canal(nota_encendida->second->canal);
 
 					//Se envia el evento de apagado
-					if(m_configuracion->dispositivo_salida() != NULL && nota_encendida->second->sonido)
-						m_configuracion->dispositivo_salida()->Write(evento);
+					if(nota_encendida->second->sonido)
+						m_controlador_midi->escribir(evento);
 
 					//Borra la nota
 					unsigned int nota_a_borrar = nota_encendida->second->id_nota;
@@ -652,12 +633,8 @@ void VentanaOrgano::reiniciar()
 	for(unsigned long int i=0; i<m_primera_nota.size(); i++)
 		m_primera_nota[i] = 0;
 
-	//Reinicia las luces
-	m_teclas_luminosas->reiniciar(m_configuracion->dispositivo_salida());
-
-	//Reinicia la salida
-	if(m_configuracion->dispositivo_salida() != NULL)
-		m_configuracion->dispositivo_salida()->Reset();
+	//Limpia los eventos incompletos
+	m_controlador_midi->reiniciar();
 
 	//Descarta texto inicial de archivo midi
 	m_descartar_texto_inicial = true;
@@ -796,7 +773,7 @@ void VentanaOrgano::desbloquear_notas(bool desbloquear_todas)
 
 void VentanaOrgano::agregar_nota_requerida(unsigned int id_nota, const Color &color)
 {
-	m_teclas_luminosas->encender(id_nota, m_configuracion->dispositivo_salida());
+	m_controlador_midi->tecla_luninosa(id_nota, true);
 	m_notas_requeridas[id_nota] = color;
 }
 
@@ -816,7 +793,7 @@ void VentanaOrgano::borrar_notas_requeridas()
 		for(std::pair<unsigned int, Color> valor : m_notas_requeridas)
 		{
 			//Apagando luces
-			m_teclas_luminosas->apagar(valor.first, m_configuracion->dispositivo_salida());
+			m_controlador_midi->tecla_luninosa(valor.first, false);
 		}
 		//Todas son tocadas correctamente por lo que se suman al combo
 		m_puntaje->combo(static_cast<unsigned int>(m_notas_requeridas.size()));
@@ -910,8 +887,7 @@ void VentanaOrgano::evento_teclado(Tecla tecla, bool estado)
 	{
 		m_pausa = !m_pausa;
 		if(m_pausa)
-			if(m_configuracion->dispositivo_salida() != NULL)
-				m_configuracion->dispositivo_salida()->Reset();
+			m_controlador_midi->detener_eventos();
 	}
 	else if(tecla == TECLA_F4 && estado)
 	{

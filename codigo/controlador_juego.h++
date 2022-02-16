@@ -22,7 +22,7 @@
 #include "control/configuracion.h++"
 #include "control/datos_musica.h++"
 
-#include "libmidi/MidiComm.h++"
+//#include "libmidi/MidiComm.h++"
 
 #include <SDL2/SDL.h>
 
@@ -41,6 +41,7 @@ private:
 	float m_contador_inactividad;
 
 	//Control
+	bool m_consumir_eventos;
 	bool m_depurar;
 	bool m_pantalla_completa;
 	bool m_modo_alambre;

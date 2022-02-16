@@ -25,15 +25,9 @@ VentanaTitulo::VentanaTitulo(Configuracion *configuracion, Administrador_Recurso
 	m_boton_salir->color_boton(Color(0.9f, 0.9f, 0.9f));
 	m_boton_salir->centrado(true);
 
-	std::string entrada = "No conectado";
-	MidiCommDescriptionList lista_entrada = MidiCommIn::GetDeviceList();
-	if(configuracion->id_dispositivo_entrada() < lista_entrada.size())
-		entrada = lista_entrada[configuracion->id_dispositivo_entrada()].name;
-
-	std::string salida = "No conectado";
-	MidiCommDescriptionList lista_salida = MidiCommOut::GetDeviceList();
-	if(configuracion->id_dispositivo_salida() < lista_salida.size())
-		salida = lista_salida[configuracion->id_dispositivo_salida()].name;
+	m_configuracion = configuracion;
+	std::string entrada = m_configuracion->controlador_midi()->dispositivos_conectados(ENTRADA);
+	std::string salida = m_configuracion->controlador_midi()->dispositivos_conectados(SALIDA);
 
 	m_texto_dispositivo_entrada.texto("Entrada: " + entrada);
 	m_texto_dispositivo_entrada.tipografia(recursos->tipografia(LetraChica));
@@ -65,6 +59,16 @@ void VentanaTitulo::actualizar(unsigned int diferencia_tiempo)
 	m_boton_tocar->actualizar(diferencia_tiempo);
 	m_boton_configurar->actualizar(diferencia_tiempo);
 	m_boton_salir->actualizar(diferencia_tiempo);
+
+	if(m_configuracion->controlador_midi()->hay_cambios_de_dispositivos())
+	{
+		Registro::Aviso("Actualizado");
+		std::string entrada = m_configuracion->controlador_midi()->dispositivos_conectados(ENTRADA);
+		std::string salida = m_configuracion->controlador_midi()->dispositivos_conectados(SALIDA);
+
+		m_texto_dispositivo_entrada.texto("Entrada: " + entrada);
+		m_texto_dispositivo_salida.texto("Salida: " + salida);
+	}
 }
 
 void VentanaTitulo::dibujar()

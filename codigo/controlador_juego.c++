@@ -16,6 +16,7 @@ Controlador_Juego::Controlador_Juego(Administrador_Recursos *recursos) : m_texto
 	m_ventana_actual = new VentanaTitulo(&m_configuracion, recursos);
 
 	//Control dinamico de fps
+	m_consumir_eventos = true;
 	m_fps_dinamico = true;
 	m_fps_reducido = false;
 	m_contador_inactividad = 0;
@@ -28,6 +29,7 @@ Controlador_Juego::Controlador_Juego(Administrador_Recursos *recursos) : m_texto
 	m_finalizar = false;
 
 	m_aviso_fps_mostrado = false;
+	m_tiempo_espera_aviso = 0;
 
 	m_pantalla_completa = m_configuracion.pantalla_completa();
 }
@@ -48,16 +50,9 @@ void Controlador_Juego::actualizar()
 	unsigned int diferencia_tiempo = Fps::Obtener_nanosegundos();
 	//unsigned int diferencia_tiempo = (1.0/60.0)*1000000000;
 
-	//Reconecta los dispositivos midis si es necesario
-	if(m_configuracion.dispositivo_entrada() != NULL)
-	{
-		if(m_configuracion.dispositivo_entrada()->ShouldReconnect())
-		{
-			m_configuracion.dispositivo_entrada()->Reconnect();
-			if(m_configuracion.dispositivo_salida() != NULL)
-				m_configuracion.dispositivo_salida()->Reconnect();
-		}
-	}
+	m_configuracion.controlador_midi()->actualizar(diferencia_tiempo, m_consumir_eventos);
+	while(m_configuracion.controlador_midi()->hay_mensajes())
+		Notificacion::Nota(m_configuracion.controlador_midi()->siguiente_mensaje(), 5);
 
 	m_ventana_actual->actualizar(diferencia_tiempo);
 	m_notificaciones.actualizar(diferencia_tiempo);
@@ -89,6 +84,7 @@ void Controlador_Juego::actualizar()
 		m_fps_dinamico = true;
 		m_ventana_actual = new VentanaTitulo(&m_configuracion, m_recursos);
 		cambio_ventana = true;
+		m_consumir_eventos = true;
 	}
 	else if(accion_actual == CambiarASeleccionMusica)
 	{
@@ -96,6 +92,7 @@ void Controlador_Juego::actualizar()
 		m_fps_dinamico = true;
 		m_ventana_actual = new VentanaSeleccionMusica(&m_configuracion, &m_musica, m_recursos);
 		cambio_ventana = true;
+		m_consumir_eventos = true;
 	}
 	else if(accion_actual == CambiarASeleccionPista)
 	{
@@ -103,6 +100,7 @@ void Controlador_Juego::actualizar()
 		m_fps_dinamico = true;
 		m_ventana_actual = new VentanaSeleccionPista(&m_configuracion, &m_musica, m_recursos);
 		cambio_ventana = true;
+		m_consumir_eventos = true;
 
 		m_fotograma = -1;
 	}
@@ -112,6 +110,7 @@ void Controlador_Juego::actualizar()
 		m_fps_dinamico = false;
 		m_ventana_actual = new VentanaOrgano(&m_configuracion, &m_musica, m_recursos);
 		cambio_ventana = true;
+		m_consumir_eventos = false;
 
 		m_fotograma++;
 	}
@@ -121,6 +120,7 @@ void Controlador_Juego::actualizar()
 		m_fps_dinamico = false;
 		m_ventana_actual = new VentanaOrganoLibre(&m_configuracion, m_recursos);
 		cambio_ventana = true;
+		m_consumir_eventos = false;
 	}
 	else if(accion_actual == CambiarAConfiguracion)
 	{
@@ -162,6 +162,10 @@ void Controlador_Juego::actualizar()
 			m_depurar = false;
 	}
 
+	//Restablece el tiempo si sale de la ventana de reproduccion
+	if(m_fps_dinamico && m_tiempo_espera_aviso > 0)
+		m_tiempo_espera_aviso = 0;
+	//Espera un tiempo a que se estabilicen los fps antes de mostrar el mensaje
 	if(!m_fps_dinamico && m_tiempo_espera_aviso < 5)
 		m_tiempo_espera_aviso += (static_cast<float>(diferencia_tiempo)/1000000000.0f);
 	if(!m_fps_dinamico && !m_aviso_fps_mostrado && Fps::Actualizar_fps() && fps < 30 && m_tiempo_espera_aviso >= 5)
@@ -244,15 +248,15 @@ void Controlador_Juego::eventos_teclado(Tecla tecla, bool estado)
 	else
 	{
 		m_ventana_actual->evento_teclado(tecla, estado);
-		unsigned int nota = Teclado::Tecla_a_nota(tecla);
-		if(nota < 255)
+		unsigned char nota = Teclado::Tecla_a_nota(tecla);
+		if(nota < 128)
 		{
 			if(estado)
 			{
 				if(m_teclas_pulsadas.count(nota) == 0)
 				{
 					m_teclas_pulsadas.insert(nota);
-					sendNote(nota, true);
+					m_configuracion.controlador_midi()->enviar_nota(nota, true);
 				}
 			}
 			else
@@ -260,7 +264,7 @@ void Controlador_Juego::eventos_teclado(Tecla tecla, bool estado)
 				if(m_teclas_pulsadas.count(nota) > 0)
 				{
 					m_teclas_pulsadas.erase(nota);
-					sendNote(nota, false);
+					m_configuracion.controlador_midi()->enviar_nota(nota, false);
 				}
 			}
 		}

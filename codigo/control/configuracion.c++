@@ -1,16 +1,7 @@
 #include "configuracion.h++"
 
-Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL), m_teclas_luminosas(NULL)
+Configuracion::Configuracion()
 {
-	m_id_entrada = 0;
-	m_id_salida = 0;
-	//Configuracion MIDI
-	m_id_entrada_original = 0;
-	m_id_salida_original = 0;
-	m_id_teclas_luminosas_original = 0;
-	m_entrada_notificacion = false;
-	m_salida_notificacion = false;
-
 	//Configuracion General
 	m_pantalla_completa_original = false;
 
@@ -35,9 +26,24 @@ Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL), m_teclas_lumin
 		m_datos.actualizar();//Actualiza la base de datos
 
 		//Configuracion MIDI
-		m_id_entrada_original = this->leer("dispositivo_entrada", m_id_entrada_original);
-		m_id_salida_original = this->leer("dispositivo_salida", m_id_salida_original);
-		m_id_teclas_luminosas_original = this->leer("teclas_luminosas", m_id_teclas_luminosas_original);
+		Dispositivo_Midi *dispositivo1 = m_controlador_midi.configurar_dispositivo(129, 2, ENTRADA, "Teclado y Ratón");
+		dispositivo1->modo(ENTRADA);
+		dispositivo1->habilitado(true);
+		m_controlador_midi.conectar(dispositivo1, false);//Habilita el dispositivo
+
+		Dispositivo_Midi *dispositivo2 = m_controlador_midi.configurar_dispositivo(128, 0, SALIDA, "TiMidity");
+		dispositivo2->modo(SALIDA);
+		dispositivo2->habilitado(true);
+		m_controlador_midi.conectar(dispositivo2, false);//Habilita el dispositivo
+
+		Dispositivo_Midi *dispositivo3 = m_controlador_midi.configurar_dispositivo(24, 0, ENTRADA | SALIDA, "CASIO USB-MIDI");
+		dispositivo3->teclas_luminosas(17);
+		dispositivo3->rango_teclado("21,88");
+		dispositivo3->volumen_entrada(1.0f);
+		dispositivo3->volumen_salida(1.0f);
+		dispositivo3->sensitivo(false);
+		dispositivo3->habilitado(true);
+		m_controlador_midi.conectar(dispositivo3, false);//Habilita el dispositivo
 
 		//Configuracion General
 		m_pantalla_completa_original = this->leer("pantalla_completa", m_pantalla_completa_original);
@@ -60,36 +66,7 @@ Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL), m_teclas_lumin
 		Registro::Depurar("Creando la base de datos en: " + ruta_base_de_datos);
 		m_datos.abrir(ruta_base_de_datos);
 		m_datos.crear();
-
-		//Busca el Teclado y Ratón para el dispositivo de entrada predeterminado
-		MidiCommDescriptionList lista_entrada = MidiCommIn::GetDeviceList();
-		for(unsigned long int e=0; e<lista_entrada.size(); e++)
-		{
-			if(lista_entrada[e].name == "Teclado y Ratón")
-			{
-				m_id_entrada_original = static_cast<unsigned int>(e);
-				m_datos.escribir_configuracion("dispositivo_entrada", std::to_string(m_id_entrada_original));
-				e = lista_entrada.size();//Termina la busqueda
-			}
-		}
-
-		//Busca TiMidity port 0 para el dispositivo de salida predeterminado
-		MidiCommDescriptionList lista_salida = MidiCommOut::GetDeviceList();
-		for(unsigned long int e=0; e<lista_salida.size(); e++)
-		{
-			if(lista_salida[e].name == "TiMidity port 0")
-			{
-				m_id_salida_original = static_cast<unsigned int>(e);
-				m_datos.escribir_configuracion("dispositivo_salida", std::to_string(m_id_salida_original));
-				e = lista_salida.size();//Termina la busqueda
-			}
-		}
 	}
-	//Configuracion Midi
-	this->dispositivo_entrada(m_id_entrada_original);
-	this->dispositivo_salida(m_id_salida_original);
-	m_teclas_luminosas = TeclasLuminosas::Cargar_tecla_luminosa(m_id_teclas_luminosas_original);
-
 	//Se guarda la configuracion original para poder ver cual se ha modificado
 	//Configuracion General
 	m_pantalla_completa = m_pantalla_completa_original;
@@ -109,13 +86,6 @@ Configuracion::Configuracion() : m_entrada(NULL), m_salida(NULL), m_teclas_lumin
 
 Configuracion::~Configuracion()
 {
-	if(m_entrada != NULL)
-		delete m_entrada;
-	if(m_salida != NULL)
-		delete m_salida;
-	midiStop();
-	if(m_teclas_luminosas != NULL)
-		delete m_teclas_luminosas;
 }
 
 Base_de_Datos* Configuracion::base_de_datos()
@@ -161,12 +131,6 @@ void Configuracion::guardar_configuracion()
 	//Escribe la configuracion cambiada, usar al salir
 	//Configuracion MIDI
 	m_datos.iniciar_transaccion();
-	if(m_id_entrada_original != m_id_entrada)
-		m_datos.escribir_configuracion("dispositivo_entrada", std::to_string(m_id_entrada));
-	if(m_id_salida_original != m_id_salida)
-		m_datos.escribir_configuracion("dispositivo_salida", std::to_string(m_id_salida));
-	if(m_id_teclas_luminosas_original != m_teclas_luminosas->identificador())
-		m_datos.escribir_configuracion("teclas_luminosas", std::to_string(m_teclas_luminosas->identificador()));
 
 	//Configuracion General
 	if(m_pantalla_completa_original != m_pantalla_completa)
@@ -204,88 +168,9 @@ void Configuracion::guardar_configuracion()
 	m_datos.finalizar_transaccion();
 }
 
-//Configuracion MIDI
-void Configuracion::dispositivo_entrada(unsigned int id_entrada)
+Controlador_Midi *Configuracion::controlador_midi()
 {
-	if(id_entrada == m_id_entrada && m_entrada != NULL)
-		return;
-	MidiCommDescriptionList dispositivos_entrada = MidiCommIn::GetDeviceList();
-	if(dispositivos_entrada.size() > 0)
-	{
-		m_id_entrada = 0;
-		if(id_entrada < dispositivos_entrada.size())
-			m_id_entrada = id_entrada;
-
-		Registro::Nota("Conectado al dispositivo de entrada: " + dispositivos_entrada[m_id_entrada].name);
-		if(m_entrada != NULL)
-			delete m_entrada;
-		m_entrada = new MidiCommIn(m_id_entrada);
-	}
-	else
-	{
-		if(!m_entrada_notificacion)
-		{
-			Notificacion::Error("No existen dispositivos MIDI de entrada", 10);
-			m_entrada_notificacion = true;
-		}
-	}
-}
-
-void Configuracion::dispositivo_salida(unsigned int id_salida)
-{
-	if(id_salida == m_id_salida && m_salida != NULL)
-		return;
-	MidiCommDescriptionList dispositivos_salida = MidiCommOut::GetDeviceList();
-	if(dispositivos_salida.size() > 0)
-	{
-		m_id_salida = 0;
-		if(id_salida < dispositivos_salida.size())
-			m_id_salida = id_salida;
-
-		Registro::Nota("Conectado al dispositivo de salida: " + dispositivos_salida[m_id_salida].name);
-		if(m_salida != NULL)
-			delete m_salida;
-		m_salida = new MidiCommOut(m_id_salida);
-	}
-	else
-	{
-		if(!m_salida_notificacion)
-		{
-			Notificacion::Error("No existen dispositivos MIDI de salida", 10);
-			m_salida_notificacion = true;
-		}
-	}
-}
-
-void Configuracion::teclas_luminosas(unsigned int identificador)
-{
-	delete m_teclas_luminosas;
-	m_teclas_luminosas = TeclasLuminosas::Cargar_tecla_luminosa(identificador);;
-}
-
-unsigned int Configuracion::id_dispositivo_entrada()
-{
-	return m_id_entrada;
-}
-
-unsigned int Configuracion::id_dispositivo_salida()
-{
-	return m_id_salida;
-}
-
-MidiCommIn *Configuracion::dispositivo_entrada()
-{
-	return m_entrada;
-}
-
-MidiCommOut *Configuracion::dispositivo_salida()
-{
-	return m_salida;
-}
-
-TeclasLuminosas *Configuracion::teclas_luminosas()
-{
-	return m_teclas_luminosas;
+	return &m_controlador_midi;
 }
 
 //Configuracion General
@@ -325,7 +210,7 @@ void Configuracion::volumen(double valor)
 {
 	if(valor < 0)
 		m_volumen = 0;
-	else if(m_volumen > 2)
+	else if(valor > 2)
 		m_volumen = 2;
 	else
 		m_volumen = valor;
@@ -335,7 +220,7 @@ void Configuracion::velocidad(double valor)
 {
 	if(valor <= 0)
 		m_velocidad = 0.01;
-	else if(m_velocidad > 2)
+	else if(valor > 2)
 		m_velocidad = 2;
 	else
 		m_velocidad = valor;

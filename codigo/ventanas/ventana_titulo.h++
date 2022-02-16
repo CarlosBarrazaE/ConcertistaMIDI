@@ -23,6 +23,9 @@ private:
 	Boton *m_boton_configurar;
 	Boton *m_boton_salir;
 
+	//Datos
+	Configuracion *m_configuracion;
+
 public:
 	VentanaTitulo(Configuracion *configuracion, Administrador_Recursos *recursos);
 	~VentanaTitulo();

@@ -4,6 +4,7 @@ VentanaOrganoLibre::VentanaOrganoLibre(Configuracion *configuracion, Administrad
 {
 	m_rectangulo = recursos->figura(F_Rectangulo);
 	m_configuracion = configuracion;
+	m_controlador_midi = m_configuracion->controlador_midi();
 
 	m_teclado_visible = m_configuracion->teclado_visible();
 	m_teclado_util = m_configuracion->teclado_util();
@@ -21,10 +22,7 @@ VentanaOrganoLibre::VentanaOrganoLibre(Configuracion *configuracion, Administrad
 
 VentanaOrganoLibre::~VentanaOrganoLibre()
 {
-	if(m_configuracion->dispositivo_entrada() != NULL)
-		m_configuracion->dispositivo_entrada()->Reset();
-	if(m_configuracion->dispositivo_salida() != NULL)
-		m_configuracion->dispositivo_salida()->Reset();
+	m_controlador_midi->reiniciar();
 
 	delete m_tablero;
 	delete m_organo;
@@ -67,13 +65,10 @@ void VentanaOrganoLibre::actualizar(unsigned int diferencia_tiempo)
 	m_organo->actualizar(diferencia_tiempo);
 	m_tablero->actualizar(diferencia_tiempo);
 
-	if(m_configuracion->dispositivo_entrada() == NULL)
-		return;
-
 	//Lee todos los eventos
-	while(m_configuracion->dispositivo_entrada()->KeepReading())
+	while(m_controlador_midi->hay_eventos())
 	{
-		MidiEvent evento = m_configuracion->dispositivo_entrada()->Read();
+		Evento_Midi evento = m_controlador_midi->leer();
 		/*Registro::Aviso("Evento capturado: " + std::to_string(evento.Type()));
 		if(evento.Type() == MidiEventType_Meta)
 		{
@@ -85,13 +80,13 @@ void VentanaOrganoLibre::actualizar(unsigned int diferencia_tiempo)
 		}*/
 
 		//Omitir eventos que no son NoteOn o NoteOff
-		if(evento.Type() != MidiEventType_NoteOn && evento.Type() != MidiEventType_NoteOff)
+		if(evento.tipo_evento() != EventoMidi_NotaEncendida && evento.tipo_evento() != EventoMidi_NotaApagada)
 			continue;
 
-		if(evento.Type() == MidiEventType_NoteOn && evento.NoteVelocity() > 0)
-			this->insertar_nota(evento.NoteNumber());
+		if(evento.tipo_evento() == EventoMidi_NotaEncendida && evento.velocidad() > 0)
+			this->insertar_nota(evento.id_nota());
 		else
-			this->eliminar_nota(evento.NoteNumber());
+			this->eliminar_nota(evento.id_nota());
 	}
 
 	//Agregar al organo el color de las teclas presionada
