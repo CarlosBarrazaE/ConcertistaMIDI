@@ -101,11 +101,7 @@ void Notificacion::dibujar()
 		m_textura_fondo->activar();
 		m_rectangulo->dibujar_estirable(this->x(), this->y() + actual->posicion_y, this->ancho(), this->alto(), 15.0f, 12.0f);
 
-		//Animacion de opacidad
-		if(actual->opacidad < 1)
-			actual->etiqueta->color(Color(1.0f, 1.0f, 1.0f, actual->opacidad));
-
-		//Dibuja el texto
+		actual->etiqueta->color(Color(1.0f, 1.0f, 1.0f, actual->opacidad));
 		actual->etiqueta->posicion(this->x(), this->y() + actual->posicion_y);
 		actual->etiqueta->dibujar();
 	}
