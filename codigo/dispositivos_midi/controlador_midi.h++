@@ -2,7 +2,7 @@
 #define CONTROLADOR_MIDI
 
 #include "dispositivo_midi.h++"
-#include "evento_midi.h++"
+#include "../libreria_midi/evento_midi.h++"
 #include "../libmidi/MidiEvent.h++"
 
 #include <alsa/asoundlib.h>
@@ -36,10 +36,10 @@ private:
 	snd_seq_t *m_secuenciador_alsa;
 	int m_cliente;
 	int m_puerto_entrada, m_puerto_salida, m_puerto_virtual;
-	int m_estado;
 	bool m_cambio_dispositivos;
 	std::vector<std::string> m_mensajes;
 
+	void mostrar_estado_alsa(int estado, const std::string &mensaje) const;
 	void suscribir_puerto(int cliente_origen, int puerto_origen, int cliente_destino, int puerto_destino);
 	void crear_lista_dispositivos();
 	void agregar_nuevo_dispositivo(int cliente, int puerto);

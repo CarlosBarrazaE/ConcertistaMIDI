@@ -5,47 +5,65 @@ unsigned int Controlador_Midi::Bandera_salida = SND_SEQ_PORT_CAP_WRITE | SND_SEQ
 
 Controlador_Midi::Controlador_Midi()
 {
-	m_estado = snd_seq_open(&m_secuenciador_alsa, "default", SND_SEQ_OPEN_DUPLEX, 0);
-	m_estado = snd_config_update_free_global();//Libera memoria de la configuración
+	m_secuenciador_alsa = NULL;
 
-	m_cliente = snd_seq_client_id(m_secuenciador_alsa);
+	int estado = snd_seq_open(&m_secuenciador_alsa, "default", SND_SEQ_OPEN_DUPLEX, 0);
+	mostrar_estado_alsa(estado, "No se ha podido iniciar el secuenciador alsa.");
 
-	if(m_estado < 0)
-		m_secuenciador_alsa = NULL;
+	snd_config_update_free_global();//Libera memoria de la configuración
 
-	m_estado = snd_seq_set_client_name(m_secuenciador_alsa, "Concertista MIDI");//Nombre del cliente
-	//Crea el puerto de entrada
-	//Bandera_salida porque la entrada se conecta a la salida del otro dispositivo
-	m_puerto_entrada = snd_seq_create_simple_port(m_secuenciador_alsa, "Concertista MIDI Entrada", Bandera_salida, SND_SEQ_PORT_TYPE_MIDI_GENERIC);
+	if(m_secuenciador_alsa != NULL)
+	{
+		m_cliente = snd_seq_client_id(m_secuenciador_alsa);
 
-	//Crea el puerto de salida
-	//Bandera_entrada porque la salida se conecta a la entrada del otro dispositivo
-	m_puerto_salida = snd_seq_create_simple_port(m_secuenciador_alsa, "Concertista MIDI Salida", Bandera_entrada, SND_SEQ_PORT_TYPE_MIDI_GENERIC);
+		estado = snd_seq_set_client_name(m_secuenciador_alsa, "Concertista MIDI");//Nombre del cliente
+		mostrar_estado_alsa(estado, "No se ha podido asignar el nombre");
+		//Crea el puerto de entrada
+		//Bandera_salida porque la entrada se conecta a la salida del otro dispositivo
+		m_puerto_entrada = snd_seq_create_simple_port(m_secuenciador_alsa, "Concertista MIDI Entrada", Bandera_salida, SND_SEQ_PORT_TYPE_MIDI_GENERIC);
 
-	//Crea el puerto para el teclado y ratón
-	//Bandera_entrada porque la salida se conecta a la entrada del otro dispositivo
-	m_puerto_virtual = snd_seq_create_simple_port(m_secuenciador_alsa, "Teclado y Ratón", Bandera_entrada, SND_SEQ_PORT_TYPE_MIDI_GENERIC);
+		//Crea el puerto de salida
+		//Bandera_entrada porque la salida se conecta a la entrada del otro dispositivo
+		m_puerto_salida = snd_seq_create_simple_port(m_secuenciador_alsa, "Concertista MIDI Salida", Bandera_entrada, SND_SEQ_PORT_TYPE_MIDI_GENERIC);
 
-	//Crea el puerto de anuncio
-	unsigned int bandera_anuncio = SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_NO_EXPORT;
-	unsigned int bandera_tipo_anuncio = SND_SEQ_PORT_TYPE_MIDI_GENERIC | SND_SEQ_PORT_TYPE_APPLICATION;
-	int puerto_anuncio = snd_seq_create_simple_port(m_secuenciador_alsa, "Concertista MIDI Anuncio", bandera_anuncio, bandera_tipo_anuncio);
+		//Crea el puerto para el teclado y ratón
+		//Bandera_entrada porque la salida se conecta a la entrada del otro dispositivo
+		m_puerto_virtual = snd_seq_create_simple_port(m_secuenciador_alsa, "Teclado y Ratón", Bandera_entrada, SND_SEQ_PORT_TYPE_MIDI_GENERIC);
 
-	this->suscribir_puerto(SND_SEQ_CLIENT_SYSTEM, SND_SEQ_PORT_SYSTEM_ANNOUNCE, m_cliente, puerto_anuncio);
-	this->crear_lista_dispositivos();
+		//Crea el puerto de anuncio
+		unsigned int bandera_anuncio = SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_NO_EXPORT;
+		unsigned int bandera_tipo_anuncio = SND_SEQ_PORT_TYPE_MIDI_GENERIC | SND_SEQ_PORT_TYPE_APPLICATION;
+		int puerto_anuncio = snd_seq_create_simple_port(m_secuenciador_alsa, "Concertista MIDI Anuncio", bandera_anuncio, bandera_tipo_anuncio);
+
+		this->suscribir_puerto(SND_SEQ_CLIENT_SYSTEM, SND_SEQ_PORT_SYSTEM_ANNOUNCE, m_cliente, puerto_anuncio);
+		this->crear_lista_dispositivos();
+	}
 	m_cambio_dispositivos = false;
 }
 
 Controlador_Midi::~Controlador_Midi()
 {
-	snd_seq_close(m_secuenciador_alsa);
+	if(m_secuenciador_alsa != NULL)
+	{
+		int estado = snd_seq_close(m_secuenciador_alsa);
+		mostrar_estado_alsa(estado, "No se ha podido detener el secuenciador alsa");
+	}
 
 	for(unsigned long int x=0; x<m_dispositivos.size(); x++)
 		delete m_dispositivos[x];
 }
 
+void Controlador_Midi::mostrar_estado_alsa(int estado, const std::string &mensaje) const
+{
+	if(estado < 0)
+		Registro::Error(mensaje + " " + strerror(estado));
+}
+
 void Controlador_Midi::suscribir_puerto(int cliente_origen, int puerto_origen, int cliente_destino, int puerto_destino)
 {
+	if(m_secuenciador_alsa == NULL)
+		return;
+
 	//Suscribirse al puerto de anuncio para detectar nuevos dispositivos MIDI
 	snd_seq_addr_t origen, destino;
 	origen.client = static_cast<unsigned char>(cliente_origen);
@@ -55,23 +73,37 @@ void Controlador_Midi::suscribir_puerto(int cliente_origen, int puerto_origen, i
 	destino.port = static_cast<unsigned char>(puerto_destino);
 
 	snd_seq_port_subscribe_t *suscripcion;
-	m_estado = snd_seq_port_subscribe_malloc(&suscripcion);
-	snd_seq_port_subscribe_set_sender(suscripcion, &origen);//Establece Origen
-	snd_seq_port_subscribe_set_dest(suscripcion, &destino);//Establece Destino
-	m_estado = snd_seq_subscribe_port(m_secuenciador_alsa, suscripcion);//Se suscribe al puerto de anuncio
-	free(suscripcion);
+	int estado = snd_seq_port_subscribe_malloc(&suscripcion);
+	mostrar_estado_alsa(estado, "No se ha podido reservar memoria para la suscripcion");
+	if(estado == 0)
+	{
+		snd_seq_port_subscribe_set_sender(suscripcion, &origen);//Establece Origen
+		snd_seq_port_subscribe_set_dest(suscripcion, &destino);//Establece Destino
+		estado = snd_seq_subscribe_port(m_secuenciador_alsa, suscripcion);//Se suscribe al puerto de anuncio
+		mostrar_estado_alsa(estado, "No se ha podido suscibir al puerto de anuncio");
+
+		free(suscripcion);
+	}
 }
 
 void Controlador_Midi::crear_lista_dispositivos()
 {
+	if(m_secuenciador_alsa == NULL)
+		return;
+
 	snd_seq_client_info_t* informacion_cliente;
 	snd_seq_port_info_t* informacion_puerto;
 	int cliente, puerto;
 	unsigned int capacidad = 0;
 	std::string nombre;
 
-	m_estado = snd_seq_client_info_malloc(&informacion_cliente);
-	m_estado = snd_seq_port_info_malloc(&informacion_puerto);
+	int estado1 = snd_seq_client_info_malloc(&informacion_cliente);
+	int estado2 = snd_seq_port_info_malloc(&informacion_puerto);
+
+	mostrar_estado_alsa(estado1, "No se ha podido reservar memoria para la informacion del cliente");
+	mostrar_estado_alsa(estado2, "No se ha podido reservar memoria para la informacion del puerto");
+	if(estado1 < 0 || estado2 < 0)
+		return;
 
 	snd_seq_client_info_set_client(informacion_cliente, -1);
 	//Recorre todos los clientes
@@ -125,14 +157,27 @@ void Controlador_Midi::crear_lista_dispositivos()
 
 void Controlador_Midi::agregar_nuevo_dispositivo(int cliente, int puerto)
 {
+	if(m_secuenciador_alsa == NULL)
+		return;
+
 	snd_seq_client_info_t* informacion_cliente;
 	snd_seq_port_info_t* informacion_puerto;
 
-	/*int estado = */snd_seq_client_info_malloc(&informacion_cliente);
-	/*estado = */snd_seq_port_info_malloc(&informacion_puerto);
+	int estado1 = snd_seq_client_info_malloc(&informacion_cliente);
+	int estado2 = snd_seq_port_info_malloc(&informacion_puerto);
 
-	snd_seq_get_any_client_info(m_secuenciador_alsa, cliente, informacion_cliente);
-	snd_seq_get_any_port_info(m_secuenciador_alsa, cliente, puerto, informacion_puerto);
+	mostrar_estado_alsa(estado1, "No se ha podido reservar memoria para la informacion del cliente");
+	mostrar_estado_alsa(estado2, "No se ha podido reservar memoria para la informacion del puerto");
+	if(estado1 < 0 || estado2 < 0)
+		return;
+
+	estado1 = snd_seq_get_any_client_info(m_secuenciador_alsa, cliente, informacion_cliente);
+	estado2 = snd_seq_get_any_port_info(m_secuenciador_alsa, cliente, puerto, informacion_puerto);
+
+	mostrar_estado_alsa(estado1, "No se ha podido obtener la informacion del cliente");
+	mostrar_estado_alsa(estado2, "No se ha podido obtener la informacion del puerto");
+	if(estado1 < 0 || estado2 < 0)
+		return;
 
 	unsigned int capacidad = snd_seq_port_info_get_capability(informacion_puerto);
 
@@ -155,7 +200,7 @@ void Controlador_Midi::agregar_nuevo_dispositivo(int cliente, int puerto)
 
 bool Controlador_Midi::hay_eventos()
 {
-	if(snd_seq_event_input_pending(m_secuenciador_alsa, 1) > 0)
+	if(m_secuenciador_alsa != NULL && snd_seq_event_input_pending(m_secuenciador_alsa, 1) > 0)
 		return true;
 	return false;
 }
@@ -163,22 +208,38 @@ bool Controlador_Midi::hay_eventos()
 std::string Controlador_Midi::nombre_dispositivo(int cliente, int puerto) const
 {
 	std::string nombre;
-	if(cliente != m_cliente)
+	if(m_secuenciador_alsa != NULL)
 	{
-		snd_seq_client_info_t* informacion_cliente;
-		/*int estado = */snd_seq_client_info_malloc(&informacion_cliente);
-		snd_seq_get_any_client_info(m_secuenciador_alsa, cliente, informacion_cliente);
-		nombre = snd_seq_client_info_get_name(informacion_cliente);
-		free(informacion_cliente);
-	}
-	else
-	{
-		//Nombres de puertos del programa
-		snd_seq_port_info_t* informacion_puerto;
-		/*int estado = */snd_seq_port_info_malloc(&informacion_puerto);
-		snd_seq_get_any_port_info(m_secuenciador_alsa, cliente, puerto, informacion_puerto);
-		nombre = snd_seq_port_info_get_name(informacion_puerto);
-		free(informacion_puerto);
+		if(cliente != m_cliente)
+		{
+			snd_seq_client_info_t* informacion_cliente;
+			int estado = snd_seq_client_info_malloc(&informacion_cliente);
+			mostrar_estado_alsa(estado, "No se ha podido reservar memoria para la informacion del cliente");
+			if(estado == 0)
+			{
+				estado = snd_seq_get_any_client_info(m_secuenciador_alsa, cliente, informacion_cliente);
+				mostrar_estado_alsa(estado, "No se ha podido obtener la informacion del cliente");
+				if(estado == 0)
+					nombre = snd_seq_client_info_get_name(informacion_cliente);
+				free(informacion_cliente);
+			}
+		}
+		else
+		{
+			//Nombres de puertos del programa
+			snd_seq_port_info_t* informacion_puerto;
+			int estado = snd_seq_port_info_malloc(&informacion_puerto);
+			mostrar_estado_alsa(estado, "No se ha podido reservar memoria para la informacion del puerto");
+			if(estado == 0)
+			{
+				snd_seq_get_any_port_info(m_secuenciador_alsa, cliente, puerto, informacion_puerto);
+				mostrar_estado_alsa(estado, "No se ha podido obtener la informacion del puerto");
+
+				if(estado == 0)
+					nombre = snd_seq_port_info_get_name(informacion_puerto);
+				free(informacion_puerto);
+			}
+		}
 	}
 
 	return nombre;
@@ -251,11 +312,13 @@ void Controlador_Midi::reenviar_programas(Dispositivo_Midi *dispositivo)
 
 Evento_Midi Controlador_Midi::leer()
 {
-	if(!this->hay_eventos())
+	if(m_secuenciador_alsa == NULL || !this->hay_eventos())
 		return Evento_Midi();
 
 	snd_seq_event_t* evento;
-	snd_seq_event_input(m_secuenciador_alsa, &evento);
+	int estado = snd_seq_event_input(m_secuenciador_alsa, &evento);
+	mostrar_estado_alsa(estado, "Al leer los eventos de entrada");
+
 	unsigned char *datos;
 
 	if(evento->type == SND_SEQ_EVENT_NOTEOFF)
@@ -371,7 +434,7 @@ Evento_Midi Controlador_Midi::leer()
 void Controlador_Midi::escribir(const Evento_Midi &evento_entrada, Dispositivo_Midi *dispositivo)
 {
 	//Termina si recive un evento vacio
-	if(evento_entrada.datos() == NULL || evento_entrada.largo_datos() == 0)
+	if(m_secuenciador_alsa == NULL || evento_entrada.datos() == NULL || evento_entrada.largo_datos() == 0)
 		return;
 
 	snd_seq_event_t evento;
@@ -419,12 +482,15 @@ void Controlador_Midi::escribir(const Evento_Midi &evento_entrada, Dispositivo_M
 		evento.data.ext.ptr = evento_entrada.datos();
 	}
 
-	m_estado = snd_seq_event_output(m_secuenciador_alsa, &evento);
-	m_estado = snd_seq_drain_output(m_secuenciador_alsa);
-	if(m_estado < 0)
+	int estado = snd_seq_event_output(m_secuenciador_alsa, &evento);
+	mostrar_estado_alsa(estado, "No se ha podido enviar el evento");
+
+	estado = snd_seq_drain_output(m_secuenciador_alsa);
+	if(estado < 0)
 	{
 		//Se eliminan todos los eventos que no se enviaron correctamente
 		snd_seq_drop_output_buffer(m_secuenciador_alsa);
+		mostrar_estado_alsa(estado, "No se ha podido drenar el evento");
 	}
 }
 
@@ -503,6 +569,9 @@ void Controlador_Midi::tecla_luninosa(unsigned char id_nota, bool estado)
 
 void Controlador_Midi::enviar_nota(unsigned char id_nota, bool estado)
 {
+	if(m_secuenciador_alsa == NULL)
+		return;
+
 	snd_seq_event_t evento;
 	snd_seq_ev_clear(&evento);
 
@@ -522,8 +591,16 @@ void Controlador_Midi::enviar_nota(unsigned char id_nota, bool estado)
 	evento.data.note.note = id_nota;
 	evento.data.note.velocity = VELOCIDAD_NORMAL;
 
-	m_estado = snd_seq_event_output(m_secuenciador_alsa, &evento);
-	m_estado = snd_seq_drain_output(m_secuenciador_alsa);
+	int estado1 = snd_seq_event_output(m_secuenciador_alsa, &evento);
+	mostrar_estado_alsa(estado1, "No se ha podido enviar el evento del teclado virtual");
+
+	estado1 = snd_seq_drain_output(m_secuenciador_alsa);
+	if(estado1 < 0)
+	{
+		//Se eliminan todos los eventos que no se enviaron correctamente
+		snd_seq_drop_output_buffer(m_secuenciador_alsa);
+		mostrar_estado_alsa(estado1, "No se ha podido drenar el evento del teclado virtual");
+	}
 }
 
 void Controlador_Midi::actualizar(unsigned int diferencia_tiempo, bool consumir_eventos)
@@ -569,6 +646,9 @@ void Controlador_Midi::reiniciar()
 
 void Controlador_Midi::detener_eventos()
 {
+	if(m_secuenciador_alsa == NULL)
+		return;
+
 	//Detiene solo las notas sonando
 	for(unsigned long int x=0; x<m_salida.size(); x++)
 	{
@@ -599,11 +679,16 @@ void Controlador_Midi::detener_eventos()
 			for(unsigned long int n=0; n<canal_actual.second.size(); n++)
 			{
 				evento.data.note.note = canal_actual.second[n];
-				snd_seq_event_output(m_secuenciador_alsa, &evento);
-				snd_seq_drain_output(m_secuenciador_alsa);
-				//Se eliminan todos los eventos que no se enviaron correctamente
-				if(m_estado < 0)
+				int estado = snd_seq_event_output(m_secuenciador_alsa, &evento);
+				mostrar_estado_alsa(estado, "No se ha podido enviar el evento al detener");
+
+				estado = snd_seq_drain_output(m_secuenciador_alsa);
+				if(estado < 0)
+				{
+					//Se eliminan todos los eventos que no se enviaron correctamente
 					snd_seq_drop_output_buffer(m_secuenciador_alsa);
+					mostrar_estado_alsa(estado, "No se ha podido drenar el evento al detener");
+				}
 				m_salida[x]->desactivar_tecla(canal_actual.first, canal_actual.second[n]);
 			}
 		}
@@ -642,6 +727,9 @@ Dispositivo_Midi *Controlador_Midi::configurar_dispositivo(int cliente, int puer
 
 void Controlador_Midi::conectar(Dispositivo_Midi *dispositivo, bool conexion_fisica)
 {
+	if(m_secuenciador_alsa == NULL)
+		return;
+
 	//Habilita y conecta el dispositivo si esta disponible si no solo se habilita
 	if(conexion_fisica)
 		dispositivo->conectado(true);
@@ -653,26 +741,42 @@ void Controlador_Midi::conectar(Dispositivo_Midi *dispositivo, bool conexion_fis
 
 	if((dispositivo->modo() & ENTRADA) == ENTRADA)
 	{
-		m_estado = snd_seq_connect_from(m_secuenciador_alsa, m_puerto_entrada, dispositivo->cliente(), dispositivo->puerto());
-		m_entrada.push_back(dispositivo);
+		int estado = snd_seq_connect_from(m_secuenciador_alsa, m_puerto_entrada, dispositivo->cliente(), dispositivo->puerto());
+
+		if(estado == 0)
+			m_entrada.push_back(dispositivo);
+		else
+			mostrar_estado_alsa(estado, "No se ha podido conectar al dispositivo de entrada " + dispositivo->nombre());
 	}
 	if((dispositivo->modo() & SALIDA) == SALIDA)
 	{
-		m_estado = snd_seq_connect_to(m_secuenciador_alsa, m_puerto_salida, dispositivo->cliente(), dispositivo->puerto());
-		dispositivo->reenviar_programa(true);
-		m_salida.push_back(dispositivo);
+		int estado = snd_seq_connect_to(m_secuenciador_alsa, m_puerto_salida, dispositivo->cliente(), dispositivo->puerto());
+
+
+		if(estado == 0)
+		{
+			dispositivo->reenviar_programa(true);
+			m_salida.push_back(dispositivo);
+		}
+		else
+			mostrar_estado_alsa(estado, "No se ha podido conectar al dispositivo de salida " + dispositivo->nombre());
 	}
 }
 
 void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexion_fisica)
 {
+	if(m_secuenciador_alsa == NULL)
+		return;
+
 	//Deshabilita el dispositivo si no es una desconexion fisica o lo desconecta sin deshabilitar
 	if(dispositivo->habilitado())
 	{
 		if((dispositivo->modo() & ENTRADA) == ENTRADA)
 		{
 			//Se desconecta el dispositivo de la entrada
-			snd_seq_disconnect_from(m_secuenciador_alsa, m_puerto_entrada, dispositivo->cliente(), dispositivo->puerto());
+			int estado = snd_seq_disconnect_from(m_secuenciador_alsa, m_puerto_entrada, dispositivo->cliente(), dispositivo->puerto());
+			mostrar_estado_alsa(estado, "No se ha podido desconectar del dispositivo de entrada " + dispositivo->nombre());
+
 			bool borrado = false;
 			for(unsigned int x=0; x<m_entrada.size() && !borrado; x++)
 			{
@@ -687,7 +791,9 @@ void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexi
 		if((dispositivo->modo() & SALIDA) == SALIDA)
 		{
 			//Se desconecta el dispositivo de la salida
-			snd_seq_disconnect_to(m_secuenciador_alsa, m_puerto_salida, dispositivo->cliente(), dispositivo->puerto());
+			int estado = snd_seq_disconnect_to(m_secuenciador_alsa, m_puerto_salida, dispositivo->cliente(), dispositivo->puerto());
+			mostrar_estado_alsa(estado, "No se ha podido desconectar del dispositivo de salida " + dispositivo->nombre());
+
 			bool borrado = false;
 			for(unsigned int x=0; x<m_salida.size() && !borrado; x++)
 			{

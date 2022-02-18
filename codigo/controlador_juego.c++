@@ -51,6 +51,7 @@ void Controlador_Juego::actualizar()
 	//unsigned int diferencia_tiempo = (1.0/60.0)*1000000000;
 
 	m_configuracion.controlador_midi()->actualizar(diferencia_tiempo, m_consumir_eventos);
+
 	while(m_configuracion.controlador_midi()->hay_mensajes())
 		Notificacion::Nota(m_configuracion.controlador_midi()->siguiente_mensaje(), 5);
 

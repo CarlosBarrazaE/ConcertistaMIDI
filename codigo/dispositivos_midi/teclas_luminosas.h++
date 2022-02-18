@@ -1,7 +1,7 @@
 #ifndef TECLAS_LUMINOSAS_H
 #define TECLAS_LUMINOSAS_H
 
-#include "evento_midi.h++"
+#include "../libreria_midi/evento_midi.h++"
 #include <string>
 #include <vector>
 

@@ -24,7 +24,6 @@ bool Datos_Musica::cargar_midi(std::string direccion)
 	}
 	catch(const MidiError &e)
 	{
-		Notificacion::Error("No se puede abrir el archivo MIDI", 5);
 		Registro::Error(e.GetErrorDescription());
 		m_musica = NULL;
 		return false;

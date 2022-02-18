@@ -347,6 +347,8 @@ bool VentanaSeleccionMusica::abrir_archivo_seleccionado()
 				}
 				return true;
 			}
+			else
+				Notificacion::Error("No se puede abrir el archivo MIDI", 5);
 			return false;
 		}
 	}

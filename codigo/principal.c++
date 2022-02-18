@@ -3,7 +3,7 @@
 
 #include "recursos/administrador_recursos.h++"
 #include "dispositivos/pantalla.h++"
-#include "libreria_midi/sintetizador_midi.h++"
+#include "dispositivos_midi/sintetizador_midi.h++"
 #include "archivos/imagen_tga.h++"
 #include "util/usuario.h++"
 #include "controlador_juego.h++"

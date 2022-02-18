@@ -5,8 +5,8 @@
 #include "../util/usuario.h++"
 #include "../control/teclado_organo.h++"
 #include "../elementos_graficos/notificacion.h++"
-#include "../libreria_midi/controlador_midi.h++"
-#include "../libreria_midi/teclas_luminosas.h++"
+#include "../dispositivos_midi/controlador_midi.h++"
+#include "../dispositivos_midi/teclas_luminosas.h++"
 
 class Configuracion
 {
