@@ -27,12 +27,12 @@ Configuracion::Configuracion()
 
 		//Configuracion MIDI
 		Dispositivo_Midi *dispositivo1 = m_controlador_midi.configurar_dispositivo(129, 2, ENTRADA, "Teclado y Ratón");
-		dispositivo1->modo(ENTRADA);
+		dispositivo1->capacidad_activa(ENTRADA);
 		dispositivo1->habilitado(true);
 		m_controlador_midi.conectar(dispositivo1, false);//Habilita el dispositivo
 
 		Dispositivo_Midi *dispositivo2 = m_controlador_midi.configurar_dispositivo(128, 0, SALIDA, "TiMidity");
-		dispositivo2->modo(SALIDA);
+		dispositivo2->capacidad_activa(SALIDA);
 		dispositivo2->habilitado(true);
 		m_controlador_midi.conectar(dispositivo2, false);//Habilita el dispositivo
 

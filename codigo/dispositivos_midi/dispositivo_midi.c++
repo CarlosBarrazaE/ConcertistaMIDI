@@ -5,14 +5,16 @@ Dispositivo_Midi::Dispositivo_Midi(int cliente, int puerto, unsigned char capaci
 	m_cliente = cliente;
 	m_puerto = puerto;
 	m_capacidad = capacidad;
-	m_capacidad_habilitada = capacidad;
+	m_capacidad_activa = capacidad;
 	m_nombre = nombre;
+
 	m_conectado = conectado;
 	m_habilitado = false;
+	m_reenviar_programa = false;
 
 	//Entrada
-	m_volumen_entrada = 1.0f;
 	m_sensitivo = true;
+	m_volumen_entrada = 1.0f;
 	m_rango_teclado.cambiar(21, 88);
 
 	//Salida
@@ -46,15 +48,15 @@ unsigned char Dispositivo_Midi::capacidad()
 	return m_capacidad;
 }
 
-void Dispositivo_Midi::modo(unsigned char modo)
+void Dispositivo_Midi::capacidad_activa(unsigned char modo)
 {
 	if((m_capacidad & modo) == modo)
-		m_capacidad_habilitada = modo;
+		m_capacidad_activa = modo;
 }
 
-unsigned char Dispositivo_Midi::modo()
+unsigned char Dispositivo_Midi::capacidad_activa()
 {
-	return m_capacidad_habilitada;
+	return m_capacidad_activa;
 }
 
 std::string Dispositivo_Midi::nombre()
@@ -117,10 +119,48 @@ void Dispositivo_Midi::volumen_entrada(float valor)
 	m_volumen_entrada = valor;
 }
 
+void Dispositivo_Midi::sensitivo(bool estado)
+{
+	m_sensitivo = estado;
+}
+
+bool Dispositivo_Midi::sensitivo()
+{
+	return m_sensitivo;
+}
+
 float Dispositivo_Midi::volumen_entrada()
 {
 	return m_volumen_entrada;
 }
+
+void Dispositivo_Midi::nota_entrada(unsigned char id_nota, bool encendida)
+{
+	if(encendida)
+	{
+		//Nueva nota activada
+		m_notas_entrada.push_back(id_nota);
+	}
+	else
+	{
+		//Nota desactivada
+		for(std::vector<unsigned char>::iterator i = m_notas_entrada.begin(); i != m_notas_entrada.end(); i++)
+		{
+			if(*i == id_nota)
+			{
+				//Al eliminarlo termina
+				m_notas_entrada.erase(i);
+				return;
+			}
+		}
+	}
+}
+
+std::vector<unsigned char> Dispositivo_Midi::notas_entrada() const
+{
+	return m_notas_entrada;
+}
+
 
 void Dispositivo_Midi::volumen_salida(float valor)
 {
@@ -132,41 +172,35 @@ float Dispositivo_Midi::volumen_salida()
 	return m_volumen_salida;
 }
 
-void Dispositivo_Midi::sensitivo(bool estado)
+void Dispositivo_Midi::nota_salida(unsigned char canal, unsigned char id_nota, bool encendida)
 {
-	m_sensitivo = estado;
-}
-
-bool Dispositivo_Midi::sensitivo()
-{
-	return m_sensitivo;
-}
-
-void Dispositivo_Midi::activar_tecla(unsigned char canal, unsigned char id_nota)
-{
-	m_notas_activas[canal].push_back(id_nota);
-}
-
-void Dispositivo_Midi::desactivar_tecla(unsigned char canal, unsigned char id_nota)
-{
-	std::vector<unsigned char> &notas_canal = m_notas_activas[canal];
-	for(std::vector<unsigned char>::iterator i = notas_canal.begin(); i != notas_canal.end(); i++)
+	if(encendida)
 	{
-		if(*i == id_nota)
+		//Nueva nota activada
+		m_notas_salida[canal].push_back(id_nota);
+	}
+	else
+	{
+		//Nota desactivada
+		std::vector<unsigned char> &notas_canal = m_notas_salida[canal];
+		for(std::vector<unsigned char>::iterator i = notas_canal.begin(); i != notas_canal.end(); i++)
 		{
-			//Al eliminarlo termina
-			notas_canal.erase(i);
-			return;
+			if(*i == id_nota)
+			{
+				//Al eliminarlo termina
+				notas_canal.erase(i);
+				return;
+			}
 		}
 	}
 }
 
-std::map<unsigned char, std::vector<unsigned char>> Dispositivo_Midi::teclas_activas() const
+std::map<unsigned char, std::vector<unsigned char>> Dispositivo_Midi::notas_salida() const
 {
-	return m_notas_activas;
+	return m_notas_salida;
 }
 
 void Dispositivo_Midi::limpiar()
 {
-	m_notas_activas.clear();
+	m_notas_salida.clear();
 }
