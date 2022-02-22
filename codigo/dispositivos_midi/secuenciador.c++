@@ -12,3 +12,8 @@ Secuenciador::Secuenciador()
 Secuenciador::~Secuenciador()
 {
 }
+
+unsigned char Secuenciador::cliente()
+{
+	return m_cliente;
+}

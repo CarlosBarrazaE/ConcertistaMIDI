@@ -15,7 +15,6 @@ Evento_Midi::Evento_Midi()
 
 Evento_Midi::Evento_Midi(const Evento_Midi &evento)
 {
-	Registro::Aviso("Copiando evento");
 	m_delta_pulso = evento.m_delta_pulso;
 	m_tipo_evento = evento.m_tipo_evento;
 	m_tipo_metaevento = evento.m_tipo_metaevento;
@@ -26,8 +25,8 @@ Evento_Midi::Evento_Midi(const Evento_Midi &evento)
 
 	m_largo_evento = evento.m_largo_evento;
 
-	m_cliente = 0;
-	m_puerto = 0;
+	m_cliente = evento.m_cliente;
+	m_puerto = evento.m_puerto;
 }
 
 Evento_Midi::Evento_Midi(EventoMidi tipo_evento)

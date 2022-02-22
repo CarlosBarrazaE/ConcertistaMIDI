@@ -32,6 +32,12 @@ Controlador_Juego::Controlador_Juego(Administrador_Recursos *recursos) : m_texto
 	m_tiempo_espera_aviso = 0;
 
 	m_pantalla_completa = m_configuracion.pantalla_completa();
+	/*
+	SDL_SetWindowPosition(SDL_Window * window,int *x, int *y)
+	SDL_GetWindowPosition(SDL_Window * window,int *x, int *y)
+	SDL_SetWindowSize(SDL_Window * window, int w, int h)
+	SDL_GetWindowSize(SDL_Window * window, int w, int h)
+	 */
 }
 
 Controlador_Juego::~Controlador_Juego()

@@ -25,6 +25,8 @@ public:
 	Secuenciador();
 	virtual ~Secuenciador();
 
+	unsigned char cliente();
+
 	virtual std::string nombre_dispositivo(unsigned char cliente, unsigned char puerto) const = 0;
 
 	virtual void crear_lista_dispositivos(std::vector<Dispositivo_Midi*> &dispositivos) const = 0;

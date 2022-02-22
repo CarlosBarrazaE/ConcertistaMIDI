@@ -8,45 +8,43 @@ Secuenciador_Alsa::Secuenciador_Alsa()
 	m_secuenciador_alsa = NULL;
 
 	int estado = snd_seq_open(&m_secuenciador_alsa, "default", SND_SEQ_OPEN_DUPLEX, 0);
-	mostrar_estado_alsa(estado, "No se ha podido iniciar el secuenciador alsa.");
+	if(estado < 0)
+	{
+		mostrar_estado_alsa(estado, "No se ha podido iniciar el secuenciador alsa.");
+		throw 1;
+	}
 
 	snd_config_update_free_global();//Libera memoria de la configuración
 
-	if(m_secuenciador_alsa != NULL)
-	{
-		m_cliente = static_cast<unsigned char>(snd_seq_client_id(m_secuenciador_alsa));
+	m_cliente = static_cast<unsigned char>(snd_seq_client_id(m_secuenciador_alsa));
 
-		estado = snd_seq_set_client_name(m_secuenciador_alsa, "Concertista MIDI");//Nombre del cliente
-		mostrar_estado_alsa(estado, "No se ha podido asignar el nombre");
-		//Crea el puerto de entrada
-		//Bandera_salida porque la entrada se conecta a la salida del otro dispositivo
-		m_puerto_entrada = static_cast<unsigned char>(snd_seq_create_simple_port(m_secuenciador_alsa, "Concertista MIDI Entrada", Bandera_salida, SND_SEQ_PORT_TYPE_MIDI_GENERIC));
+	estado = snd_seq_set_client_name(m_secuenciador_alsa, "Concertista MIDI");//Nombre del cliente
+	mostrar_estado_alsa(estado, "No se ha podido asignar el nombre");
+	//Crea el puerto de entrada
+	//Bandera_salida porque la entrada se conecta a la salida del otro dispositivo
+	m_puerto_entrada = static_cast<unsigned char>(snd_seq_create_simple_port(m_secuenciador_alsa, "Concertista MIDI Entrada", Bandera_salida, SND_SEQ_PORT_TYPE_MIDI_GENERIC));
 
-		//Crea el puerto de salida
-		//Bandera_entrada porque la salida se conecta a la entrada del otro dispositivo
-		m_puerto_salida = static_cast<unsigned char>(snd_seq_create_simple_port(m_secuenciador_alsa, "Concertista MIDI Salida", Bandera_entrada, SND_SEQ_PORT_TYPE_MIDI_GENERIC));
+	//Crea el puerto de salida
+	//Bandera_entrada porque la salida se conecta a la entrada del otro dispositivo
+	m_puerto_salida = static_cast<unsigned char>(snd_seq_create_simple_port(m_secuenciador_alsa, "Concertista MIDI Salida", Bandera_entrada, SND_SEQ_PORT_TYPE_MIDI_GENERIC));
 
-		//Crea el puerto para el teclado y ratón
-		//Bandera_entrada porque la salida se conecta a la entrada del otro dispositivo
-		m_puerto_virtual = static_cast<unsigned char>(snd_seq_create_simple_port(m_secuenciador_alsa, "Teclado y Ratón", Bandera_entrada, SND_SEQ_PORT_TYPE_MIDI_GENERIC));
+	//Crea el puerto para el teclado y ratón
+	//Bandera_entrada porque la salida se conecta a la entrada del otro dispositivo
+	m_puerto_virtual = static_cast<unsigned char>(snd_seq_create_simple_port(m_secuenciador_alsa, "Teclado y Ratón", Bandera_entrada, SND_SEQ_PORT_TYPE_MIDI_GENERIC));
 
-		//Crea el puerto de anuncio
-		unsigned int bandera_anuncio = SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_NO_EXPORT;
-		unsigned int bandera_tipo_anuncio = SND_SEQ_PORT_TYPE_MIDI_GENERIC | SND_SEQ_PORT_TYPE_APPLICATION;
-		int puerto_anuncio = snd_seq_create_simple_port(m_secuenciador_alsa, "Concertista MIDI Anuncio", bandera_anuncio, bandera_tipo_anuncio);
+	//Crea el puerto de anuncio
+	unsigned int bandera_anuncio = SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_NO_EXPORT;
+	unsigned int bandera_tipo_anuncio = SND_SEQ_PORT_TYPE_MIDI_GENERIC | SND_SEQ_PORT_TYPE_APPLICATION;
+	int puerto_anuncio = snd_seq_create_simple_port(m_secuenciador_alsa, "Concertista MIDI Anuncio", bandera_anuncio, bandera_tipo_anuncio);
 
-		this->suscribir_puerto(SND_SEQ_CLIENT_SYSTEM, SND_SEQ_PORT_SYSTEM_ANNOUNCE, m_cliente, puerto_anuncio);
-	}
+	this->suscribir_puerto(SND_SEQ_CLIENT_SYSTEM, SND_SEQ_PORT_SYSTEM_ANNOUNCE, m_cliente, puerto_anuncio);
 	m_cambio_dispositivos = false;
 }
 
 Secuenciador_Alsa::~Secuenciador_Alsa()
 {
-	if(m_secuenciador_alsa != NULL)
-	{
-		int estado = snd_seq_close(m_secuenciador_alsa);
-		mostrar_estado_alsa(estado, "No se ha podido detener el secuenciador alsa");
-	}
+	int estado = snd_seq_close(m_secuenciador_alsa);
+	mostrar_estado_alsa(estado, "No se ha podido detener el secuenciador alsa");
 }
 
 void Secuenciador_Alsa::mostrar_estado_alsa(int estado, const std::string &mensaje) const
@@ -57,9 +55,6 @@ void Secuenciador_Alsa::mostrar_estado_alsa(int estado, const std::string &mensa
 
 void Secuenciador_Alsa::suscribir_puerto(int cliente_origen, int puerto_origen, int cliente_destino, int puerto_destino) const
 {
-	if(m_secuenciador_alsa == NULL)
-		return;
-
 	//Suscribirse al puerto de anuncio para detectar nuevos dispositivos MIDI
 	snd_seq_addr_t origen, destino;
 	origen.client = static_cast<unsigned char>(cliente_origen);
@@ -85,37 +80,34 @@ void Secuenciador_Alsa::suscribir_puerto(int cliente_origen, int puerto_origen, 
 std::string Secuenciador_Alsa::nombre_dispositivo(unsigned char cliente, unsigned char puerto) const
 {
 	std::string nombre;
-	if(m_secuenciador_alsa != NULL)
+	if(cliente != m_cliente)
 	{
-		if(cliente != m_cliente)
+		snd_seq_client_info_t* informacion_cliente;
+		int estado = snd_seq_client_info_malloc(&informacion_cliente);
+		mostrar_estado_alsa(estado, "No se ha podido reservar memoria para la informacion del cliente - nombre dispositivo");
+		if(estado == 0)
 		{
-			snd_seq_client_info_t* informacion_cliente;
-			int estado = snd_seq_client_info_malloc(&informacion_cliente);
-			mostrar_estado_alsa(estado, "No se ha podido reservar memoria para la informacion del cliente");
+			estado = snd_seq_get_any_client_info(m_secuenciador_alsa, cliente, informacion_cliente);
+			mostrar_estado_alsa(estado, "No se ha podido obtener la informacion del cliente - nombre dispositivo");
 			if(estado == 0)
-			{
-				estado = snd_seq_get_any_client_info(m_secuenciador_alsa, cliente, informacion_cliente);
-				mostrar_estado_alsa(estado, "No se ha podido obtener la informacion del cliente");
-				if(estado == 0)
-					nombre = snd_seq_client_info_get_name(informacion_cliente);
-				free(informacion_cliente);
-			}
+				nombre = snd_seq_client_info_get_name(informacion_cliente);
+			free(informacion_cliente);
 		}
-		else
+	}
+	else
+	{
+		//Nombres de puertos del programa
+		snd_seq_port_info_t* informacion_puerto;
+		int estado = snd_seq_port_info_malloc(&informacion_puerto);
+		mostrar_estado_alsa(estado, "No se ha podido reservar memoria para la informacion del puerto - nombre dispositivo");
+		if(estado == 0)
 		{
-			//Nombres de puertos del programa
-			snd_seq_port_info_t* informacion_puerto;
-			int estado = snd_seq_port_info_malloc(&informacion_puerto);
-			mostrar_estado_alsa(estado, "No se ha podido reservar memoria para la informacion del puerto");
-			if(estado == 0)
-			{
-				snd_seq_get_any_port_info(m_secuenciador_alsa, cliente, puerto, informacion_puerto);
-				mostrar_estado_alsa(estado, "No se ha podido obtener la informacion del puerto");
+			snd_seq_get_any_port_info(m_secuenciador_alsa, cliente, puerto, informacion_puerto);
+			mostrar_estado_alsa(estado, "No se ha podido obtener la informacion del puerto - nombre dispositivo");
 
-				if(estado == 0)
-					nombre = snd_seq_port_info_get_name(informacion_puerto);
-				free(informacion_puerto);
-			}
+			if(estado == 0)
+				nombre = snd_seq_port_info_get_name(informacion_puerto);
+			free(informacion_puerto);
 		}
 	}
 
@@ -124,9 +116,6 @@ std::string Secuenciador_Alsa::nombre_dispositivo(unsigned char cliente, unsigne
 
 void Secuenciador_Alsa::crear_lista_dispositivos(std::vector<Dispositivo_Midi*> &dispositivos) const
 {
-	if(m_secuenciador_alsa == NULL)
-		return;
-
 	snd_seq_client_info_t* informacion_cliente;
 	snd_seq_port_info_t* informacion_puerto;
 	unsigned char cliente, puerto;
@@ -136,8 +125,8 @@ void Secuenciador_Alsa::crear_lista_dispositivos(std::vector<Dispositivo_Midi*> 
 	int estado1 = snd_seq_client_info_malloc(&informacion_cliente);
 	int estado2 = snd_seq_port_info_malloc(&informacion_puerto);
 
-	mostrar_estado_alsa(estado1, "No se ha podido reservar memoria para la informacion del cliente");
-	mostrar_estado_alsa(estado2, "No se ha podido reservar memoria para la informacion del puerto");
+	mostrar_estado_alsa(estado1, "No se ha podido reservar memoria para la informacion del cliente - lista dispositivos");
+	mostrar_estado_alsa(estado2, "No se ha podido reservar memoria para la informacion del puerto - lista dispositivos");
 	if(estado1 < 0 || estado2 < 0)
 		return;
 
@@ -193,25 +182,22 @@ void Secuenciador_Alsa::crear_lista_dispositivos(std::vector<Dispositivo_Midi*> 
 
 Dispositivo_Midi* Secuenciador_Alsa::crear_nuevo_dispositivo(unsigned char cliente, unsigned char puerto) const
 {
-	if(m_secuenciador_alsa == NULL)
-		return NULL;
-
 	snd_seq_client_info_t* informacion_cliente;
 	snd_seq_port_info_t* informacion_puerto;
 
 	int estado1 = snd_seq_client_info_malloc(&informacion_cliente);
 	int estado2 = snd_seq_port_info_malloc(&informacion_puerto);
 
-	mostrar_estado_alsa(estado1, "No se ha podido reservar memoria para la informacion del cliente");
-	mostrar_estado_alsa(estado2, "No se ha podido reservar memoria para la informacion del puerto");
+	mostrar_estado_alsa(estado1, "No se ha podido reservar memoria para la informacion del cliente - nuevo dispositivo");
+	mostrar_estado_alsa(estado2, "No se ha podido reservar memoria para la informacion del puerto - nuevo dispositivo");
 	if(estado1 < 0 || estado2 < 0)
 		return NULL;
 
 	estado1 = snd_seq_get_any_client_info(m_secuenciador_alsa, cliente, informacion_cliente);
 	estado2 = snd_seq_get_any_port_info(m_secuenciador_alsa, cliente, puerto, informacion_puerto);
 
-	mostrar_estado_alsa(estado1, "No se ha podido obtener la informacion del cliente");
-	mostrar_estado_alsa(estado2, "No se ha podido obtener la informacion del puerto");
+	mostrar_estado_alsa(estado1, "No se ha podido obtener la informacion del cliente - nuevo dispositivo");
+	mostrar_estado_alsa(estado2, "No se ha podido obtener la informacion del puerto - nuevo dispositivo");
 	if(estado1 < 0 || estado2 < 0)
 		return NULL;
 
@@ -227,7 +213,7 @@ Dispositivo_Midi* Secuenciador_Alsa::crear_nuevo_dispositivo(unsigned char clien
 	if(capacidad_dispositivo > 0)
 	{
 		std::string nombre_cliente = snd_seq_client_info_get_name(informacion_cliente);
-		std::string nombre_puerto = snd_seq_port_info_get_name(informacion_puerto);
+		//std::string nombre_puerto = snd_seq_port_info_get_name(informacion_puerto);
 		nuevo = new Dispositivo_Midi(cliente, puerto, capacidad_dispositivo, nombre_cliente, true);
 	}
 
@@ -276,7 +262,7 @@ bool Secuenciador_Alsa::desconectar(unsigned char cliente, unsigned char puerto,
 void Secuenciador_Alsa::escribir(const Evento_Midi &evento_entrada) const
 {
 	//Termina si recive un evento vacio
-	if(m_secuenciador_alsa == NULL || evento_entrada.datos() == NULL || evento_entrada.largo_datos() == 0)
+	if(evento_entrada.datos() == NULL || evento_entrada.largo_datos() == 0)
 		return;
 
 	snd_seq_event_t evento;
@@ -344,7 +330,7 @@ void Secuenciador_Alsa::escribir(const Evento_Midi &evento_entrada) const
 
 Evento_Midi Secuenciador_Alsa::leer() const
 {
-	if(m_secuenciador_alsa == NULL || !this->hay_eventos())
+	if(!this->hay_eventos())
 		return Evento_Midi();
 
 	snd_seq_event_t* evento;
@@ -461,16 +447,13 @@ Evento_Midi Secuenciador_Alsa::leer() const
 
 bool Secuenciador_Alsa::hay_eventos() const
 {
-	if(m_secuenciador_alsa != NULL && snd_seq_event_input_pending(m_secuenciador_alsa, 1) > 0)
+	if(snd_seq_event_input_pending(m_secuenciador_alsa, 1) > 0)
 		return true;
 	return false;
 }
 
 void Secuenciador_Alsa::enviar_nota(unsigned char id_nota, bool estado) const
 {
-	if(m_secuenciador_alsa == NULL)
-		return;
-
 	snd_seq_event_t evento;
 	snd_seq_ev_clear(&evento);
 

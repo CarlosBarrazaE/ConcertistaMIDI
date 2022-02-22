@@ -20,6 +20,7 @@ class Controlador_Midi
 {
 private:
 	Secuenciador *m_secuenciador;
+	bool m_cambio_dispositivos;
 
 	std::vector<Dispositivo_Midi*> m_dispositivos;
 	std::vector<Dispositivo_Midi*> m_entrada;
