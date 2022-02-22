@@ -11,11 +11,17 @@ enum EventoMidi
 	EventoMidi_CambioPrograma = 0xC0,//Incluye el canal 0
 	EventoMidi_DespuesDeTocarCanal = 0xD0,//Incluye el canal 0
 	EventoMidi_CambioRuedaDeTono = 0xE0,//Incluye el canal 0
-	EventoMidi_SistemaExclusivo = 0xF0,
+	EventoMidi_ExclusivoDelSistema = 0xF0,
 
 	EventoMidi_SecuenciaDeEscape = 0xF7,
 
 	EventoMidi_Metaevento = 0xFF,
+
+	EventoMidi_ClienteConectado,
+	EventoMidi_ClienteDesconectado,
+	EventoMidi_PuertoConectado,
+	EventoMidi_PuertoDesconectado,
+	EventoMidi_PuertoSuscrito,
 };
 
 enum MetaEventoMidi
