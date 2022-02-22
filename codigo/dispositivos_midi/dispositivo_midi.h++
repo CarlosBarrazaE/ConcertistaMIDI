@@ -13,8 +13,8 @@
 class Dispositivo_Midi
 {
 private:
-	int m_cliente;
-	int m_puerto;
+	unsigned char m_cliente;
+	unsigned char m_puerto;
 	unsigned char m_capacidad;//Lectura, escritura o ambos
 	unsigned char m_capacidad_activa;
 	std::string m_nombre;
@@ -35,12 +35,12 @@ private:
 	std::map<unsigned char, std::vector<unsigned char>> m_notas_salida;
 
 public:
-	Dispositivo_Midi(int cliente, int puerto, unsigned char capacidad, const std::string &nombre, bool conectado);
+	Dispositivo_Midi(unsigned char cliente, unsigned char puerto, unsigned char capacidad, const std::string &nombre, bool conectado);
 	~Dispositivo_Midi();
 
-	void cliente(int cliente);
-	int cliente();
-	int puerto();
+	void cliente(unsigned char cliente);
+	unsigned char cliente();
+	unsigned char puerto();
 	unsigned char capacidad();
 	void capacidad_activa(unsigned char modo);
 	unsigned char capacidad_activa();

@@ -8,6 +8,9 @@ Evento_Midi::Evento_Midi()
 	m_tipo_metaevento = MetaEventoMidi_Nulo;
 	m_datos = NULL;
 	m_largo_evento = 0;
+
+	m_cliente = 0;
+	m_puerto = 0;
 }
 
 Evento_Midi::Evento_Midi(const Evento_Midi &evento)
@@ -22,6 +25,21 @@ Evento_Midi::Evento_Midi(const Evento_Midi &evento)
 		m_datos[x] = evento.m_datos[x];
 
 	m_largo_evento = evento.m_largo_evento;
+
+	m_cliente = 0;
+	m_puerto = 0;
+}
+
+Evento_Midi::Evento_Midi(EventoMidi tipo_evento)
+{
+	m_delta_pulso = 0;
+	m_tipo_evento = tipo_evento;
+	m_tipo_metaevento = MetaEventoMidi_Nulo;
+	m_datos = NULL;
+	m_largo_evento = 0;
+
+	m_cliente = 0;
+	m_puerto = 0;
 }
 
 Evento_Midi::Evento_Midi(EventoMidi tipo_evento, unsigned char *datos, unsigned long int largo)
@@ -31,6 +49,9 @@ Evento_Midi::Evento_Midi(EventoMidi tipo_evento, unsigned char *datos, unsigned 
 	m_tipo_metaevento = MetaEventoMidi_Nulo;
 	m_datos = datos;
 	m_largo_evento = largo;
+
+	m_cliente = 0;
+	m_puerto = 0;
 }
 
 Evento_Midi::Evento_Midi(EventoMidi tipo_evento, MetaEventoMidi tipo_metaevento, unsigned char *datos, unsigned long int largo)
@@ -40,6 +61,9 @@ Evento_Midi::Evento_Midi(EventoMidi tipo_evento, MetaEventoMidi tipo_metaevento,
 	m_tipo_metaevento = tipo_metaevento;
 	m_datos = datos;
 	m_largo_evento = largo;
+
+	m_cliente = 0;
+	m_puerto = 0;
 }
 
 Evento_Midi::~Evento_Midi()
@@ -153,4 +177,24 @@ unsigned char *Evento_Midi::datos() const
 unsigned long int Evento_Midi::largo_datos() const
 {
 	return m_largo_evento;
+}
+
+unsigned char Evento_Midi::cliente() const
+{
+	return m_cliente;
+}
+
+void Evento_Midi::cliente(unsigned char cliente)
+{
+	m_cliente = cliente;
+}
+
+unsigned char Evento_Midi::puerto() const
+{
+	return m_puerto;
+}
+
+void Evento_Midi::puerto(unsigned char puerto)
+{
+	m_puerto = puerto;
 }

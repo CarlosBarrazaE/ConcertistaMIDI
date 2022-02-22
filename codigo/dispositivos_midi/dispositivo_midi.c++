@@ -1,6 +1,6 @@
 #include "dispositivo_midi.h++"
 
-Dispositivo_Midi::Dispositivo_Midi(int cliente, int puerto, unsigned char capacidad, const std::string &nombre, bool conectado)
+Dispositivo_Midi::Dispositivo_Midi(unsigned char cliente, unsigned char puerto, unsigned char capacidad, const std::string &nombre, bool conectado)
 {
 	m_cliente = cliente;
 	m_puerto = puerto;
@@ -28,17 +28,17 @@ Dispositivo_Midi::~Dispositivo_Midi()
 		delete m_teclas_luminosas;
 }
 
-void Dispositivo_Midi::cliente(int cliente)
+void Dispositivo_Midi::cliente(unsigned char cliente)
 {
 	m_cliente = cliente;
 }
 
-int Dispositivo_Midi::cliente()
+unsigned char Dispositivo_Midi::cliente()
 {
 	return m_cliente;
 }
 
-int Dispositivo_Midi::puerto()
+unsigned char Dispositivo_Midi::puerto()
 {
 	return m_puerto;
 }

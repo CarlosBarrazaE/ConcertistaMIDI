@@ -2,6 +2,9 @@ set(dispositivos_midi
 	${CMAKE_CURRENT_SOURCE_DIR}/controlador_midi.c++
 	${CMAKE_CURRENT_SOURCE_DIR}/dispositivo_midi.c++
 
+	${CMAKE_CURRENT_SOURCE_DIR}/secuenciador.c++
+	${CMAKE_CURRENT_SOURCE_DIR}/secuenciador_alsa.c++
+
 	${CMAKE_CURRENT_SOURCE_DIR}/sintetizador_midi.c++
 
 	${CMAKE_CURRENT_SOURCE_DIR}/teclas_luminosas.c++
