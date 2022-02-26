@@ -43,20 +43,10 @@ unsigned char Dispositivo_Midi::puerto()
 	return m_puerto;
 }
 
-unsigned char Dispositivo_Midi::capacidad()
+void Dispositivo_Midi::capacidad_activa(unsigned char capacidad)
 {
-	return m_capacidad;
-}
-
-void Dispositivo_Midi::capacidad_activa(unsigned char modo)
-{
-	if((m_capacidad & modo) == modo)
-		m_capacidad_activa = modo;
-}
-
-unsigned char Dispositivo_Midi::capacidad_activa()
-{
-	return m_capacidad_activa;
+	if((m_capacidad & capacidad) == capacidad)
+		m_capacidad_activa = capacidad;
 }
 
 std::string Dispositivo_Midi::nombre()
@@ -94,29 +84,18 @@ bool Dispositivo_Midi::reenviar_programa()
 	return m_reenviar_programa;
 }
 
-void Dispositivo_Midi::teclas_luminosas(unsigned int identificador)
+bool Dispositivo_Midi::es_entrada()
 {
-	m_teclas_luminosas = Teclas_Luminosas::Cargar_tecla_luminosa(identificador);
+	if((m_capacidad & ENTRADA) == ENTRADA)
+		return true;
+	return false;
 }
 
-Teclas_Luminosas *Dispositivo_Midi::teclas_luminosas()
+bool Dispositivo_Midi::entrada_activa()
 {
-	return m_teclas_luminosas;
-}
-
-void Dispositivo_Midi::rango_teclado(const std::string &rango)
-{
-	m_rango_teclado.cargar(rango);
-}
-
-Teclado_Organo Dispositivo_Midi::rango_teclado()
-{
-	return m_rango_teclado;
-}
-
-void Dispositivo_Midi::volumen_entrada(float valor)
-{
-	m_volumen_entrada = valor;
+	if((m_capacidad_activa & ENTRADA) == ENTRADA)
+		return true;
+	return false;
 }
 
 void Dispositivo_Midi::sensitivo(bool estado)
@@ -129,9 +108,24 @@ bool Dispositivo_Midi::sensitivo()
 	return m_sensitivo;
 }
 
+void Dispositivo_Midi::volumen_entrada(float valor)
+{
+	m_volumen_entrada = valor;
+}
+
 float Dispositivo_Midi::volumen_entrada()
 {
 	return m_volumen_entrada;
+}
+
+void Dispositivo_Midi::rango_teclado(const std::string &rango)
+{
+	m_rango_teclado.cargar(rango);
+}
+
+Teclado_Organo Dispositivo_Midi::rango_teclado()
+{
+	return m_rango_teclado;
 }
 
 void Dispositivo_Midi::nota_entrada(unsigned char id_nota, bool encendida)
@@ -161,6 +155,19 @@ std::vector<unsigned char> Dispositivo_Midi::notas_entrada() const
 	return m_notas_entrada;
 }
 
+bool Dispositivo_Midi::es_salida()
+{
+	if((m_capacidad & SALIDA) == ENTRADA)
+		return true;
+	return false;
+}
+
+bool Dispositivo_Midi::salida_activa()
+{
+	if((m_capacidad_activa & SALIDA) == SALIDA)
+		return true;
+	return false;
+}
 
 void Dispositivo_Midi::volumen_salida(float valor)
 {
@@ -170,6 +177,16 @@ void Dispositivo_Midi::volumen_salida(float valor)
 float Dispositivo_Midi::volumen_salida()
 {
 	return m_volumen_salida;
+}
+
+void Dispositivo_Midi::teclas_luminosas(unsigned int identificador)
+{
+	m_teclas_luminosas = Teclas_Luminosas::Cargar_tecla_luminosa(identificador);
+}
+
+Teclas_Luminosas *Dispositivo_Midi::teclas_luminosas()
+{
+	return m_teclas_luminosas;
 }
 
 void Dispositivo_Midi::nota_salida(unsigned char canal, unsigned char id_nota, bool encendida)

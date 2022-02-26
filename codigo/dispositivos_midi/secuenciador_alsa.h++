@@ -25,7 +25,7 @@ public:
 	bool conectar(unsigned char cliente, unsigned char puerto, Tipo tipo) const;
 	bool desconectar(unsigned char cliente, unsigned char puerto, Tipo tipo) const;
 
-	void escribir(const Evento_Midi &evento_entrada) const;
+	void escribir(const Evento_Midi &evento_salida) const;
 	Evento_Midi leer() const;
 	bool hay_eventos() const;
 

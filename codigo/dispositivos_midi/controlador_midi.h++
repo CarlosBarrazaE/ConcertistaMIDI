@@ -21,6 +21,7 @@ class Controlador_Midi
 private:
 	Secuenciador *m_secuenciador;
 	bool m_cambio_dispositivos;
+	unsigned int m_desconectado_pendiente;
 
 	std::vector<Dispositivo_Midi*> m_dispositivos;
 	std::vector<Dispositivo_Midi*> m_entrada;
@@ -40,13 +41,13 @@ public:
 
 	Dispositivo_Midi* configurar_dispositivo(unsigned char cliente, unsigned char puerto, unsigned char capacidad, const std::string &nombre);
 	void conectar(Dispositivo_Midi *dispositivo, bool conexion_fisica);
-	void desconectar(Dispositivo_Midi *dispositivo, bool desconexion_fisica);
+	void desconectar(Dispositivo_Midi *dispositivo, bool desconexion_fisica, bool conexion_perdida);
 
 	bool hay_eventos();
 	Evento_Midi leer();
 
-	void escribir(MidiEvent &evento);
-	void escribir(Evento_Midi &evento);
+	void escribir(MidiEvent &evento_salida);
+	void escribir(Evento_Midi &evento_salida);
 	void tecla_luninosa(unsigned char id_nota, bool estado);
 	void enviar_nota(unsigned char id_nota, bool estado);
 

@@ -15,6 +15,7 @@ Controlador_Midi::Controlador_Midi()
 		m_secuenciador->crear_lista_dispositivos(m_dispositivos);
 
 	m_cambio_dispositivos = false;
+	m_desconectado_pendiente = 0;
 }
 
 Controlador_Midi::~Controlador_Midi()
@@ -147,12 +148,12 @@ void Controlador_Midi::conectar(Dispositivo_Midi *dispositivo, bool conexion_fis
 	if(!dispositivo->conectado() || !dispositivo->habilitado())
 		return;
 
-	if((dispositivo->capacidad_activa() & ENTRADA) == ENTRADA)
+	if(dispositivo->entrada_activa())
 	{
 		if(m_secuenciador->conectar(dispositivo->cliente(), dispositivo->puerto(), Entrada))
 			m_entrada.push_back(dispositivo);
 	}
-	if((dispositivo->capacidad_activa() & SALIDA) == SALIDA)
+	if(dispositivo->salida_activa())
 	{
 		if(m_secuenciador->conectar(dispositivo->cliente(), dispositivo->puerto(), Salida))
 		{
@@ -162,7 +163,7 @@ void Controlador_Midi::conectar(Dispositivo_Midi *dispositivo, bool conexion_fis
 	}
 }
 
-void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexion_fisica)
+void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexion_fisica, bool conexion_perdida)
 {
 	if(m_secuenciador == NULL)
 		return;
@@ -170,10 +171,11 @@ void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexi
 	//Deshabilita el dispositivo si no es una desconexion fisica o lo desconecta sin deshabilitar
 	if(dispositivo->habilitado())
 	{
-		if((dispositivo->capacidad_activa() & ENTRADA) == ENTRADA)
+		if(dispositivo->entrada_activa())
 		{
 			//Se desconecta el dispositivo de la entrada
-			m_secuenciador->desconectar(dispositivo->cliente(), dispositivo->puerto(), Entrada);
+			if(!conexion_perdida)
+				m_secuenciador->desconectar(dispositivo->cliente(), dispositivo->puerto(), Entrada);
 
 			bool borrado = false;
 			for(unsigned int x=0; x<m_entrada.size() && !borrado; x++)
@@ -186,10 +188,11 @@ void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexi
 			}
 		}
 
-		if((dispositivo->capacidad_activa() & SALIDA) == SALIDA)
+		if(dispositivo->salida_activa())
 		{
 			//Se desconecta el dispositivo de la salida
-			m_secuenciador->desconectar(dispositivo->cliente(), dispositivo->puerto(), Salida);
+			if(!conexion_perdida)
+				m_secuenciador->desconectar(dispositivo->cliente(), dispositivo->puerto(), Salida);
 
 			bool borrado = false;
 			for(unsigned int x=0; x<m_salida.size() && !borrado; x++)
@@ -211,6 +214,9 @@ void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexi
 
 bool Controlador_Midi::hay_eventos()
 {
+	if(m_desconectado_pendiente > 0)
+		return true;
+
 	if(m_secuenciador != NULL)
 		return m_secuenciador->hay_eventos();
 	return false;
@@ -218,6 +224,35 @@ bool Controlador_Midi::hay_eventos()
 
 Evento_Midi Controlador_Midi::leer()
 {
+	//Crea un evento para apagar las notas que dejo encendida al desconectarse
+	if(m_desconectado_pendiente > 0)
+	{
+		for(unsigned long int x=0; x<m_dispositivos.size(); x++)
+		{
+			if(!m_dispositivos[x]->conectado() && m_dispositivos[x]->entrada_activa())
+			{
+				std::vector<unsigned char> notas_aun_activas = m_dispositivos[x]->notas_entrada();
+				if(notas_aun_activas.size() > 0)
+				{
+					//Cuando solo queda una nota se puede recien se puede descontar de la descionexion pendiente
+					//Porque solo se puede apagar una nota a la vez
+					if(notas_aun_activas.size() == 1)
+						m_desconectado_pendiente--;
+
+					unsigned char *datos = new unsigned char[3];
+					datos[0] = 0;
+					datos[1] = notas_aun_activas[0];
+					datos[2] = 0;
+					Evento_Midi evento_nuevo(EventoMidi_NotaApagada, datos, 3);
+
+					m_dispositivos[x]->nota_entrada(notas_aun_activas[0], false);
+					return evento_nuevo;
+				}
+			}
+		}
+
+	}
+
 	if(m_secuenciador == NULL)
 		return Evento_Midi();
 
@@ -228,6 +263,8 @@ Evento_Midi Controlador_Midi::leer()
 		if(origen == NULL)
 			return evento;
 
+		origen->nota_entrada(evento.id_nota(), false);
+
 		if(origen->volumen_entrada() < 0.999f || origen->volumen_entrada() > 1.001f)
 			evento.velocidad(static_cast<unsigned char>(evento.velocidad() * origen->volumen_entrada()));
 	}
@@ -236,6 +273,8 @@ Evento_Midi Controlador_Midi::leer()
 		Dispositivo_Midi *origen = dispositivo_activo(evento.cliente(), evento.puerto(), ENTRADA);
 		if(origen == NULL)
 			return evento;
+
+		origen->nota_entrada(evento.id_nota(), true);
 
 		unsigned char velocidad = evento.velocidad();
 		if(!origen->sensitivo())
@@ -276,7 +315,12 @@ Evento_Midi Controlador_Midi::leer()
 		//Desactiva un puerto de la lista
 		Dispositivo_Midi *origen = dispositivo(evento.cliente(), evento.puerto(), true, Indeterminado, true);
 		if(origen != NULL)
-			desconectar(origen, true);
+		{
+			//Revisa si el dispositivo que se desconecto dejo notas encendidas que hay que apagar
+			if(origen->notas_entrada().size() > 0)
+				m_desconectado_pendiente++;
+			desconectar(origen, true, true);
+		}
 	}
 	else if(evento.tipo_evento() == EventoMidi_PuertoSuscrito)
 	{
@@ -296,71 +340,75 @@ Evento_Midi Controlador_Midi::leer()
 	return evento;
 }
 
-void Controlador_Midi::escribir(Evento_Midi &evento_entrada)
+void Controlador_Midi::escribir(Evento_Midi &evento_salida)
 {
 	if(m_secuenciador == NULL)
 		return;
 
 	//Guarda el ultimo programa del canal
-	if(evento_entrada.tipo_evento() == EventoMidi_CambioPrograma)
-		m_ultimo_programa[evento_entrada.canal()] = evento_entrada.programa();
+	if(evento_salida.tipo_evento() == EventoMidi_CambioPrograma)
+		m_ultimo_programa[evento_salida.canal()] = evento_salida.programa();
 
 	//Solo contiene la velocidad si es un evento de NotaEncendida o NotaApagada
-	unsigned char velocidad = evento_entrada.velocidad();
+	unsigned char velocidad = evento_salida.velocidad();
 
 	for(unsigned long x=0; x<m_salida.size(); x++)
 	{
-		evento_entrada.cliente(m_salida[x]->cliente());
-		evento_entrada.puerto(m_salida[x]->puerto());
-		if(m_salida[x]->volumen_salida() < 0.999f || m_salida[x]->volumen_salida() > 1.001f)
+		evento_salida.cliente(m_salida[x]->cliente());
+		evento_salida.puerto(m_salida[x]->puerto());
+		if(	evento_salida.tipo_evento() == EventoMidi_NotaApagada)
 		{
-			if(	evento_entrada.tipo_evento() == EventoMidi_NotaApagada ||
-				evento_entrada.tipo_evento() == EventoMidi_NotaEncendida)
-			{
-				evento_entrada.velocidad(static_cast<unsigned char>(velocidad * m_salida[x]->volumen_salida()));
-			}
+			if(m_salida[x]->volumen_salida() < 0.999f || m_salida[x]->volumen_salida() > 1.001f)
+				evento_salida.velocidad(static_cast<unsigned char>(velocidad * m_salida[x]->volumen_salida()));
+			m_salida[x]->nota_salida(evento_salida.canal(), evento_salida.id_nota(), false);
 		}
-		m_secuenciador->escribir(evento_entrada);
+		else if(evento_salida.tipo_evento() == EventoMidi_NotaEncendida)
+		{
+			if(m_salida[x]->volumen_salida() < 0.999f || m_salida[x]->volumen_salida() > 1.001f)
+				evento_salida.velocidad(static_cast<unsigned char>(velocidad * m_salida[x]->volumen_salida()));
+			m_salida[x]->nota_salida(evento_salida.canal(), evento_salida.id_nota(), true);
+		}
+		m_secuenciador->escribir(evento_salida);
 	}
 }
 
-void Controlador_Midi::escribir(MidiEvent &evento_entrada)
+void Controlador_Midi::escribir(MidiEvent &evento_salida)
 {
 	//NOTE Este es un metodo provisorio hasta reemplazar libmidi por completo
 	//Reenviar el MidiEvent al nuevo tipo Evento_Midi
 	unsigned char *datos;
-	if(evento_entrada.Type() == MidiEventType_NoteOff)
+	if(evento_salida.Type() == MidiEventType_NoteOff)
 	{
 		datos = new unsigned char[3];
-		datos[0] = evento_entrada.Channel();
-		datos[1] = static_cast<unsigned char>(evento_entrada.NoteNumber());
-		datos[2] = static_cast<unsigned char>(evento_entrada.NoteVelocity());
+		datos[0] = evento_salida.Channel();
+		datos[1] = static_cast<unsigned char>(evento_salida.NoteNumber());
+		datos[2] = static_cast<unsigned char>(evento_salida.NoteVelocity());
 		Evento_Midi evento(EventoMidi_NotaApagada, datos, 3);
 		this->escribir(evento);
 	}
-	else if(evento_entrada.Type() == MidiEventType_NoteOn)
+	else if(evento_salida.Type() == MidiEventType_NoteOn)
 	{
 		datos = new unsigned char[3];
-		datos[0] = evento_entrada.Channel();
-		datos[1] = static_cast<unsigned char>(evento_entrada.NoteNumber());
-		datos[2] = static_cast<unsigned char>(evento_entrada.NoteVelocity());
+		datos[0] = evento_salida.Channel();
+		datos[1] = static_cast<unsigned char>(evento_salida.NoteNumber());
+		datos[2] = static_cast<unsigned char>(evento_salida.NoteVelocity());
 		Evento_Midi evento(EventoMidi_NotaEncendida, datos, 3);
 		this->escribir(evento);
 	}
-	else if(evento_entrada.Type() == MidiEventType_ProgramChange)
+	else if(evento_salida.Type() == MidiEventType_ProgramChange)
 	{
 		datos = new unsigned char[2];
-		datos[0] = evento_entrada.Channel();
-		datos[1] = static_cast<unsigned char>(evento_entrada.ProgramNumber());
+		datos[0] = evento_salida.Channel();
+		datos[1] = static_cast<unsigned char>(evento_salida.ProgramNumber());
 		Evento_Midi evento(EventoMidi_CambioPrograma, datos, 2);
 		this->escribir(evento);
 	}
 	else
 	{/*
-		if(evento_entrada.Type() == MidiEventType_Meta)
-			Registro::Depurar("\tMetaevento: " + GetMidiMetaEventTypeDescription(evento_entrada.MetaType()) + "\n");
+		if(evento_salida.Type() == MidiEventType_Meta)
+			Registro::Depurar("\tMetaevento: " + GetMidiMetaEventTypeDescription(evento_salida.MetaType()) + "\n");
 		else
-			Registro::Depurar("\tEvento: " + GetMidiEventTypeDescription(evento_entrada.Type()) + "\n");*/
+			Registro::Depurar("\tEvento: " + GetMidiEventTypeDescription(evento_salida.Type()) + "\n");*/
 	}
 }
 
@@ -515,7 +563,9 @@ std::string Controlador_Midi::siguiente_mensaje()
 
 bool Controlador_Midi::hay_cambios_de_dispositivos()
 {
-	return false;//NOTE Terminar
+	bool cambios = m_cambio_dispositivos;
+	m_cambio_dispositivos = false;
+	return cambios;
 }
 
 std::string Controlador_Midi::dispositivos_conectados(unsigned char capacidad)

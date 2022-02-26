@@ -41,9 +41,7 @@ public:
 	void cliente(unsigned char cliente);
 	unsigned char cliente();
 	unsigned char puerto();
-	unsigned char capacidad();
-	void capacidad_activa(unsigned char modo);
-	unsigned char capacidad_activa();
+	void capacidad_activa(unsigned char capacidad);
 	std::string nombre();
 
 	void conectado(bool estado);
@@ -53,6 +51,8 @@ public:
 	void reenviar_programa(bool valor);
 	bool reenviar_programa();
 
+	bool es_entrada();
+	bool entrada_activa();
 	void sensitivo(bool estado);
 	bool sensitivo();
 	void volumen_entrada(float valor);
@@ -62,6 +62,8 @@ public:
 	void nota_entrada(unsigned char id_nota, bool encendida);
 	std::vector<unsigned char> notas_entrada() const;
 
+	bool es_salida();
+	bool salida_activa();
 	void volumen_salida(float valor);
 	float volumen_salida();
 	void teclas_luminosas(unsigned int identificador);

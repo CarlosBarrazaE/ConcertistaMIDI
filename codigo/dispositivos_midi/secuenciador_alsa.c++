@@ -259,61 +259,61 @@ bool Secuenciador_Alsa::desconectar(unsigned char cliente, unsigned char puerto,
 	return true;
 }
 
-void Secuenciador_Alsa::escribir(const Evento_Midi &evento_entrada) const
+void Secuenciador_Alsa::escribir(const Evento_Midi &evento_salida) const
 {
 	//Termina si recive un evento vacio
-	if(evento_entrada.datos() == NULL || evento_entrada.largo_datos() == 0)
+	if(evento_salida.datos() == NULL || evento_salida.largo_datos() == 0)
 		return;
 
 	snd_seq_event_t evento;
 	snd_seq_ev_clear(&evento);
 
 	evento.source.port = static_cast<unsigned char>(m_puerto_salida);
-	if(evento_entrada.cliente() == DIRECCIONES_SUSCRITAS || evento_entrada.puerto() == DIRECCIONES_SUSCRITAS)
+	if(evento_salida.cliente() == DIRECCIONES_SUSCRITAS || evento_salida.puerto() == DIRECCIONES_SUSCRITAS)
 	{
 		evento.dest.client = SND_SEQ_ADDRESS_SUBSCRIBERS;
 		evento.dest.port = SND_SEQ_ADDRESS_UNKNOWN;
 	}
 	else
 	{
-		evento.dest.client = static_cast<unsigned char>(evento_entrada.cliente());
-		evento.dest.port = static_cast<unsigned char>(evento_entrada.puerto());
+		evento.dest.client = static_cast<unsigned char>(evento_salida.cliente());
+		evento.dest.port = static_cast<unsigned char>(evento_salida.puerto());
 	}
 	evento.queue = SND_SEQ_QUEUE_DIRECT;
 
-	if(evento_entrada.tipo_evento() == EventoMidi_NotaApagada)
+	if(evento_salida.tipo_evento() == EventoMidi_NotaApagada)
 	{
 		evento.type = SND_SEQ_EVENT_NOTEOFF;
 		evento.flags &= static_cast<unsigned char>(~SND_SEQ_EVENT_LENGTH_MASK);
 		evento.flags |= SND_SEQ_EVENT_LENGTH_FIXED;
-		evento.data.note.channel = evento_entrada.canal();
-		evento.data.note.note = static_cast<unsigned char>(evento_entrada.id_nota());
-		evento.data.note.velocity = evento_entrada.velocidad();
+		evento.data.note.channel = evento_salida.canal();
+		evento.data.note.note = static_cast<unsigned char>(evento_salida.id_nota());
+		evento.data.note.velocity = evento_salida.velocidad();
 	}
-	else if(evento_entrada.tipo_evento() == EventoMidi_NotaEncendida)
+	else if(evento_salida.tipo_evento() == EventoMidi_NotaEncendida)
 	{
 		evento.type = SND_SEQ_EVENT_NOTEON;
 		evento.flags &= static_cast<unsigned char>(~SND_SEQ_EVENT_LENGTH_MASK);
 		evento.flags |= SND_SEQ_EVENT_LENGTH_FIXED;
-		evento.data.note.channel = evento_entrada.canal();
-		evento.data.note.note = static_cast<unsigned char>(evento_entrada.id_nota());
-		evento.data.note.velocity = evento_entrada.velocidad();
+		evento.data.note.channel = evento_salida.canal();
+		evento.data.note.note = static_cast<unsigned char>(evento_salida.id_nota());
+		evento.data.note.velocity = evento_salida.velocidad();
 	}
-	else if(evento_entrada.tipo_evento() == EventoMidi_CambioPrograma)
+	else if(evento_salida.tipo_evento() == EventoMidi_CambioPrograma)
 	{
 		evento.type = SND_SEQ_EVENT_PGMCHANGE;
 		evento.flags &= static_cast<unsigned char>(~SND_SEQ_EVENT_LENGTH_MASK);
 		evento.flags |= SND_SEQ_EVENT_LENGTH_FIXED;
-		evento.data.control.channel = evento_entrada.canal();
-		evento.data.control.value = evento_entrada.programa();
+		evento.data.control.channel = evento_salida.canal();
+		evento.data.control.value = evento_salida.programa();
 	}
-	else if(evento_entrada.tipo_evento() == EventoMidi_ExclusivoDelSistema)
+	else if(evento_salida.tipo_evento() == EventoMidi_ExclusivoDelSistema)
 	{
 		evento.type = SND_SEQ_EVENT_SYSEX;
 		evento.flags &= static_cast<unsigned char>(~SND_SEQ_EVENT_LENGTH_MASK);
 		evento.flags |= SND_SEQ_EVENT_LENGTH_VARIABLE;
-		evento.data.ext.len = static_cast<unsigned int>(evento_entrada.largo_datos());
-		evento.data.ext.ptr = evento_entrada.datos();
+		evento.data.ext.len = static_cast<unsigned int>(evento_salida.largo_datos());
+		evento.data.ext.ptr = evento_salida.datos();
 	}
 
 	int estado = snd_seq_event_output(m_secuenciador_alsa, &evento);
@@ -433,14 +433,13 @@ Evento_Midi Secuenciador_Alsa::leer() const
 	}
 	else if(evento->type == SND_SEQ_EVENT_SYSEX)//130
 	{
-		//NOTE Verificar que data.ext.ptr sea un objeto new
-		datos = static_cast<unsigned char*>(evento->data.ext.ptr);
+		/*datos = static_cast<unsigned char*>(evento->data.ext.ptr);
 
 		Evento_Midi evento_nuevo(EventoMidi_ExclusivoDelSistema, datos, evento->data.ext.len);
 		evento_nuevo.cliente(evento->source.client);
 		evento_nuevo.puerto(evento->source.port);
 
-		return evento_nuevo;
+		return evento_nuevo;*/
 	}
 	return Evento_Midi();
 }

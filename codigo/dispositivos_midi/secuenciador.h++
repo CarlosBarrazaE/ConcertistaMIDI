@@ -35,7 +35,7 @@ public:
 	virtual bool conectar(unsigned char cliente, unsigned char puerto, Tipo tipo) const = 0;
 	virtual bool desconectar(unsigned char cliente, unsigned char puerto, Tipo tipo) const = 0;
 
-	virtual void escribir(const Evento_Midi &evento_entrada) const = 0;
+	virtual void escribir(const Evento_Midi &evento_salida) const = 0;
 	virtual Evento_Midi leer() const = 0;
 	virtual bool hay_eventos() const = 0;
 
