@@ -189,30 +189,15 @@ Teclas_Luminosas *Dispositivo_Midi::teclas_luminosas()
 	return m_teclas_luminosas;
 }
 
-void Dispositivo_Midi::nota_salida(unsigned char canal, unsigned char id_nota, bool encendida)
+void Dispositivo_Midi::nota_salida(unsigned char canal, bool encendida)
 {
-	if(encendida)
-	{
-		//Nueva nota activada
-		m_notas_salida[canal].push_back(id_nota);
-	}
-	else
-	{
-		//Nota desactivada
-		std::vector<unsigned char> &notas_canal = m_notas_salida[canal];
-		for(std::vector<unsigned char>::iterator i = notas_canal.begin(); i != notas_canal.end(); i++)
-		{
-			if(*i == id_nota)
-			{
-				//Al eliminarlo termina
-				notas_canal.erase(i);
-				return;
-			}
-		}
-	}
+	if(encendida)//Nueva nota activada
+		m_notas_salida[canal]++;
+	else if(m_notas_salida[canal] > 0)//Nota desactivada
+		m_notas_salida[canal]--;
 }
 
-std::map<unsigned char, std::vector<unsigned char>> Dispositivo_Midi::notas_salida() const
+std::map<unsigned char, unsigned int> Dispositivo_Midi::notas_salida() const
 {
 	return m_notas_salida;
 }

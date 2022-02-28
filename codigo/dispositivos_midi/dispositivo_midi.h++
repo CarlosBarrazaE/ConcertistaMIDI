@@ -32,7 +32,7 @@ private:
 	//Salida
 	float m_volumen_salida;
 	Teclas_Luminosas *m_teclas_luminosas;
-	std::map<unsigned char, std::vector<unsigned char>> m_notas_salida;
+	std::map<unsigned char, unsigned int> m_notas_salida;
 
 public:
 	Dispositivo_Midi(unsigned char cliente, unsigned char puerto, unsigned char capacidad, const std::string &nombre, bool conectado);
@@ -68,8 +68,8 @@ public:
 	float volumen_salida();
 	void teclas_luminosas(unsigned int identificador);
 	Teclas_Luminosas *teclas_luminosas();
-	void nota_salida(unsigned char canal, unsigned char id_nota, bool encendida);
-	std::map<unsigned char, std::vector<unsigned char>> notas_salida() const;
+	void nota_salida(unsigned char canal, bool encendida);
+	std::map<unsigned char, unsigned int> notas_salida() const;
 
 	void limpiar();
 };

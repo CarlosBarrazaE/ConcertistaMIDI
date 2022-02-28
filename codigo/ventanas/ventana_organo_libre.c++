@@ -83,7 +83,7 @@ void VentanaOrganoLibre::actualizar(unsigned int diferencia_tiempo)
 		if(evento.tipo_evento() != EventoMidi_NotaEncendida && evento.tipo_evento() != EventoMidi_NotaApagada)
 			continue;
 
-		if(evento.tipo_evento() == EventoMidi_NotaEncendida && evento.velocidad() > 0)
+		if(evento.tipo_evento() == EventoMidi_NotaEncendida && evento.velocidad_nota() > 0)
 			this->insertar_nota(evento.id_nota());
 		else
 			this->eliminar_nota(evento.id_nota());

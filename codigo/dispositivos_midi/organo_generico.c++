@@ -19,12 +19,18 @@ Evento_Midi OrganoGenerico::actualizar_virtual(unsigned int /*diferencia_tiempo*
 
 Evento_Midi OrganoGenerico::encender_virtual(unsigned char id_nota)
 {
-	unsigned char *datos = new unsigned char[3] {m_canal, id_nota, 1};
-	return Evento_Midi(EventoMidi_NotaEncendida, datos, 3);
+	Evento_Midi evento(EventoMidi_NotaEncendida);
+	evento.canal(m_canal);
+	evento.id_nota(id_nota);
+	evento.velocidad_nota(1);
+	return evento;
 }
 
 Evento_Midi OrganoGenerico::apagar_virtual(unsigned char id_nota)
 {
-	unsigned char *datos = new unsigned char[3] {m_canal, id_nota, 0};
-	return Evento_Midi(EventoMidi_NotaApagada, datos, 3);
+	Evento_Midi evento(EventoMidi_NotaApagada);
+	evento.canal(m_canal);
+	evento.id_nota(id_nota);
+	evento.velocidad_nota(0);
+	return evento;
 }

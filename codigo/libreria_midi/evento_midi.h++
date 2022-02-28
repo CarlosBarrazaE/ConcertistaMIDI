@@ -27,15 +27,33 @@ public:
 	EventoMidi tipo_evento() const;
 	MetaEventoMidi tipo_metaevento() const;
 
+	void id_nota(unsigned char id_nota);
 	unsigned char id_nota() const;
 
 	void canal(unsigned char canal);
 	unsigned char canal() const;
 
-	void velocidad(unsigned char velocidad);
-	unsigned char velocidad() const;
+	void velocidad_nota(unsigned char velocidad);
+	unsigned char velocidad_nota() const;
 
+	void presion_nota(unsigned char presion);
+	unsigned char presion_nota() const;
+
+	void presion_canal(unsigned char presion);
+	unsigned char presion_canal() const;
+
+	void programa(unsigned char programa);
 	unsigned char programa() const;
+
+	void inflexion_de_tono(unsigned int valor);
+	unsigned int inflexion_de_tono() const;
+
+	void controlador_mensaje(unsigned char mensaje);
+	unsigned char controlador_mensaje() const;
+
+	void controlador_valor(unsigned char valor);
+	unsigned char controlador_valor() const;
+
 	std::string texto() const;
 
 	unsigned char *datos() const;

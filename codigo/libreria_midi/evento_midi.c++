@@ -28,14 +28,46 @@ Evento_Midi::Evento_Midi(const Evento_Midi &evento)
 	m_cliente = evento.m_cliente;
 	m_puerto = evento.m_puerto;
 }
+/*
+enum EventoMidi
+{
+	EventoMidi_Nulo,
+	EventoMidi_ExclusivoDelSistema = 0xF0,
+	EventoMidi_SecuenciaDeEscape = 0xF7,
+	EventoMidi_Metaevento = 0xFF,
 
+	EventoMidi_ClienteConectado,
+	EventoMidi_ClienteDesconectado,
+	EventoMidi_PuertoConectado,
+	EventoMidi_PuertoDesconectado,
+	EventoMidi_PuertoSuscrito,
+};
+*/
 Evento_Midi::Evento_Midi(EventoMidi tipo_evento)
 {
 	m_delta_pulso = 0;
 	m_tipo_evento = tipo_evento;
+	if(	m_tipo_evento == EventoMidi_CambioPrograma ||
+		m_tipo_evento == EventoMidi_DespuesDeTocarCanal)
+	{
+		m_datos = new unsigned char[2] {0, 0};
+		m_largo_evento = 2;
+	}
+	else if	(m_tipo_evento == EventoMidi_NotaApagada ||
+			m_tipo_evento == EventoMidi_NotaEncendida ||
+			m_tipo_evento == EventoMidi_DespuesDeTocarNota ||
+			m_tipo_evento == EventoMidi_Controlador ||
+			m_tipo_evento == EventoMidi_InflexionDeTono)
+	{
+		m_datos = new unsigned char[3] {0, 0, 0};
+		m_largo_evento = 3;
+	}
+	else
+	{
+		m_datos = NULL;
+		m_largo_evento = 0;
+	}
 	m_tipo_metaevento = MetaEventoMidi_Nulo;
-	m_datos = NULL;
-	m_largo_evento = 0;
 
 	m_cliente = 0;
 	m_puerto = 0;
@@ -81,6 +113,19 @@ MetaEventoMidi Evento_Midi::tipo_metaevento() const
 	return m_tipo_metaevento;
 }
 
+void Evento_Midi::id_nota(unsigned char id_nota)
+{
+	if(m_datos == NULL || m_largo_evento < 3)
+		return;
+
+	if(	m_tipo_evento != EventoMidi_NotaApagada &&
+		m_tipo_evento != EventoMidi_NotaEncendida &&
+		m_tipo_evento != EventoMidi_DespuesDeTocarNota)
+		return;
+
+	m_datos[1] = id_nota & 0x7F;
+}
+
 unsigned char Evento_Midi::id_nota() const
 {
 	if(m_datos == NULL || m_largo_evento < 3)
@@ -88,7 +133,7 @@ unsigned char Evento_Midi::id_nota() const
 
 	if(	m_tipo_evento != EventoMidi_NotaApagada &&
 		m_tipo_evento != EventoMidi_NotaEncendida &&
-		m_tipo_evento != EventoMidi_DespuesDeTocarTecla)
+		m_tipo_evento != EventoMidi_DespuesDeTocarNota)
 		return 0;
 
 	return m_datos[1];
@@ -101,14 +146,14 @@ void Evento_Midi::canal(unsigned char canal)
 
 	if(	m_tipo_evento != EventoMidi_NotaApagada &&
 		m_tipo_evento != EventoMidi_NotaEncendida &&
-		m_tipo_evento != EventoMidi_DespuesDeTocarTecla &&
-		m_tipo_evento != EventoMidi_CambioControl &&
+		m_tipo_evento != EventoMidi_DespuesDeTocarNota &&
+		m_tipo_evento != EventoMidi_Controlador &&
 		m_tipo_evento != EventoMidi_CambioPrograma &&
 		m_tipo_evento != EventoMidi_DespuesDeTocarCanal &&
-		m_tipo_evento != EventoMidi_CambioRuedaDeTono)
+		m_tipo_evento != EventoMidi_InflexionDeTono)
 		return;
 
-	m_datos[0] = canal;
+	m_datos[0] = canal & 0x0F;
 }
 
 unsigned char Evento_Midi::canal() const
@@ -118,17 +163,17 @@ unsigned char Evento_Midi::canal() const
 
 	if(	m_tipo_evento != EventoMidi_NotaApagada &&
 		m_tipo_evento != EventoMidi_NotaEncendida &&
-		m_tipo_evento != EventoMidi_DespuesDeTocarTecla &&
-		m_tipo_evento != EventoMidi_CambioControl &&
+		m_tipo_evento != EventoMidi_DespuesDeTocarNota &&
+		m_tipo_evento != EventoMidi_Controlador &&
 		m_tipo_evento != EventoMidi_CambioPrograma &&
 		m_tipo_evento != EventoMidi_DespuesDeTocarCanal &&
-		m_tipo_evento != EventoMidi_CambioRuedaDeTono)
+		m_tipo_evento != EventoMidi_InflexionDeTono)
 		return 0;
 
 	return m_datos[0];
 }
 
-void Evento_Midi::velocidad(unsigned char velocidad)
+void Evento_Midi::velocidad_nota(unsigned char velocidad)
 {
 	if(m_datos == NULL || m_largo_evento < 3)
 		return;
@@ -137,10 +182,10 @@ void Evento_Midi::velocidad(unsigned char velocidad)
 		m_tipo_evento != EventoMidi_NotaEncendida)
 		return;
 
-	m_datos[2] = velocidad;
+	m_datos[2] = velocidad & 0x7F;
 }
 
-unsigned char Evento_Midi::velocidad() const
+unsigned char Evento_Midi::velocidad_nota() const
 {
 	if(m_datos == NULL || m_largo_evento < 3)
 		return 0;
@@ -152,6 +197,61 @@ unsigned char Evento_Midi::velocidad() const
 	return m_datos[2];
 }
 
+void Evento_Midi::presion_nota(unsigned char presion)
+{
+	if(m_datos == NULL || m_largo_evento < 3)
+		return;
+
+	if(	m_tipo_evento != EventoMidi_DespuesDeTocarNota)
+		return;
+
+	m_datos[2] = presion & 0x7F;
+}
+
+unsigned char Evento_Midi::presion_nota() const
+{
+	if(m_datos == NULL || m_largo_evento < 3)
+		return 0;
+
+	if(	m_tipo_evento != EventoMidi_DespuesDeTocarNota)
+		return 0;
+
+	return m_datos[2];
+}
+
+void Evento_Midi::presion_canal(unsigned char presion)
+{
+	if(m_datos == NULL || m_largo_evento < 2)
+		return;
+
+	if(	m_tipo_evento != EventoMidi_DespuesDeTocarCanal)
+		return;
+
+	m_datos[1] = presion & 0x7F;
+}
+
+unsigned char Evento_Midi::presion_canal() const
+{
+	if(m_datos == NULL || m_largo_evento < 2)
+		return 0;
+
+	if(	m_tipo_evento != EventoMidi_DespuesDeTocarCanal)
+		return 0;
+
+	return m_datos[1];
+}
+
+void Evento_Midi::programa(unsigned char programa)
+{
+	if(m_datos == NULL || m_largo_evento < 2)
+		return;
+
+	if(	m_tipo_evento != EventoMidi_CambioPrograma)
+		return;
+
+	m_datos[1] = programa & 0x7F;
+}
+
 unsigned char Evento_Midi::programa() const
 {
 	if(m_datos == NULL || m_largo_evento < 2)
@@ -161,6 +261,73 @@ unsigned char Evento_Midi::programa() const
 		return 0;
 
 	return m_datos[1];
+}
+
+void Evento_Midi::inflexion_de_tono(unsigned int valor)
+{
+	if(m_datos == NULL || m_largo_evento < 3)
+		return;
+
+	if(	m_tipo_evento != EventoMidi_InflexionDeTono)
+		return;
+
+	m_datos[1] = valor & 0x7F;
+	m_datos[2] = (valor >> 7) & 0x7F;
+}
+
+unsigned int Evento_Midi::inflexion_de_tono() const
+{
+	if(m_datos == NULL || m_largo_evento < 3)
+		return 0;
+
+	if(	m_tipo_evento != EventoMidi_InflexionDeTono)
+		return 0;
+
+	return static_cast<unsigned int>((m_datos[2] << 7) | m_datos[1]);
+}
+
+void Evento_Midi::controlador_mensaje(unsigned char mensaje)
+{
+	if(m_datos == NULL || m_largo_evento < 3)
+		return;
+
+	if(	m_tipo_evento != EventoMidi_Controlador)
+		return;
+
+	m_datos[1] = mensaje & 0x7F;
+}
+
+unsigned char Evento_Midi::controlador_mensaje() const
+{
+	if(m_datos == NULL || m_largo_evento < 3)
+		return 0;
+
+	if(	m_tipo_evento != EventoMidi_Controlador)
+		return 0;
+
+	return m_datos[1];
+}
+
+void Evento_Midi::controlador_valor(unsigned char valor)
+{
+	if(m_datos == NULL || m_largo_evento < 3)
+		return;
+
+	if(	m_tipo_evento != EventoMidi_Controlador)
+		return;
+
+	m_datos[2] = valor & 0x7F;
+}
+
+unsigned char Evento_Midi::controlador_valor() const
+{
+	if(m_datos == NULL || m_largo_evento < 3)
+		return 0;
+
+	if(	m_tipo_evento != EventoMidi_Controlador)
+		return 0;
+
+	return m_datos[2];
 }
 
 std::string Evento_Midi::texto() const

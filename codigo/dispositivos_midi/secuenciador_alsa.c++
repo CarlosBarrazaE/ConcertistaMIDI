@@ -288,7 +288,7 @@ void Secuenciador_Alsa::escribir(const Evento_Midi &evento_salida) const
 		evento.flags |= SND_SEQ_EVENT_LENGTH_FIXED;
 		evento.data.note.channel = evento_salida.canal();
 		evento.data.note.note = static_cast<unsigned char>(evento_salida.id_nota());
-		evento.data.note.velocity = evento_salida.velocidad();
+		evento.data.note.velocity = evento_salida.velocidad_nota();
 	}
 	else if(evento_salida.tipo_evento() == EventoMidi_NotaEncendida)
 	{
@@ -297,7 +297,18 @@ void Secuenciador_Alsa::escribir(const Evento_Midi &evento_salida) const
 		evento.flags |= SND_SEQ_EVENT_LENGTH_FIXED;
 		evento.data.note.channel = evento_salida.canal();
 		evento.data.note.note = static_cast<unsigned char>(evento_salida.id_nota());
-		evento.data.note.velocity = evento_salida.velocidad();
+		evento.data.note.velocity = evento_salida.velocidad_nota();
+	}
+	else if(evento_salida.tipo_evento() == EventoMidi_Controlador)
+	{
+		Registro::Nota("Enviando evento cambio de control: " + std::to_string(evento_salida.canal()));
+		evento.type = SND_SEQ_EVENT_CONTROLLER;
+		evento.flags &= static_cast<unsigned char>(~SND_SEQ_EVENT_LENGTH_MASK);
+		evento.flags |= SND_SEQ_EVENT_LENGTH_FIXED;
+		evento.data.control.channel = evento_salida.canal();
+		//NOTE falta el metodo para obtener el dato
+		evento.data.control.param = evento_salida.controlador_mensaje();
+		evento.data.control.value = evento_salida.controlador_valor();
 	}
 	else if(evento_salida.tipo_evento() == EventoMidi_CambioPrograma)
 	{
@@ -337,44 +348,33 @@ Evento_Midi Secuenciador_Alsa::leer() const
 	int estado = snd_seq_event_input(m_secuenciador_alsa, &evento);
 	mostrar_estado_alsa(estado, "Al leer los eventos de entrada");
 
-	unsigned char *datos;
-
 	if(evento->type == SND_SEQ_EVENT_NOTEOFF)
 	{
-		datos = new unsigned char[3];
-		datos[0] = evento->data.note.channel;
-		datos[1] = evento->data.note.note;
-		datos[2] = evento->data.note.velocity;
-
-		Evento_Midi evento_nuevo(EventoMidi_NotaApagada, datos, 3);
+		Evento_Midi evento_nuevo(EventoMidi_NotaApagada);
+		evento_nuevo.canal(evento->data.note.channel);
+		evento_nuevo.id_nota(evento->data.note.note);
+		evento_nuevo.velocidad_nota(evento->data.note.velocity);
 		evento_nuevo.cliente(evento->source.client);
 		evento_nuevo.puerto(evento->source.port);
-
 		return evento_nuevo;
 	}
 	else if(evento->type == SND_SEQ_EVENT_NOTEON)
 	{
-		datos = new unsigned char[3];
-		datos[0] = evento->data.note.channel;
-		datos[1] = evento->data.note.note;
-		datos[2] = evento->data.note.velocity;
-
-		Evento_Midi evento_nuevo(EventoMidi_NotaEncendida, datos, 3);
+		Evento_Midi evento_nuevo(EventoMidi_NotaEncendida);
+		evento_nuevo.canal(evento->data.note.channel);
+		evento_nuevo.id_nota(evento->data.note.note);
+		evento_nuevo.velocidad_nota(evento->data.note.velocity);
 		evento_nuevo.cliente(evento->source.client);
 		evento_nuevo.puerto(evento->source.port);
-
 		return evento_nuevo;
 	}
 	else if(evento->type == SND_SEQ_EVENT_PGMCHANGE)
 	{
-		datos = new unsigned char[2];
-		datos[0] = evento->data.note.channel;
-		datos[1] = static_cast<unsigned char>(evento->data.control.value);
-
-		Evento_Midi evento_nuevo(EventoMidi_CambioPrograma, datos, 2);
+		Evento_Midi evento_nuevo(EventoMidi_CambioPrograma);
+		evento_nuevo.canal(evento->data.note.channel);
+		evento_nuevo.programa(static_cast<unsigned char>(evento->data.control.value));
 		evento_nuevo.cliente(evento->source.client);
 		evento_nuevo.puerto(evento->source.port);
-
 		return evento_nuevo;
 	}
 	else if(evento->type == SND_SEQ_EVENT_CLIENT_START)
@@ -382,7 +382,6 @@ Evento_Midi Secuenciador_Alsa::leer() const
 		Evento_Midi evento_nuevo(EventoMidi_ClienteConectado);
 		evento_nuevo.cliente(evento->data.addr.client);
 		evento_nuevo.puerto(evento->data.addr.port);
-
 		return evento_nuevo;
 	}
 	else if(evento->type == SND_SEQ_EVENT_CLIENT_EXIT)
@@ -390,7 +389,6 @@ Evento_Midi Secuenciador_Alsa::leer() const
 		Evento_Midi evento_nuevo(EventoMidi_ClienteDesconectado);
 		evento_nuevo.cliente(evento->data.addr.client);
 		evento_nuevo.puerto(evento->data.addr.port);
-
 		return evento_nuevo;
 	}
 	else if(evento->type == SND_SEQ_EVENT_PORT_START)
@@ -406,21 +404,16 @@ Evento_Midi Secuenciador_Alsa::leer() const
 		Evento_Midi evento_nuevo(EventoMidi_PuertoDesconectado);
 		evento_nuevo.cliente(evento->data.addr.client);
 		evento_nuevo.puerto(evento->data.addr.port);
-
 		return evento_nuevo;
 	}
 	else if(evento->type == SND_SEQ_EVENT_CONTROLLER)//10
 	{
-		//NOTE Verificar param y value
-		datos = new unsigned char[3];
-		datos[0] = evento->data.note.channel;
-		datos[1] = static_cast<unsigned char>(evento->data.control.param);
-		datos[2] = static_cast<unsigned char>(evento->data.control.value);
-
-		Evento_Midi evento_nuevo(EventoMidi_CambioControl, datos, 3);
+		Evento_Midi evento_nuevo(EventoMidi_Controlador);
+		evento_nuevo.canal(evento->data.note.channel);
+		evento_nuevo.controlador_mensaje(static_cast<unsigned char>(evento->data.control.param));
+		evento_nuevo.controlador_valor(static_cast<unsigned char>(evento->data.control.value));
 		evento_nuevo.cliente(evento->source.client);
 		evento_nuevo.puerto(evento->source.port);
-
 		return evento_nuevo;
 	}
 	else if(evento->type == SND_SEQ_EVENT_PORT_SUBSCRIBED)//66
@@ -428,7 +421,6 @@ Evento_Midi Secuenciador_Alsa::leer() const
 		Evento_Midi evento_nuevo(EventoMidi_PuertoSuscrito);
 		evento_nuevo.cliente(evento->data.addr.client);
 		evento_nuevo.puerto(evento->data.addr.port);
-
 		return evento_nuevo;
 	}
 	else if(evento->type == SND_SEQ_EVENT_SYSEX)//130
@@ -438,7 +430,6 @@ Evento_Midi Secuenciador_Alsa::leer() const
 		Evento_Midi evento_nuevo(EventoMidi_ExclusivoDelSistema, datos, evento->data.ext.len);
 		evento_nuevo.cliente(evento->source.client);
 		evento_nuevo.puerto(evento->source.port);
-
 		return evento_nuevo;*/
 	}
 	return Evento_Midi();

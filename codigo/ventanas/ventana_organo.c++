@@ -332,7 +332,7 @@ void VentanaOrgano::escuchar_eventos()
 		if(evento.tipo_evento() != EventoMidi_NotaEncendida && evento.tipo_evento() != EventoMidi_NotaApagada)
 			continue;
 
-		if(evento.tipo_evento() == EventoMidi_NotaEncendida && evento.velocidad() > 0)
+		if(evento.tipo_evento() == EventoMidi_NotaEncendida && evento.velocidad_nota() > 0)
 		{
 			//Eventos NoteOn
 			TranslatedNote *nota_encontrada = NULL;
@@ -431,7 +431,7 @@ void VentanaOrgano::escuchar_eventos()
 
 				//Se cambia el canal y escala el volumen
 				evento.canal(nota_encontrada->channel);
-				evento.velocidad(static_cast<unsigned char>(evento.velocidad() * m_volumen));
+				evento.velocidad_nota(static_cast<unsigned char>(evento.velocidad_nota() * m_volumen));
 
 				//Se envia el evento
 				if(m_pistas->at(pista_encontrada).sonido())
@@ -443,7 +443,7 @@ void VentanaOrgano::escuchar_eventos()
 				this->insertar_nota_activa(evento.id_nota(), evento.canal(), 0, 0, Pista::Colores_pista[0], true, false);
 
 				//Escala el volumen
-				evento.velocidad(static_cast<unsigned char>(evento.velocidad() * m_volumen));
+				evento.velocidad_nota(static_cast<unsigned char>(evento.velocidad_nota() * m_volumen));
 				//Se envia el evento
 				m_controlador_midi->escribir(evento);
 

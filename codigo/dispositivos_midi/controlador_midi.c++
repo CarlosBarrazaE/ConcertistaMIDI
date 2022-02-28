@@ -91,14 +91,11 @@ void Controlador_Midi::reenviar_programas(Dispositivo_Midi *dispositivo)
 	if(m_secuenciador == NULL)
 		return;
 
-	unsigned char *datos;
 	for(std::pair<unsigned char, unsigned char> programa : m_ultimo_programa)
 	{
-		datos = new unsigned char[2];
-		datos[0] = programa.first;
-		datos[1] = programa.second;
-
-		Evento_Midi evento(EventoMidi_CambioPrograma, datos, 2);
+		Evento_Midi evento(EventoMidi_CambioPrograma);
+		evento.canal(programa.first);
+		evento.programa(programa.second);
 		evento.cliente(dispositivo->cliente());
 		evento.puerto(dispositivo->puerto());
 		m_secuenciador->escribir(evento);
@@ -239,11 +236,10 @@ Evento_Midi Controlador_Midi::leer()
 					if(notas_aun_activas.size() == 1)
 						m_desconectado_pendiente--;
 
-					unsigned char *datos = new unsigned char[3];
-					datos[0] = 0;
-					datos[1] = notas_aun_activas[0];
-					datos[2] = 0;
-					Evento_Midi evento_nuevo(EventoMidi_NotaApagada, datos, 3);
+					Evento_Midi evento_nuevo(EventoMidi_NotaApagada);
+					evento_nuevo.canal(0);
+					evento_nuevo.id_nota(notas_aun_activas[0]);
+					evento_nuevo.velocidad_nota(0);
 
 					m_dispositivos[x]->nota_entrada(notas_aun_activas[0], false);
 					return evento_nuevo;
@@ -266,7 +262,7 @@ Evento_Midi Controlador_Midi::leer()
 		origen->nota_entrada(evento.id_nota(), false);
 
 		if(origen->volumen_entrada() < 0.999f || origen->volumen_entrada() > 1.001f)
-			evento.velocidad(static_cast<unsigned char>(evento.velocidad() * origen->volumen_entrada()));
+			evento.velocidad_nota(static_cast<unsigned char>(evento.velocidad_nota() * origen->volumen_entrada()));
 	}
 	else if(evento.tipo_evento() == EventoMidi_NotaEncendida)
 	{
@@ -276,12 +272,12 @@ Evento_Midi Controlador_Midi::leer()
 
 		origen->nota_entrada(evento.id_nota(), true);
 
-		unsigned char velocidad = evento.velocidad();
+		unsigned char velocidad = evento.velocidad_nota();
 		if(!origen->sensitivo())
 			velocidad = VELOCIDAD_NORMAL;
 
 		if(origen->volumen_entrada() < 0.999f || origen->volumen_entrada() > 1.001f || !origen->sensitivo())
-			evento.velocidad(static_cast<unsigned char>(velocidad * origen->volumen_entrada()));
+			evento.velocidad_nota(static_cast<unsigned char>(velocidad * origen->volumen_entrada()));
 	}
 	else if(evento.tipo_evento() == EventoMidi_ClienteConectado)
 	{
@@ -350,7 +346,7 @@ void Controlador_Midi::escribir(Evento_Midi &evento_salida)
 		m_ultimo_programa[evento_salida.canal()] = evento_salida.programa();
 
 	//Solo contiene la velocidad si es un evento de NotaEncendida o NotaApagada
-	unsigned char velocidad = evento_salida.velocidad();
+	unsigned char velocidad = evento_salida.velocidad_nota();
 
 	for(unsigned long x=0; x<m_salida.size(); x++)
 	{
@@ -359,14 +355,14 @@ void Controlador_Midi::escribir(Evento_Midi &evento_salida)
 		if(	evento_salida.tipo_evento() == EventoMidi_NotaApagada)
 		{
 			if(m_salida[x]->volumen_salida() < 0.999f || m_salida[x]->volumen_salida() > 1.001f)
-				evento_salida.velocidad(static_cast<unsigned char>(velocidad * m_salida[x]->volumen_salida()));
-			m_salida[x]->nota_salida(evento_salida.canal(), evento_salida.id_nota(), false);
+				evento_salida.velocidad_nota(static_cast<unsigned char>(velocidad * m_salida[x]->volumen_salida()));
+			m_salida[x]->nota_salida(evento_salida.canal(), false);
 		}
 		else if(evento_salida.tipo_evento() == EventoMidi_NotaEncendida)
 		{
 			if(m_salida[x]->volumen_salida() < 0.999f || m_salida[x]->volumen_salida() > 1.001f)
-				evento_salida.velocidad(static_cast<unsigned char>(velocidad * m_salida[x]->volumen_salida()));
-			m_salida[x]->nota_salida(evento_salida.canal(), evento_salida.id_nota(), true);
+				evento_salida.velocidad_nota(static_cast<unsigned char>(velocidad * m_salida[x]->volumen_salida()));
+			m_salida[x]->nota_salida(evento_salida.canal(), true);
 		}
 		m_secuenciador->escribir(evento_salida);
 	}
@@ -376,31 +372,27 @@ void Controlador_Midi::escribir(MidiEvent &evento_salida)
 {
 	//NOTE Este es un metodo provisorio hasta reemplazar libmidi por completo
 	//Reenviar el MidiEvent al nuevo tipo Evento_Midi
-	unsigned char *datos;
 	if(evento_salida.Type() == MidiEventType_NoteOff)
 	{
-		datos = new unsigned char[3];
-		datos[0] = evento_salida.Channel();
-		datos[1] = static_cast<unsigned char>(evento_salida.NoteNumber());
-		datos[2] = static_cast<unsigned char>(evento_salida.NoteVelocity());
-		Evento_Midi evento(EventoMidi_NotaApagada, datos, 3);
+		Evento_Midi evento(EventoMidi_NotaApagada);
+		evento.canal(evento_salida.Channel());
+		evento.id_nota(static_cast<unsigned char>(evento_salida.NoteNumber()));
+		evento.velocidad_nota(static_cast<unsigned char>(evento_salida.NoteVelocity()));
 		this->escribir(evento);
 	}
 	else if(evento_salida.Type() == MidiEventType_NoteOn)
 	{
-		datos = new unsigned char[3];
-		datos[0] = evento_salida.Channel();
-		datos[1] = static_cast<unsigned char>(evento_salida.NoteNumber());
-		datos[2] = static_cast<unsigned char>(evento_salida.NoteVelocity());
-		Evento_Midi evento(EventoMidi_NotaEncendida, datos, 3);
+		Evento_Midi evento(EventoMidi_NotaEncendida);
+		evento.canal(evento_salida.Channel());
+		evento.id_nota(static_cast<unsigned char>(evento_salida.NoteNumber()));
+		evento.velocidad_nota(static_cast<unsigned char>(evento_salida.NoteVelocity()));
 		this->escribir(evento);
 	}
 	else if(evento_salida.Type() == MidiEventType_ProgramChange)
 	{
-		datos = new unsigned char[2];
-		datos[0] = evento_salida.Channel();
-		datos[1] = static_cast<unsigned char>(evento_salida.ProgramNumber());
-		Evento_Midi evento(EventoMidi_CambioPrograma, datos, 2);
+		Evento_Midi evento(EventoMidi_CambioPrograma);
+		evento.canal(evento_salida.Channel());
+		evento.programa(static_cast<unsigned char>(evento_salida.ProgramNumber()));
 		this->escribir(evento);
 	}
 	else
@@ -489,10 +481,9 @@ void Controlador_Midi::reiniciar()
 	{
 		if(programa.second != 0)
 		{
-			unsigned char *datos = new unsigned char[2];
-			datos[0] = programa.first;
-			datos[1] = 0;
-			Evento_Midi evento(EventoMidi_CambioPrograma, datos, 2);
+			Evento_Midi evento(EventoMidi_CambioPrograma);
+			evento.canal(programa.first);
+			evento.programa(0);
 			evento.cliente(DIRECCIONES_SUSCRITAS);
 			evento.puerto(DIRECCIONES_SUSCRITAS);
 			m_secuenciador->escribir(evento);
@@ -522,18 +513,15 @@ void Controlador_Midi::detener_eventos()
 			}
 		}
 
-		std::map<unsigned char, std::vector<unsigned char>> teclas_activas = m_salida[x]->notas_salida();
-		unsigned char *datos = NULL;
-		for(std::pair<unsigned char, std::vector<unsigned char>> canal_actual : teclas_activas)
+		std::map<unsigned char, unsigned int> canales_activos = m_salida[x]->notas_salida();
+		for(std::pair<unsigned char, unsigned int> canal_actual : canales_activos)
 		{
-			for(unsigned long int n=0; n<canal_actual.second.size(); n++)
+			if(canal_actual.second > 0)
 			{
-				datos = new unsigned char[3];
-				datos[0] = canal_actual.first;
-				datos[1] = canal_actual.second[n];
-				datos[2] = 0;
-
-				Evento_Midi evento(EventoMidi_NotaApagada, datos, 3);
+				Evento_Midi evento(EventoMidi_Controlador);
+				evento.canal(canal_actual.first);
+				evento.controlador_mensaje(MensajeControlador_TodasLasNotasApagadas);
+				evento.controlador_valor(0x00);
 				evento.cliente(m_salida[x]->cliente());
 				evento.puerto(m_salida[x]->puerto());
 				m_secuenciador->escribir(evento);
