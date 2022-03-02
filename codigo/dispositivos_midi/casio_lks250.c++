@@ -25,7 +25,7 @@ Evento_Midi CasioLks250::actualizar_virtual(unsigned int diferencia_tiempo)
 	//Evento desconocido
 	//unsigned char *desconocido = new unsigned char[9] {0xF0,0x44,0x7E,0x7E,0x7F,0x00,0x06,0x00,0xF7};
 
-	return Evento_Midi();
+	return Evento_Midi();//Retorna un EventoMidi_Nulo
 }
 
 Evento_Midi CasioLks250::encender_virtual(unsigned char id_nota)

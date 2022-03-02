@@ -34,6 +34,7 @@ private:
 	Dispositivo_Midi *dispositivo_activo(unsigned char cliente, unsigned char puerto, unsigned char capacidad);
 
 	void reenviar_programas(Dispositivo_Midi *dispositivo);
+	void detener_eventos(Dispositivo_Midi *dispositivo);
 
 public:
 	Controlador_Midi();

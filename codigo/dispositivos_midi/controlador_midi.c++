@@ -23,12 +23,18 @@ Controlador_Midi::~Controlador_Midi()
 	if(m_secuenciador != NULL)
 		delete m_secuenciador;
 
+	m_entrada.clear();
+	m_salida.clear();
+
 	for(unsigned long int x=0; x<m_dispositivos.size(); x++)
 		delete m_dispositivos[x];
+
+	m_dispositivos.clear();
 }
 
 Dispositivo_Midi *Controlador_Midi::dispositivo(unsigned char cliente, unsigned char puerto, bool conectado, Habilitado habilitado, bool exacto)
 {
+	//Encuentra un dispositivo que cumpla las condiciones establecidas
 	if(m_secuenciador == NULL)
 		return NULL;
 
@@ -50,11 +56,11 @@ Dispositivo_Midi *Controlador_Midi::dispositivo(unsigned char cliente, unsigned 
 		if(exacto && m_dispositivos[x]->cliente() == cliente && m_dispositivos[x]->puerto() == puerto)
 			return m_dispositivos[x];
 
-		//Aunque no se pida, se encontro el mismo y se retorna de inmediato
-		//Usado al conectar, se tiene el nombre y puede haber otro dispositivo en su lugar
+		//Usado al conectar, puede haber otro dispositivo en su lugar por eso se verifica el nombre
 		if(!exacto && m_dispositivos[x]->cliente() == cliente && m_dispositivos[x]->puerto() == puerto && m_dispositivos[x]->nombre() == nombre)
 			return m_dispositivos[x];
 
+		//Se encontro en otro puerto un dispositivo con el mismo nombre pero no se puede estar seguro hasta terminar
 		if(!exacto && m_dispositivos[x]->puerto() == puerto && m_dispositivos[x]->nombre() == nombre)
 			dispositivo = m_dispositivos[x];
 	}
@@ -66,7 +72,7 @@ Dispositivo_Midi *Controlador_Midi::dispositivo(unsigned char cliente, unsigned 
 
 Dispositivo_Midi *Controlador_Midi::dispositivo_activo(unsigned char cliente, unsigned char puerto, unsigned char capacidad)
 {
-	//Encuentra un dispositivo que cumpla las condiciones establecidas
+	//Encuentra un dispositivo conectado que cumpla las condiciones establecidas
 	if(capacidad == ENTRADA)
 	{
 		for(unsigned long int x=0; x<m_entrada.size(); x++)
@@ -88,6 +94,8 @@ Dispositivo_Midi *Controlador_Midi::dispositivo_activo(unsigned char cliente, un
 
 void Controlador_Midi::reenviar_programas(Dispositivo_Midi *dispositivo)
 {
+	//Envia los programas activos al dispositivo que acaba de conectarse
+	//porque es posible que se conecte despues de que empezo la musica
 	if(m_secuenciador == NULL)
 		return;
 
@@ -102,8 +110,45 @@ void Controlador_Midi::reenviar_programas(Dispositivo_Midi *dispositivo)
 	}
 }
 
+void Controlador_Midi::detener_eventos(Dispositivo_Midi *dispositivo)
+{
+	if(m_secuenciador == NULL)
+		return;
+
+	//Apaga las luces
+	Teclas_Luminosas *teclado_actual = dispositivo->teclas_luminosas();
+	if(teclado_actual != NULL)
+	{
+		while(teclado_actual->quedan_luces_activas())
+		{
+			Evento_Midi evento = teclado_actual->apagar_siguiente();
+			evento.cliente(dispositivo->cliente());
+			evento.puerto(dispositivo->puerto());
+			m_secuenciador->escribir(evento);
+		}
+	}
+
+	//Envia un evento de nota apagada por cada nota encendida
+	std::map<unsigned char, unsigned int> canales_activos = dispositivo->notas_salida();
+	for(std::pair<unsigned char, unsigned int> canal_actual : canales_activos)
+	{
+		if(canal_actual.second > 0)
+		{
+			Evento_Midi evento(EventoMidi_Controlador);
+			evento.canal(canal_actual.first);
+			evento.controlador_mensaje(MensajeControlador_TodasLasNotasApagadas);
+			evento.controlador_valor(0x00);
+			evento.cliente(dispositivo->cliente());
+			evento.puerto(dispositivo->puerto());
+			m_secuenciador->escribir(evento);
+		}
+	}
+	dispositivo->limpiar();
+}
+
 Dispositivo_Midi *Controlador_Midi::configurar_dispositivo(unsigned char cliente, unsigned char puerto, unsigned char capacidad, const std::string &nombre)
 {
+	//Retorna el dispositivo pedido para guardar la configuración
 	Dispositivo_Midi *dispositivo = NULL;
 	for(unsigned long int x=0; x<m_dispositivos.size(); x++)//Salida
 	{
@@ -133,10 +178,13 @@ Dispositivo_Midi *Controlador_Midi::configurar_dispositivo(unsigned char cliente
 
 void Controlador_Midi::conectar(Dispositivo_Midi *dispositivo, bool conexion_fisica)
 {
+	//Conecta o habilita el dispositivo
+	//Habilitar el dispositivo significa que se puede usar si esta disponible y se conectara automaticamente
+	//cuando lo este, de lo contrario sera ignorado.
 	if(m_secuenciador == NULL)
 		return;
 
-	//Habilita y conecta el dispositivo si esta disponible si no solo se habilita
+	//Habilita y conecta el dispositivo si esta disponible, si no lo esta solo se habilita
 	if(conexion_fisica)
 		dispositivo->conectado(true);
 	else
@@ -162,6 +210,7 @@ void Controlador_Midi::conectar(Dispositivo_Midi *dispositivo, bool conexion_fis
 
 void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexion_fisica, bool conexion_perdida)
 {
+	//Al perder la conexion ya no se puede desconectar del secuenciador
 	if(m_secuenciador == NULL)
 		return;
 
@@ -174,6 +223,7 @@ void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexi
 			if(!conexion_perdida)
 				m_secuenciador->desconectar(dispositivo->cliente(), dispositivo->puerto(), Entrada);
 
+			//Se borra de los dispositivos activos
 			bool borrado = false;
 			for(unsigned int x=0; x<m_entrada.size() && !borrado; x++)
 			{
@@ -191,6 +241,7 @@ void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexi
 			if(!conexion_perdida)
 				m_secuenciador->desconectar(dispositivo->cliente(), dispositivo->puerto(), Salida);
 
+			//Se borra de los dispositivos activos
 			bool borrado = false;
 			for(unsigned int x=0; x<m_salida.size() && !borrado; x++)
 			{
@@ -211,6 +262,7 @@ void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexi
 
 bool Controlador_Midi::hay_eventos()
 {
+	//Si se desconecta un dispositivo y deja notas encendida, se crean nuevos eventos para apagarlas
 	if(m_desconectado_pendiente > 0)
 		return true;
 
@@ -249,6 +301,7 @@ Evento_Midi Controlador_Midi::leer()
 
 	}
 
+	//Eventos reales
 	if(m_secuenciador == NULL)
 		return Evento_Midi();
 
@@ -256,31 +309,29 @@ Evento_Midi Controlador_Midi::leer()
 	if(evento.tipo_evento() == EventoMidi_NotaApagada)
 	{
 		Dispositivo_Midi *origen = dispositivo_activo(evento.cliente(), evento.puerto(), ENTRADA);
-		if(origen == NULL)
-			return evento;
-
-		origen->nota_entrada(evento.id_nota(), false);
-
-		if(origen->volumen_entrada() < 0.999f || origen->volumen_entrada() > 1.001f)
-			evento.velocidad_nota(static_cast<unsigned char>(evento.velocidad_nota() * origen->volumen_entrada()));
+		if(origen != NULL)
+		{
+			origen->nota_entrada(evento.id_nota(), false);
+			if(origen->volumen_entrada() < 0.999f || origen->volumen_entrada() > 1.001f)
+				evento.velocidad_nota(static_cast<unsigned char>(evento.velocidad_nota() * origen->volumen_entrada()));
+		}
 	}
 	else if(evento.tipo_evento() == EventoMidi_NotaEncendida)
 	{
 		Dispositivo_Midi *origen = dispositivo_activo(evento.cliente(), evento.puerto(), ENTRADA);
-		if(origen == NULL)
-			return evento;
-
-		origen->nota_entrada(evento.id_nota(), true);
-
-		unsigned char velocidad = evento.velocidad_nota();
-		if(!origen->sensitivo())
-			velocidad = VELOCIDAD_NORMAL;
-
-		if(origen->volumen_entrada() < 0.999f || origen->volumen_entrada() > 1.001f || !origen->sensitivo())
-			evento.velocidad_nota(static_cast<unsigned char>(velocidad * origen->volumen_entrada()));
+		if(origen != NULL)
+		{
+			origen->nota_entrada(evento.id_nota(), true);
+			unsigned char velocidad = evento.velocidad_nota();
+			if(!origen->sensitivo())
+				velocidad = VELOCIDAD_NORMAL;
+			if(origen->volumen_entrada() < 0.999f || origen->volumen_entrada() > 1.001f || !origen->sensitivo())
+				evento.velocidad_nota(static_cast<unsigned char>(velocidad * origen->volumen_entrada()));
+		}
 	}
 	else if(evento.tipo_evento() == EventoMidi_ClienteConectado)
 	{
+		//Agrega el mensaje
 		m_cambio_dispositivos = true;
 		m_mensajes.push_back(m_secuenciador->nombre_dispositivo(evento.cliente(), evento.puerto()) + " - conectado");
 	}
@@ -291,14 +342,12 @@ Evento_Midi Controlador_Midi::leer()
 		Dispositivo_Midi *nuevo = dispositivo(evento.cliente(), evento.puerto(), false, Indeterminado, true);
 		if(nuevo != NULL)
 			m_mensajes.push_back(nuevo->nombre() + " - desconectado");
-		else
-			m_mensajes.push_back(" - desconectado");
 	}
 	else if(evento.tipo_evento() == EventoMidi_PuertoConectado)
 	{
 		Dispositivo_Midi *nuevo = dispositivo(evento.cliente(), evento.puerto(), false, Activo, false);
 		if(nuevo != NULL)
-			conectar(nuevo, true);
+			this->conectar(nuevo, true);
 		else
 		{
 			Dispositivo_Midi *nuevo_dispositivo = m_secuenciador->crear_nuevo_dispositivo(evento.cliente(), evento.puerto());
@@ -315,7 +364,7 @@ Evento_Midi Controlador_Midi::leer()
 			//Revisa si el dispositivo que se desconecto dejo notas encendidas que hay que apagar
 			if(origen->notas_entrada().size() > 0)
 				m_desconectado_pendiente++;
-			desconectar(origen, true, true);
+			this->desconectar(origen, true, true);
 		}
 	}
 	else if(evento.tipo_evento() == EventoMidi_PuertoSuscrito)
@@ -327,7 +376,8 @@ Evento_Midi Controlador_Midi::leer()
 				Dispositivo_Midi *dispositivo = dispositivo_activo(evento.cliente(), evento.puerto(), SALIDA);
 				if(dispositivo != NULL && dispositivo->reenviar_programa())
 				{
-					reenviar_programas(dispositivo);
+					this->detener_eventos(dispositivo);
+					this->reenviar_programas(dispositivo);
 					dispositivo->reenviar_programa(false);
 				}
 			}
@@ -348,6 +398,7 @@ void Controlador_Midi::escribir(Evento_Midi &evento_salida)
 	//Solo contiene la velocidad si es un evento de NotaEncendida o NotaApagada
 	unsigned char velocidad = evento_salida.velocidad_nota();
 
+	//Se escala el volumen segun la configuración de cada dispositivo
 	for(unsigned long x=0; x<m_salida.size(); x++)
 	{
 		evento_salida.cliente(m_salida[x]->cliente());
@@ -371,7 +422,6 @@ void Controlador_Midi::escribir(Evento_Midi &evento_salida)
 void Controlador_Midi::escribir(MidiEvent &evento_salida)
 {
 	//NOTE Este es un metodo provisorio hasta reemplazar libmidi por completo
-	//Reenviar el MidiEvent al nuevo tipo Evento_Midi
 	if(evento_salida.Type() == MidiEventType_NoteOff)
 	{
 		Evento_Midi evento(EventoMidi_NotaApagada);
@@ -395,17 +445,18 @@ void Controlador_Midi::escribir(MidiEvent &evento_salida)
 		evento.programa(static_cast<unsigned char>(evento_salida.ProgramNumber()));
 		this->escribir(evento);
 	}
-	else
-	{/*
+	/*else
+	{
 		if(evento_salida.Type() == MidiEventType_Meta)
 			Registro::Depurar("\tMetaevento: " + GetMidiMetaEventTypeDescription(evento_salida.MetaType()) + "\n");
 		else
-			Registro::Depurar("\tEvento: " + GetMidiEventTypeDescription(evento_salida.Type()) + "\n");*/
-	}
+			Registro::Depurar("\tEvento: " + GetMidiEventTypeDescription(evento_salida.Type()) + "\n");
+	}*/
 }
 
 void Controlador_Midi::tecla_luninosa(unsigned char id_nota, bool estado)
 {
+	//Este metodo se encarga de controlar las teclas luminosas del organo
 	if(m_secuenciador == NULL)
 		return;
 
@@ -434,6 +485,7 @@ void Controlador_Midi::tecla_luninosa(unsigned char id_nota, bool estado)
 
 void Controlador_Midi::enviar_nota(unsigned char id_nota, bool estado)
 {
+	//Este metodo es usado para enviar eventos desde el teclado y el ratón
 	if(m_secuenciador != NULL)
 		m_secuenciador->enviar_nota(id_nota, estado);
 }
@@ -461,6 +513,7 @@ void Controlador_Midi::actualizar(unsigned int diferencia_tiempo, bool consumir_
 			if(teclado_actual != NULL)
 			{
 				Evento_Midi evento = teclado_actual->actualizar(diferencia_tiempo);
+				if(evento.tipo_evento() != EventoMidi_Nulo)
 				evento.cliente(m_salida[x]->cliente());
 				evento.puerto(m_salida[x]->puerto());
 				m_secuenciador->escribir(evento);
@@ -474,9 +527,9 @@ void Controlador_Midi::reiniciar()
 	if(m_secuenciador == NULL)
 		return;
 
-	detener_eventos();
+	this->detener_eventos();
 
-	//Restablecer programas predeterminado
+	//Restablecer programas predeterminado en todos los dispositivos
 	for(std::pair<unsigned char, unsigned char> programa : m_ultimo_programa)
 	{
 		if(programa.second != 0)
@@ -497,38 +550,8 @@ void Controlador_Midi::detener_eventos()
 	if(m_secuenciador == NULL)
 		return;
 
-	//Detiene solo las notas sonando
 	for(unsigned long int x=0; x<m_salida.size(); x++)
-	{
-		//Apaga las luces
-		Teclas_Luminosas *teclado_actual = m_salida[x]->teclas_luminosas();
-		if(teclado_actual != NULL)
-		{
-			while(teclado_actual->quedan_luces_activas())
-			{
-				Evento_Midi evento = teclado_actual->apagar_siguiente();
-				evento.cliente(m_salida[x]->cliente());
-				evento.puerto(m_salida[x]->puerto());
-				m_secuenciador->escribir(evento);
-			}
-		}
-
-		std::map<unsigned char, unsigned int> canales_activos = m_salida[x]->notas_salida();
-		for(std::pair<unsigned char, unsigned int> canal_actual : canales_activos)
-		{
-			if(canal_actual.second > 0)
-			{
-				Evento_Midi evento(EventoMidi_Controlador);
-				evento.canal(canal_actual.first);
-				evento.controlador_mensaje(MensajeControlador_TodasLasNotasApagadas);
-				evento.controlador_valor(0x00);
-				evento.cliente(m_salida[x]->cliente());
-				evento.puerto(m_salida[x]->puerto());
-				m_secuenciador->escribir(evento);
-			}
-		}
-		m_salida[x]->limpiar();
-	}
+		this->detener_eventos(m_salida[x]);
 }
 
 bool Controlador_Midi::hay_mensajes()
@@ -558,6 +581,7 @@ bool Controlador_Midi::hay_cambios_de_dispositivos()
 
 std::string Controlador_Midi::dispositivos_conectados(unsigned char capacidad)
 {
+	//Muestra todos los dispositivos conectados de la entrada o salida
 	std::string nombres = "";
 	if(capacidad == ENTRADA)
 	{
