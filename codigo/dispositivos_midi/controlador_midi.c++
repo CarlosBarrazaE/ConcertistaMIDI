@@ -374,10 +374,11 @@ Evento_Midi Controlador_Midi::leer()
 			if(m_ultimo_programa.size() > 0)
 			{
 				Dispositivo_Midi *dispositivo = dispositivo_activo(evento.cliente(), evento.puerto(), SALIDA);
-				if(dispositivo != NULL && dispositivo->reenviar_programa())
+				if(dispositivo != NULL)
 				{
 					this->detener_eventos(dispositivo);
-					this->reenviar_programas(dispositivo);
+					if(dispositivo->reenviar_programa())
+						this->reenviar_programas(dispositivo);
 					dispositivo->reenviar_programa(false);
 				}
 			}
