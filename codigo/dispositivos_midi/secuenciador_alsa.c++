@@ -301,7 +301,7 @@ void Secuenciador_Alsa::escribir(const Evento_Midi &evento_salida) const
 	}
 	else if(evento_salida.tipo_evento() == EventoMidi_Controlador)
 	{
-		Registro::Nota("Enviando evento cambio de control: " + std::to_string(evento_salida.canal()));
+		Registro::Nota("Enviando evento cambio de control: " + std::to_string(static_cast<unsigned int>(evento_salida.canal())));
 		evento.type = SND_SEQ_EVENT_CONTROLLER;
 		evento.flags &= static_cast<unsigned char>(~SND_SEQ_EVENT_LENGTH_MASK);
 		evento.flags |= SND_SEQ_EVENT_LENGTH_FIXED;
