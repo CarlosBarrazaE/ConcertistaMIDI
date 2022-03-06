@@ -21,32 +21,6 @@ void Sintetizador_Midi::iniciar()
 	}
 }
 
-void Sintetizador_Midi::esperar_conexion()
-{
-	bool finalizado = false;
-	bool cerrado = false;
-	int limite = 0;
-	int falta_aqui;
-	while(!finalizado && !cerrado && limite < 100)
-	{
-		//Si hay error termina
-		if(waitpid(m_pid, nullptr, WNOHANG) == -1)
-			cerrado = true;
-		else
-		{
-			//MidiCommOut::UpdateDeviceList();
-			//Timidity crea 4 puertos y probablemente ya existe el puerto falso de linux
-			if(true/*MidiCommOut::GetDeviceList().size() > 1*/)
-				finalizado = true;
-			else
-			{
-				usleep(10000);
-				limite++;
-			}
-		}
-	}
-}
-
 void Sintetizador_Midi::detener()
 {
 	if(m_pid <= 0)

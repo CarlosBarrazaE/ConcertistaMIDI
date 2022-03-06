@@ -68,8 +68,6 @@ int main (int /*n*/, char **/*argumentos*/)
 	configurar_gl();
 
 	Administrador_Recursos recursos;
-	//Espera a que termine de iniciar el sintetizador midi
-	sintetizador.esperar_conexion();
 	Controlador_Juego controlador(&recursos);
 
 	while (!controlador.terminar())

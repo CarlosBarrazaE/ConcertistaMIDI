@@ -12,7 +12,6 @@ private:
 	int m_pid;
 public:
 	void iniciar();
-	void esperar_conexion();
 	void detener();
 };
 
