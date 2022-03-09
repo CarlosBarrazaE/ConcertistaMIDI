@@ -151,16 +151,12 @@ void Tabla::insertar_fila(std::vector<std::string> texto)
 		return;
 	}
 
-	float posicion_fila_y = this->y();
-	if(m_filas.size() > 0)
-		posicion_fila_y = m_filas[m_filas.size()-1]->y()+m_alto_fila;//Obtiene la posicion de la fila anterior
-
-	Fila *f = new Fila(this->x(), posicion_fila_y, this->ancho(), m_alto_fila, m_recursos);
+	Fila *f = new Fila(0, 0, this->ancho(), m_alto_fila, m_recursos);
 	Etiqueta *nueva_etiqueta;
 	for(unsigned int x=0; x<texto.size(); x++)
 	{
 		//Se crean las celdas de la fila
-		nueva_etiqueta = new Etiqueta(m_fila_titulo[x].texto->x(), posicion_fila_y, m_fila_titulo[x].centrado, texto[x], LetraChica, m_recursos);
+		nueva_etiqueta = new Etiqueta(m_fila_titulo[x].texto->x(), 0, m_fila_titulo[x].centrado, texto[x], LetraChica, m_recursos);
 		nueva_etiqueta->centrado_vertical(true);
 		if(!m_fila_titulo[x].centrado)
 			nueva_etiqueta->margen(10);
