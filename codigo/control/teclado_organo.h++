@@ -27,6 +27,10 @@ public:
 
 	bool operator == (const Teclado_Organo &tc) const;
 	bool operator != (const Teclado_Organo &tc) const;
+	bool operator < (const Teclado_Organo &tc) const;
+	bool operator <= (const Teclado_Organo &tc) const;
+	bool operator > (const Teclado_Organo &tc) const;
+	bool operator >= (const Teclado_Organo &tc) const;
 };
 
 #endif

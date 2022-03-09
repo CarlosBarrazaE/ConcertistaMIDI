@@ -57,11 +57,10 @@ public:
 	void reiniciar();//Limpiar luces con reiniciar igual
 	void detener_eventos();
 
-	//void lista();
-
 	bool hay_mensajes();
 	std::string siguiente_mensaje();
 
+	std::vector<Dispositivo_Midi*> lista_dispositivos();
 	bool hay_cambios_de_dispositivos();
 	std::string dispositivos_conectados(unsigned char capacidad);
 };

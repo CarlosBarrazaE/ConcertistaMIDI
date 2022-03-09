@@ -50,6 +50,7 @@ void Teclado_Organo::cargar(std::string datos)
 		std::vector<std::string> datos_divididos = Texto::dividir_texto(datos, ',');
 		if(datos_divididos.size() == 2)
 		{
+			//Se necesita el numero de teclas primero
 			this->numero_teclas(static_cast<unsigned int>(std::stoi(datos_divididos[1])));
 			this->tecla_inicial(static_cast<unsigned int>(std::stoi(datos_divididos[0])));
 		}
@@ -69,4 +70,24 @@ bool Teclado_Organo::operator == (const Teclado_Organo &tc) const
 bool Teclado_Organo::operator != (const Teclado_Organo &tc) const
 {
 	return m_tecla_inicial != tc.m_tecla_inicial || m_numero_teclas != tc.m_numero_teclas;
+}
+
+bool Teclado_Organo::operator < (const Teclado_Organo &tc) const
+{
+	return m_numero_teclas < tc.m_numero_teclas;
+}
+
+bool Teclado_Organo::operator <= (const Teclado_Organo &tc) const
+{
+	return m_numero_teclas <= tc.m_numero_teclas;
+}
+
+bool Teclado_Organo::operator > (const Teclado_Organo &tc) const
+{
+	return m_numero_teclas > tc.m_numero_teclas;
+}
+
+bool Teclado_Organo::operator >= (const Teclado_Organo &tc) const
+{
+	return m_numero_teclas >= tc.m_numero_teclas;
 }

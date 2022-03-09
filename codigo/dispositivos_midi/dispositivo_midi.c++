@@ -14,11 +14,11 @@ Dispositivo_Midi::Dispositivo_Midi(unsigned char cliente, unsigned char puerto, 
 
 	//Entrada
 	m_sensitivo = true;
-	m_volumen_entrada = 1.0f;
+	m_volumen_entrada = 1.0;
 	m_rango_teclado.cambiar(21, 88);
 
 	//Salida
-	m_volumen_salida = 1.0f;
+	m_volumen_salida = 1.0;
 	m_teclas_luminosas = NULL;
 }
 
@@ -108,12 +108,12 @@ bool Dispositivo_Midi::sensitivo()
 	return m_sensitivo;
 }
 
-void Dispositivo_Midi::volumen_entrada(float valor)
+void Dispositivo_Midi::volumen_entrada(double valor)
 {
 	m_volumen_entrada = valor;
 }
 
-float Dispositivo_Midi::volumen_entrada()
+double Dispositivo_Midi::volumen_entrada()
 {
 	return m_volumen_entrada;
 }
@@ -169,12 +169,12 @@ bool Dispositivo_Midi::salida_activa()
 	return false;
 }
 
-void Dispositivo_Midi::volumen_salida(float valor)
+void Dispositivo_Midi::volumen_salida(double valor)
 {
 	m_volumen_salida = valor;
 }
 
-float Dispositivo_Midi::volumen_salida()
+double Dispositivo_Midi::volumen_salida()
 {
 	return m_volumen_salida;
 }

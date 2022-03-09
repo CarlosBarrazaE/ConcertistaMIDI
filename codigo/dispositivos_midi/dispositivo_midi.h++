@@ -25,12 +25,12 @@ private:
 
 	//Entrada
 	bool m_sensitivo;
-	float m_volumen_entrada;
+	double m_volumen_entrada;
 	Teclado_Organo m_rango_teclado;
 	std::vector<unsigned char> m_notas_entrada;
 
 	//Salida
-	float m_volumen_salida;
+	double m_volumen_salida;
 	Teclas_Luminosas *m_teclas_luminosas;
 	std::map<unsigned char, unsigned int> m_notas_salida;
 
@@ -55,8 +55,8 @@ public:
 	bool entrada_activa();
 	void sensitivo(bool estado);
 	bool sensitivo();
-	void volumen_entrada(float valor);
-	float volumen_entrada();
+	void volumen_entrada(double valor);
+	double volumen_entrada();
 	void rango_teclado(const std::string &rango);
 	Teclado_Organo rango_teclado();
 	void nota_entrada(unsigned char id_nota, bool encendida);
@@ -64,8 +64,8 @@ public:
 
 	bool es_salida();
 	bool salida_activa();
-	void volumen_salida(float valor);
-	float volumen_salida();
+	void volumen_salida(double valor);
+	double volumen_salida();
 	void teclas_luminosas(unsigned int identificador);
 	Teclas_Luminosas *teclas_luminosas();
 	void nota_salida(unsigned char canal, bool encendida);

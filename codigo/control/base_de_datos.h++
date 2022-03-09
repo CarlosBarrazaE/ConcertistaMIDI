@@ -5,6 +5,10 @@
 #include <string>
 #include <vector>
 
+#include "../util/texto.h++"
+#include "../dispositivos_midi/datos_dispositivo.h++"
+#include "../dispositivos_midi/dispositivo_midi.h++"
+
 #include "../registro.h++"
 #include "configuracion_cmake.h++"
 #include "version.h++"
@@ -32,6 +36,10 @@ class Base_de_Datos
 		//Tabla configuracion
 		bool escribir_configuracion(const std::string &atributo, const std::string &valor);
 		std::string leer_configuracion(const std::string &atributo);
+
+		//Tabla dispositivos
+		void agregar_dispositivo(const Datos_Dispositivo &dispositivo);
+		std::vector<Datos_Dispositivo> lista_dispositivos();
 
 		//Tabla carpetas
 		bool agregar_carpeta(const std::string &nombre, const std::string &ruta);

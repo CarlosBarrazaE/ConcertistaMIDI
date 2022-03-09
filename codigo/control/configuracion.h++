@@ -14,11 +14,11 @@ private:
 	//Base de datos
 	Base_de_Datos m_datos;
 
-	//Configuracion MIDI
-	Controlador_Midi m_controlador_midi;
-
 	//Configuracion General
 	bool m_pantalla_completa, m_pantalla_completa_original;
+
+	//Configuracion MIDI
+	Controlador_Midi m_controlador_midi;
 
 	//Configuracion Archivo
 	std::string m_carpeta_inicial, m_carpeta_inicial_original;
@@ -30,7 +30,7 @@ private:
 	unsigned int m_duracion_nota, m_duracion_nota_original;
 	bool m_subtitulos, m_subtitulos_original;
 	Teclado_Organo m_teclado_visible, m_teclado_visible_original;
-	Teclado_Organo m_teclado_util, m_teclado_util_original;
+	Teclado_Organo m_teclado_util;
 
 	std::string leer(std::string atributo, std::string predeterminado);
 	unsigned int leer(std::string atributo, unsigned int predeterminado);
@@ -66,7 +66,6 @@ public:
 	void duracion_nota(unsigned int duracion);
 	void subtitulos(bool estado);
 	void teclado_visible(unsigned int inicial, unsigned int largo);
-	void teclado_util(unsigned int inicial, unsigned int largo);
 	double volumen();
 	double velocidad();
 	unsigned int duracion_nota();

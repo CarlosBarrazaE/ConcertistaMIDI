@@ -70,7 +70,11 @@ VentanaConfiguracion::VentanaConfiguracion(Configuracion *configuracion, Adminis
 	m_solapa3_teclas_luminosas = new Lista_Opciones(500, 210, 300, 20, true, recursos);
 	//Se agregan las opciones opciones_textos
 	m_solapa3_opcion_entrada->tipografia(recursos->tipografia(LetraMediana));
-	//TODO m_solapa3_opcion_entrada->opciones_textos(this->obtener_dispositivos(MidiCommIn::GetDeviceList()));
+	std::vector<std::string> dispositivos_disponibles;
+	std::vector<Dispositivo_Midi*> lista_dispositivos = m_configuracion->controlador_midi()->lista_dispositivos();
+	for(Dispositivo_Midi* d : lista_dispositivos)
+		dispositivos_disponibles.push_back(std::to_string(d->cliente()) + ":" + std::to_string(d->puerto()) + " " + d->nombre());
+	m_solapa3_opcion_entrada->opciones_textos(dispositivos_disponibles);
 	m_solapa3_opcion_salida->tipografia(recursos->tipografia(LetraMediana));
 	//TODO m_solapa3_opcion_salida->opciones_textos(this->obtener_dispositivos(MidiCommOut::GetDeviceList()));
 
@@ -357,7 +361,7 @@ void VentanaConfiguracion::evento_raton(Raton *raton)
 	}
 	else if(m_solapa->solapa_activa() == 2)
 	{
-		if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 0)
+		/*if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 0)
 			m_configuracion->teclado_util(48, 24);
 		else if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 1)
 			m_configuracion->teclado_util(48, 37);
@@ -368,7 +372,7 @@ void VentanaConfiguracion::evento_raton(Raton *raton)
 		else if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 4)
 			m_configuracion->teclado_util(28, 76);
 		else if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 5)
-			m_configuracion->teclado_util(21, 88);
+			m_configuracion->teclado_util(21, 88);*/
 	}
 	else if(m_solapa->solapa_activa() == 3)
 	{

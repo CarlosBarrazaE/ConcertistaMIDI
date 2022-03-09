@@ -22,9 +22,10 @@ bool Base_de_Datos::consulta(const std::string &consulta_entrada)
 	int respuesta = sqlite3_exec(m_base_de_datos, consulta_entrada.c_str(), NULL, 0, &error);
 	if(respuesta != SQLITE_OK)
 	{
+		Registro::Error(consulta_entrada);
 		Registro::Error(std::string(error));
 		sqlite3_free(error);
-        return false;
+		return false;
 	}
 	return true;
 }
@@ -158,14 +159,42 @@ bool Base_de_Datos::abrir(const std::string &direccion)
 void Base_de_Datos::crear()
 {
 	//Crea todas las tablas de la base de datos
-	this->consulta("CREATE TABLE configuracion (atributo VARCHAR(30), valor TEXT)");
-	this->consulta("CREATE TABLE carpetas (nombre VARCHAR(30) NOT NULL, ruta TEXT NOT NULL PRIMARY KEY)");
-	this->consulta("CREATE TABLE seleccion (ruta TEXT NOT NULL PRIMARY KEY, seleccion INT DEFAULT 0, ruta_seleccion TEXT)");
-	this->consulta("CREATE TABLE archivos (ruta TEXT NOT NULL PRIMARY KEY, visitas INT DEFAULT 0, duracion BIGINT DEFAULT 0, ultimo_acceso DATETIME)");
+	this->consulta("CREATE TABLE configuracion (atributo TEXT NOT NULL, valor TEXT NOT NULL)");
+	this->consulta("CREATE TABLE carpetas (nombre TEXT NOT NULL, ruta TEXT NOT NULL PRIMARY KEY)");
+	this->consulta("CREATE TABLE seleccion (ruta TEXT NOT NULL PRIMARY KEY, seleccion INTEGER DEFAULT 0, ruta_seleccion TEXT NOT NULL)");
+	this->consulta("CREATE TABLE archivos (ruta TEXT NOT NULL PRIMARY KEY, visitas INTEGER DEFAULT 0, duracion INTEGER DEFAULT 0, ultimo_acceso DATETIME)");
+	this->consulta("CREATE TABLE dispositivos (	cliente INTEGER DEFAULT 0,"
+												"puerto INTEGER DEFAULT 0,"
+												"nombre TEXT NOT NULL, "
+												"capacidad_activa INTEGER DEFAULT 0,"
+												"habilitado INTEGER DEFAULT 0,"
+												"sensitivo INTEGER DEFAULT 1,"
+												"volumen_entrada REAL DEFAULT 1,"
+												"rango_teclado TEXT NOT NULL,"
+												"volumen_salida REAL DEFAULT 1,"
+												"teclado_luminoso TEXT NOT NULL,"
+												"PRIMARY KEY(cliente, puerto, nombre))");
 
 	this->escribir_configuracion("version_base_de_datos", VERSION_BASE_DE_DATOS);
 	this->escribir_configuracion("ruta_instalacion", RUTA_ARCHIVOS);
 	this->agregar_carpeta("Canciones", std::string(RUTA_ARCHIVOS) + "/musica/");
+
+	Datos_Dispositivo teclado_y_raton;
+	teclado_y_raton.cliente = 129;
+	teclado_y_raton.puerto = 2;
+	teclado_y_raton.nombre = "Teclado y Ratón";
+	teclado_y_raton.capacidad_activa = ENTRADA;
+	teclado_y_raton.habilitado = true;
+	teclado_y_raton.rango_teclado = "48,24";
+	this->agregar_dispositivo(teclado_y_raton);
+
+	Datos_Dispositivo timidity;
+	timidity.cliente = 128;
+	timidity.puerto = 0;
+	timidity.nombre = "TiMidity";
+	timidity.capacidad_activa = SALIDA;
+	timidity.habilitado = true;
+	this->agregar_dispositivo(timidity);
 }
 
 void Base_de_Datos::actualizar()
@@ -187,6 +216,74 @@ void Base_de_Datos::actualizar()
 			//No existia ruta de instalacion
 			this->escribir_configuracion("ruta_instalacion", "..");
 			version = "1.2";
+		}
+		if(version == "1.2")
+		{
+			this->iniciar_transaccion();
+			//No vale la pena intentar recuperar el dispositivo seleccionado
+			this->consulta("DELETE FROM configuracion WHERE 	atributo = 'dispositivo_entrada'"
+															"OR atributo = 'dispositivo_salida'"
+															"OR atributo = 'teclado_util'"
+															"OR atributo = 'teclas_luminosas'");
+
+			//Actualiza tablas configuracion
+			this->consulta("DELETE FROM configuracion WHERE atributo IS NULL OR valor IS NULL");
+			this->consulta("ALTER TABLE configuracion RENAME TO configuracion_ant");
+			this->consulta("CREATE TABLE configuracion (atributo TEXT NOT NULL, valor TEXT NOT NULL)");
+			this->consulta("INSERT INTO configuracion (atributo, valor) SELECT atributo, valor FROM configuracion_ant");
+			this->consulta("DROP TABLE configuracion_ant");
+
+			//Actualiza tablas carpetas
+			this->consulta("ALTER TABLE carpetas RENAME TO carpetas_ant");
+			this->consulta("CREATE TABLE carpetas (nombre TEXT NOT NULL, ruta TEXT NOT NULL PRIMARY KEY)");
+			this->consulta("INSERT INTO carpetas (nombre, ruta) SELECT nombre, ruta FROM carpetas_ant");
+			this->consulta("DROP TABLE carpetas_ant");
+
+			//Actualiza tabla selección
+			this->consulta("DELETE FROM seleccion WHERE ruta_seleccion IS NULL");
+			this->consulta("ALTER TABLE seleccion RENAME TO seleccion_ant");
+			this->consulta("CREATE TABLE seleccion (ruta TEXT NOT NULL PRIMARY KEY, seleccion INTEGER DEFAULT 0, ruta_seleccion TEXT NOT NULL)");
+			this->consulta("INSERT INTO seleccion (ruta, seleccion, ruta_seleccion) SELECT ruta, seleccion, ruta_seleccion FROM seleccion_ant");
+			this->consulta("DROP TABLE seleccion_ant");
+
+			//Actualiza tabla archivos
+			this->consulta("ALTER TABLE archivos RENAME TO archivos_ant");
+			this->consulta("CREATE TABLE archivos (ruta TEXT NOT NULL PRIMARY KEY, visitas INTEGER DEFAULT 0, duracion INTEGER DEFAULT 0, ultimo_acceso DATETIME)");
+			this->consulta("INSERT INTO archivos (ruta, visitas, duracion, ultimo_acceso) SELECT ruta, visitas, duracion, ultimo_acceso FROM archivos_ant");
+			this->consulta("DROP TABLE archivos_ant");
+
+			//Crea la nueva tabla para almacenar la configuracion de los dispositivos
+			this->consulta("CREATE TABLE dispositivos (	cliente INTEGER DEFAULT 0,"
+														"puerto INTEGER DEFAULT 0,"
+														"nombre TEXT NOT NULL, "
+														"capacidad_activa INTEGER DEFAULT 0,"
+														"habilitado INTEGER DEFAULT 0,"
+														"sensitivo INTEGER DEFAULT 1,"
+														"volumen_entrada REAL DEFAULT 1,"
+														"rango_teclado TEXT NOT NULL,"
+														"volumen_salida REAL DEFAULT 1,"
+														"teclado_luminoso TEXT NOT NULL,"
+														"PRIMARY KEY(cliente, puerto, nombre))");
+
+			Datos_Dispositivo teclado_y_raton;
+			teclado_y_raton.cliente = 129;
+			teclado_y_raton.puerto = 2;
+			teclado_y_raton.nombre = "Teclado y Ratón";
+			teclado_y_raton.capacidad_activa = ENTRADA;
+			teclado_y_raton.habilitado = true;
+			teclado_y_raton.rango_teclado = "48,24";
+			this->agregar_dispositivo(teclado_y_raton);
+
+			Datos_Dispositivo timidity;
+			timidity.cliente = 128;
+			timidity.puerto = 0;
+			timidity.nombre = "TiMidity";
+			timidity.capacidad_activa = SALIDA;
+			timidity.habilitado = true;
+			this->agregar_dispositivo(timidity);
+
+			version = "1.3";
+			this->finalizar_transaccion();
 		}
 	}
 
@@ -221,11 +318,6 @@ void Base_de_Datos::finalizar_transaccion()
 //Tabla configuracion
 bool Base_de_Datos::escribir_configuracion(const std::string &atributo, const std::string &valor)
 {
-	if(atributo.size() > 30)
-	{
-		Registro::Error("Nombre del atributo '"+atributo+"' es demaciado largo, maximo 30");
-		return false;
-	}
 	if(valor != "")
 	{
 		Registro::Depurar("Escribiendo el registro: " + atributo + "->"+valor);
@@ -245,12 +337,58 @@ bool Base_de_Datos::escribir_configuracion(const std::string &atributo, const st
 
 std::string Base_de_Datos::leer_configuracion(const std::string &atributo)
 {
-	if(atributo.size() > 30)
-	{
-		Registro::Error("Nombre del atributo '"+atributo+"' es demaciado largo, maximo 30");
-		return "";
-	}
 	return this->consulta_texto("SELECT valor FROM configuracion WHERE atributo = '"+atributo+"' LIMIT 1");
+}
+
+void Base_de_Datos::agregar_dispositivo(const Datos_Dispositivo &dispositivo)
+{
+	this->consulta("INSERT INTO dispositivos (cliente, puerto, nombre, capacidad_activa, "
+												"habilitado, sensitivo, volumen_entrada, rango_teclado, "
+												"volumen_salida, teclado_luminoso) "
+							"VALUES ('"+std::to_string(static_cast<unsigned int>(dispositivo.cliente))+"', "
+									"'"+std::to_string(static_cast<unsigned int>(dispositivo.puerto))+"', "
+									"'"+dispositivo.nombre+"', "
+									"'"+std::to_string(static_cast<unsigned int>(dispositivo.capacidad_activa))+"', "
+									"'"+std::to_string(static_cast<unsigned int>(dispositivo.habilitado))+"', "
+									"'"+std::to_string(static_cast<unsigned int>(dispositivo.sensitivo))+"', "
+									"'"+std::to_string(dispositivo.volumen_entrada)+"', "
+									"'"+dispositivo.rango_teclado+"', "
+									"'"+std::to_string(dispositivo.volumen_salida)+"', "
+									"'"+std::to_string(static_cast<unsigned int>(dispositivo.teclas_luminosas))+"')");
+}
+
+std::vector<Datos_Dispositivo> Base_de_Datos::lista_dispositivos()
+{
+	std::vector<std::vector<std::string>> datos = this->consulta_tabla("SELECT 	cliente, puerto, nombre, capacidad_activa, "
+																				"habilitado, sensitivo, volumen_entrada, rango_teclado, "
+																				"volumen_salida, teclado_luminoso "
+																		"FROM dispositivos", 10);
+	std::vector<Datos_Dispositivo> dispositivos;
+
+	for(unsigned long int x=0; x<datos.size(); x++)
+	{
+		Datos_Dispositivo nuevo;
+
+		if(datos[x][0].size() <= 3)
+			nuevo.cliente = static_cast<unsigned char>(std::stoi(datos[x][0]));
+		if(datos[x][1].size() <= 3)
+			nuevo.puerto = static_cast<unsigned char>(std::stoi(datos[x][1]));
+		nuevo.nombre = datos[x][2];
+		if(datos[x][3].size() <= 1)
+			nuevo.capacidad_activa = static_cast<unsigned char>(std::stoi(datos[x][3]));
+		if(datos[x][4].size() <= 1)
+			nuevo.habilitado = static_cast<unsigned char>(std::stoi(datos[x][4]));
+		if(datos[x][5].size() <= 1)
+		nuevo.sensitivo = static_cast<unsigned char>(std::stoi(datos[x][5]));
+		nuevo.volumen_entrada = static_cast<unsigned char>(std::stod(datos[x][6]));
+		nuevo.rango_teclado = datos[x][7];
+		nuevo.volumen_salida = static_cast<unsigned char>(std::stod(datos[x][8]));
+		if(datos[x][9].size() <= 3)
+			nuevo.teclas_luminosas = static_cast<unsigned int>(std::stoi(datos[x][9]));
+
+		dispositivos.push_back(nuevo);
+	}
+	return dispositivos;
 }
 
 bool Base_de_Datos::agregar_carpeta(const std::string &nombre, const std::string &ruta)

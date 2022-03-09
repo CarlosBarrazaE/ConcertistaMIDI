@@ -184,11 +184,9 @@ void Controlador_Midi::conectar(Dispositivo_Midi *dispositivo, bool conexion_fis
 	if(m_secuenciador == NULL)
 		return;
 
-	//Habilita y conecta el dispositivo si esta disponible, si no lo esta solo se habilita
+	//Conecta el dispositivo si esta disponible
 	if(conexion_fisica)
 		dispositivo->conectado(true);
-	else
-		dispositivo->habilitado(true);
 
 	if(!dispositivo->conectado() || !dispositivo->habilitado())
 		return;
@@ -214,7 +212,7 @@ void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexi
 	if(m_secuenciador == NULL)
 		return;
 
-	//Deshabilita el dispositivo si no es una desconexion fisica o lo desconecta sin deshabilitar
+	//Desconecta el dispositivo
 	if(dispositivo->habilitado())
 	{
 		if(dispositivo->entrada_activa())
@@ -256,8 +254,6 @@ void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexi
 
 	if(desconexion_fisica)
 		dispositivo->conectado(false);
-	else
-		dispositivo->habilitado(false);
 }
 
 bool Controlador_Midi::hay_eventos()
@@ -312,7 +308,7 @@ Evento_Midi Controlador_Midi::leer()
 		if(origen != NULL)
 		{
 			origen->nota_entrada(evento.id_nota(), false);
-			if(origen->volumen_entrada() < 0.999f || origen->volumen_entrada() > 1.001f)
+			if(origen->volumen_entrada() < 0.999 || origen->volumen_entrada() > 1.001)
 				evento.velocidad_nota(static_cast<unsigned char>(evento.velocidad_nota() * origen->volumen_entrada()));
 		}
 	}
@@ -325,7 +321,7 @@ Evento_Midi Controlador_Midi::leer()
 			unsigned char velocidad = evento.velocidad_nota();
 			if(!origen->sensitivo())
 				velocidad = VELOCIDAD_NORMAL;
-			if(origen->volumen_entrada() < 0.999f || origen->volumen_entrada() > 1.001f || !origen->sensitivo())
+			if(origen->volumen_entrada() < 0.999 || origen->volumen_entrada() > 1.001 || !origen->sensitivo())
 				evento.velocidad_nota(static_cast<unsigned char>(velocidad * origen->volumen_entrada()));
 		}
 	}
@@ -406,13 +402,13 @@ void Controlador_Midi::escribir(Evento_Midi &evento_salida)
 		evento_salida.puerto(m_salida[x]->puerto());
 		if(	evento_salida.tipo_evento() == EventoMidi_NotaApagada)
 		{
-			if(m_salida[x]->volumen_salida() < 0.999f || m_salida[x]->volumen_salida() > 1.001f)
+			if(m_salida[x]->volumen_salida() < 0.999 || m_salida[x]->volumen_salida() > 1.001)
 				evento_salida.velocidad_nota(static_cast<unsigned char>(velocidad * m_salida[x]->volumen_salida()));
 			m_salida[x]->nota_salida(evento_salida.canal(), false);
 		}
 		else if(evento_salida.tipo_evento() == EventoMidi_NotaEncendida)
 		{
-			if(m_salida[x]->volumen_salida() < 0.999f || m_salida[x]->volumen_salida() > 1.001f)
+			if(m_salida[x]->volumen_salida() < 0.999 || m_salida[x]->volumen_salida() > 1.001)
 				evento_salida.velocidad_nota(static_cast<unsigned char>(velocidad * m_salida[x]->volumen_salida()));
 			m_salida[x]->nota_salida(evento_salida.canal(), true);
 		}
@@ -571,6 +567,11 @@ std::string Controlador_Midi::siguiente_mensaje()
 		return texto;
 	}
 	return "Sin notificacion";
+}
+
+std::vector<Dispositivo_Midi*> Controlador_Midi::lista_dispositivos()
+{
+	return m_dispositivos;
 }
 
 bool Controlador_Midi::hay_cambios_de_dispositivos()

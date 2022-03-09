@@ -15,7 +15,6 @@ Configuracion::Configuracion()
 	m_duracion_nota_original = 6500;
 	m_subtitulos_original = true;
 	m_teclado_visible_original.cambiar(21, 88);
-	m_teclado_util_original.cambiar(21, 88);
 
 	std::string ruta_base_de_datos = Usuario::carpeta_juego() + "concertista.db";
 	if(std::ifstream(ruta_base_de_datos))
@@ -25,25 +24,36 @@ Configuracion::Configuracion()
 		m_datos.abrir(ruta_base_de_datos);
 		m_datos.actualizar();//Actualiza la base de datos
 
-		//Configuracion MIDI
-		Dispositivo_Midi *dispositivo1 = m_controlador_midi.configurar_dispositivo(129, 2, ENTRADA, "Teclado y Ratón");
-		dispositivo1->capacidad_activa(ENTRADA);
-		dispositivo1->habilitado(true);
-		m_controlador_midi.conectar(dispositivo1, false);//Habilita el dispositivo
+		std::vector<Datos_Dispositivo> lista_dispositivos = m_datos.lista_dispositivos();
 
-		Dispositivo_Midi *dispositivo2 = m_controlador_midi.configurar_dispositivo(128, 0, SALIDA, "TiMidity");
-		dispositivo2->capacidad_activa(SALIDA);
-		dispositivo2->habilitado(true);
-		m_controlador_midi.conectar(dispositivo2, false);//Habilita el dispositivo
+		//Tamaño minimo para quedarme con el mayor de todos los rangos
+		if(lista_dispositivos.size() > 0)
+			m_teclado_util.cambiar(0, 24);
 
-		Dispositivo_Midi *dispositivo3 = m_controlador_midi.configurar_dispositivo(24, 0, ENTRADA | SALIDA, "CASIO USB-MIDI");
-		dispositivo3->teclas_luminosas(17);
-		dispositivo3->rango_teclado("21,88");
-		dispositivo3->volumen_entrada(1.0f);
-		dispositivo3->volumen_salida(1.0f);
-		dispositivo3->sensitivo(false);
-		dispositivo3->habilitado(true);
-		m_controlador_midi.conectar(dispositivo3, false);//Habilita el dispositivo
+		bool nuevo_rango = false;
+		for(Datos_Dispositivo &d : lista_dispositivos)
+		{
+			Dispositivo_Midi *dispositivo = m_controlador_midi.configurar_dispositivo(d.cliente, d.puerto, d.capacidad_activa, d.nombre);
+			dispositivo->capacidad_activa(d.capacidad_activa);
+			dispositivo->habilitado(d.habilitado);
+			dispositivo->sensitivo(d.sensitivo);
+			dispositivo->volumen_entrada(d.volumen_entrada);
+			dispositivo->rango_teclado(d.rango_teclado);
+			dispositivo->volumen_salida(d.volumen_salida);
+			dispositivo->teclas_luminosas(d.teclas_luminosas);
+
+			m_controlador_midi.conectar(dispositivo, false);
+
+			//Se queda con el teclado mas grande
+			if(dispositivo->es_entrada() && dispositivo->habilitado() && m_teclado_util <= dispositivo->rango_teclado())
+			{
+				m_teclado_util = dispositivo->rango_teclado();
+				nuevo_rango = true;
+			}
+		}
+		//Si no hay dispositivo de entrada o no estan habilitados se muestra una rango predeterminado
+		if(!nuevo_rango)
+			m_teclado_util.cambiar(21, 88);
 
 		//Configuracion General
 		m_pantalla_completa_original = this->leer("pantalla_completa", m_pantalla_completa_original);
@@ -58,7 +68,6 @@ Configuracion::Configuracion()
 		m_duracion_nota_original = this->leer("duracion_nota", m_duracion_nota_original);
 		m_subtitulos_original = this->leer("subtitulos", m_subtitulos_original);
 		m_teclado_visible_original.cargar(this->leer("teclado_visible", std::string("21,88")));
-		m_teclado_util_original.cargar(this->leer("teclado_util", std::string("21,88")));
 	}
 	else
 	{
@@ -81,7 +90,6 @@ Configuracion::Configuracion()
 	this->duracion_nota(m_duracion_nota_original);
 	m_subtitulos = m_subtitulos_original;
 	m_teclado_visible = m_teclado_visible_original;
-	m_teclado_util = m_teclado_util_original;
 }
 
 Configuracion::~Configuracion()
@@ -163,8 +171,6 @@ void Configuracion::guardar_configuracion()
 	}
 	if(m_teclado_visible_original != m_teclado_visible)
 		m_datos.escribir_configuracion("teclado_visible", m_teclado_visible.texto());
-	if(m_teclado_util_original != m_teclado_util)
-		m_datos.escribir_configuracion("teclado_util", m_teclado_util.texto());
 	m_datos.finalizar_transaccion();
 }
 
@@ -244,11 +250,6 @@ void Configuracion::subtitulos(bool estado)
 void Configuracion::teclado_visible(unsigned int inicial, unsigned int largo)
 {
 	m_teclado_visible.cambiar(inicial, largo);
-}
-
-void Configuracion::teclado_util(unsigned int inicial, unsigned int largo)
-{
-	m_teclado_util.cambiar(inicial, largo);
 }
 
 double Configuracion::volumen()
