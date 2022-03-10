@@ -12,8 +12,6 @@
 #include "../control/pista.h++"
 #include "../control/teclado_organo.h++"
 #include "../control/nota_activa.h++"
-#include "../libmidi/Midi.h++"
-#include "../libmidi/MidiComm.h++"
 
 #include <array>
 #include <vector>
@@ -42,11 +40,12 @@ private:
 
 	std::array<Color, 128> *m_notas_activas;
 	std::map<unsigned int, Color> *m_notas_requeridas;
-	unsigned int m_nota_enviada_anterior;
+	unsigned char m_nota_enviada_anterior;
+	std::vector<std::pair<unsigned char, bool>> m_eventos;
 
 	//Metodos
-	void dibujar_blancas(float x, float y, unsigned int tecla_inicial, unsigned int numero_teclas);
-	void dibujar_negras(float x, float y, unsigned int tecla_inicial, unsigned int numero_teclas);
+	void dibujar_blancas(float x, float y, unsigned char tecla_inicial, unsigned char numero_teclas);
+	void dibujar_negras(float x, float y, unsigned char tecla_inicial, unsigned char numero_teclas);
 
 public:
 	Organo(float x, float y, float ancho, Teclado_Organo *teclado_visible, Teclado_Organo *teclado_util, Administrador_Recursos *recursos);
@@ -62,6 +61,8 @@ public:
 	void notas_requeridas(std::map<unsigned int, Color> *notas_requeridas);
 
 	void calcular_tamannos();
+	bool hay_eventos();
+	std::pair<unsigned char, bool> obtener_evento();
 };
 
 #endif

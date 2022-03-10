@@ -38,11 +38,11 @@ Organo::~Organo()
 	delete m_generador_particulas;
 }
 
-void Organo::dibujar_blancas(float x, float y, unsigned int tecla_inicial, unsigned int numero_teclas)
+void Organo::dibujar_blancas(float x, float y, unsigned char tecla_inicial, unsigned char numero_teclas)
 {
 	float desplazamiento = x;
 	bool tecla_presionada_anterior = false;
-	for(unsigned int n=tecla_inicial; n<tecla_inicial+numero_teclas; n++)
+	for(unsigned char n=tecla_inicial; n<tecla_inicial+numero_teclas; n++)
 	{
 		//Se salta las negras
 		if(!Octava::es_blanca(n))
@@ -96,11 +96,11 @@ void Organo::dibujar_blancas(float x, float y, unsigned int tecla_inicial, unsig
 	}
 }
 
-void Organo::dibujar_negras(float x, float y, unsigned int tecla_inicial, unsigned int numero_teclas)
+void Organo::dibujar_negras(float x, float y, unsigned char tecla_inicial, unsigned char numero_teclas)
 {
 	float desplazamiento = 0;
-	unsigned int numero_blancas = 0;
-	for(unsigned int n=tecla_inicial; n<tecla_inicial+numero_teclas; n++)
+	unsigned char numero_blancas = 0;
+	for(unsigned char n=tecla_inicial; n<tecla_inicial+numero_teclas; n++)
 	{
 		//Se salta las blancas
 		if(Octava::es_blanca(n))
@@ -201,16 +201,16 @@ void Organo::evento_raton(Raton *raton)
 
 	if(raton->activado(BotonIzquierdo) && raton->esta_sobre(this->x(), this->y() - this->alto() + 10, this->ancho(), this->alto()))
 	{
-		unsigned int ajuste_teclas = 0;
+		unsigned char ajuste_teclas = 0;
 		//Cuenta el numero de teclas desde el inicio hasta la primera tecla visible sin contar la visible
 		if(m_teclado_visible->tecla_inicial() > 0)
 			ajuste_teclas = Octava::blancas_desde_inicio(m_teclado_visible->tecla_inicial()-1);
 
 		//Cuenta las teclas blancas que aparecen en pantalla
-		unsigned int tecla_presionada = static_cast<unsigned int>((static_cast<float>(raton->x()) - this->x()) / m_ancho_tecla_blanca);
+		unsigned char tecla_presionada = static_cast<unsigned char>((static_cast<float>(raton->x()) - this->x()) / m_ancho_tecla_blanca);
 
 		//Agrega las teclas blancas que faltan con el ajuste_teclas
-		unsigned int nota_enviar = Octava::nota_id_desde_blanca(tecla_presionada+ajuste_teclas);
+		unsigned char nota_enviar = Octava::nota_id_desde_blanca(tecla_presionada+ajuste_teclas);
 
 		//Verifica si es posible que se haya tocado una tecla negra
 		if(raton->esta_sobre(this->x(), this->y() - this->alto() + 10, this->ancho(), m_alto_tecla_negra))
@@ -243,16 +243,16 @@ void Organo::evento_raton(Raton *raton)
 		if(m_nota_enviada_anterior != nota_enviar)
 		{
 			//Apaga la nota anterior si se habia enviado una
-			//if(m_nota_enviada_anterior != SIN_NOTA)
-			//	sendNote(m_nota_enviada_anterior, false);
+			if(m_nota_enviada_anterior != SIN_NOTA)
+				m_eventos.push_back(std::pair<unsigned char, bool>(m_nota_enviada_anterior, false));
 			//Envia la nueva nota
-			//sendNote(nota_enviar, true);
+			m_eventos.push_back(std::pair<unsigned char, bool>(nota_enviar, true));
 			m_nota_enviada_anterior = nota_enviar;
 		}
 	}
 	else if(m_nota_enviada_anterior != SIN_NOTA)
 	{
-		//sendNote(m_nota_enviada_anterior, false);
+		m_eventos.push_back(std::pair<unsigned char, bool>(m_nota_enviada_anterior, false));
 		m_nota_enviada_anterior = SIN_NOTA;
 	}
 }
@@ -286,4 +286,22 @@ void Organo::calcular_tamannos()
 
 	m_generador_particulas->escala(m_ancho_tecla_blanca);
 	this->_dimension(this->ancho(), m_alto_tecla_blanca + 11);
+}
+
+bool Organo::hay_eventos()
+{
+	if(m_eventos.size() > 0)
+		return true;
+	return false;
+}
+
+std::pair<unsigned char, bool> Organo::obtener_evento()
+{
+	if(m_eventos.size() > 0)
+	{
+		std::pair<unsigned char, bool> &ultimo = m_eventos[m_eventos.size()-1];
+		m_eventos.pop_back();
+		return ultimo;
+	}
+	return std::pair<unsigned char, bool>(0, false);
 }

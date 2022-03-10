@@ -108,7 +108,7 @@ void Tablero_Notas::dibujar_lineas_verticales()
 {
 	float posicion_x = 0;
 	bool primera_parte = false;//La primera parte corresponde a la linea de DO
-	unsigned int posicion_inicial = m_teclado_visible->tecla_inicial() % 12;
+	unsigned char posicion_inicial = m_teclado_visible->tecla_inicial() % 12;
 	if(posicion_inicial == 0 || posicion_inicial > 5)
 	{
 		//Dibuja linea de DO
@@ -142,8 +142,8 @@ void Tablero_Notas::dibujar_notas_bajar(unsigned int pista)
 	float posicion_y = 0;//Es negativo hasta que la tota sale de la pantalla
 
 	//Datos para el dibujo final
-	unsigned int numero_nota = 0;//Id de la nota desde 0 hasta 127
-	unsigned int numero_notas_omitir = 0;
+	unsigned char numero_nota = 0;//Id de la nota desde 0 hasta 127
+	unsigned char numero_notas_omitir = 0;
 	if(m_teclado_visible->tecla_inicial() > 0)
 		numero_notas_omitir = Octava::blancas_desde_inicio(m_teclado_visible->tecla_inicial()-1);
 	float ancho_tecla = 0;//El ancho puede cambiar si es blanca o es negra
@@ -215,7 +215,7 @@ void Tablero_Notas::dibujar_notas_bajar(unsigned int pista)
 				m_rectangulo->color(Pista::Colores_pista[0]);
 		}
 
-		unsigned int numero_blancas = Octava::blancas_desde_inicio(numero_nota) - numero_notas_omitir;
+		unsigned char numero_blancas = Octava::blancas_desde_inicio(numero_nota) - numero_notas_omitir;
 		if(numero_blancas > 0)
 			numero_blancas--;
 		else
@@ -256,8 +256,8 @@ void Tablero_Notas::dibujar_notas_subir(unsigned int pista)
 	float posicion_y = 0;//Es negativo hasta que la tota sale de la pantalla
 
 	//Datos para el dibujo final
-	unsigned int numero_nota = 0;//Id de la nota desde 0 hasta 127
-	unsigned int numero_notas_omitir = 0;
+	unsigned char numero_nota = 0;//Id de la nota desde 0 hasta 127
+	unsigned char numero_notas_omitir = 0;
 	if(m_teclado_visible->tecla_inicial() > 0)
 		numero_notas_omitir = Octava::blancas_desde_inicio(m_teclado_visible->tecla_inicial()-1);
 	float ancho_tecla = 0;//El ancho puede cambiar si es blanca o es negra

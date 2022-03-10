@@ -9,18 +9,18 @@
 class Teclado_Organo
 {
 private:
-	unsigned int m_tecla_inicial = 0;
-	unsigned int m_numero_teclas = 128;
+	unsigned char m_tecla_inicial = 0;
+	unsigned char m_numero_teclas = 128;
 public:
 	Teclado_Organo();
-	void cambiar(unsigned int inicial, unsigned int largo);
+	void cambiar(unsigned char inicial, unsigned char largo);
 
-	unsigned int tecla_inicial();
-	void tecla_inicial(unsigned int inicial);
-	unsigned int tecla_final();
+	unsigned char tecla_inicial();
+	void tecla_inicial(unsigned char inicial);
+	unsigned char tecla_final();
 
-	unsigned int numero_teclas();
-	void numero_teclas(unsigned int largo);
+	unsigned char numero_teclas();
+	void numero_teclas(unsigned char largo);
 
 	void cargar(std::string datos);
 	std::string texto();

@@ -819,6 +819,11 @@ void VentanaOrgano::evento_raton(Raton *raton)
 	m_barra->evento_raton(raton);
 	m_tablero->evento_raton(raton);
 	m_organo->evento_raton(raton);
+	while(m_organo->hay_eventos())
+	{
+		std::pair<unsigned char, bool> evento = m_organo->obtener_evento();
+		m_controlador_midi->enviar_nota(evento.first, evento.second);
+	}
 	m_titulo_musica->evento_raton(raton);
 }
 

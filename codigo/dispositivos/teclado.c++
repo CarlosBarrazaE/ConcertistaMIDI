@@ -1,10 +1,10 @@
 #include "teclado.h++"
 
-unsigned int Teclado::Tecla_a_nota(int tecla)
+unsigned char Teclado::Tecla_a_nota(int tecla)
 {
-	const unsigned int octava = 4;
-	const unsigned int do_primera_octava = octava * 12;
-	const unsigned int do_segunda_octava = (octava+1) * 12;
+	const unsigned char octava = 4;
+	const unsigned char do_primera_octava = octava * 12;
+	const unsigned char do_segunda_octava = (octava+1) * 12;
 
 	switch(tecla)
 	{
