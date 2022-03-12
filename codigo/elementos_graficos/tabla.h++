@@ -47,7 +47,7 @@ public:
 	void dimension(float ancho, float alto) override;
 
 	void agregar_columna(std::string texto, bool centrado, unsigned int numero_espacio);
-	void insertar_fila(std::vector<std::string> texto);
+	void insertar_fila(const std::vector<std::string> &texto);
 	void vaciar();
 
 	void cambiar_seleccion(int cambio);

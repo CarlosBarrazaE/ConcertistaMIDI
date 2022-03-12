@@ -12,7 +12,7 @@ Tabla::Tabla(float x, float y, float ancho, float alto, float alto_fila, Adminis
 
 	m_espacio_total_columnas = 0;
 
-	m_panel_desplazamiento = new Panel_Desplazamiento(x, y+m_alto_fila, ancho, alto-m_alto_fila, m_alto_fila, 0, recursos);
+	m_panel_desplazamiento = new Panel_Desplazamiento(x, y+m_alto_fila, ancho, alto-m_alto_fila, 0, recursos);
 }
 
 Tabla::~Tabla()
@@ -143,7 +143,7 @@ void Tabla::agregar_columna(std::string texto, bool centrado, unsigned int numer
 	this->actualizar_ancho_columnas();
 }
 
-void Tabla::insertar_fila(std::vector<std::string> texto)
+void Tabla::insertar_fila(const std::vector<std::string> &texto)
 {
 	if(texto.size() != m_fila_titulo.size())
 	{

@@ -1,11 +1,12 @@
 #include "panel_desplazamiento.h++"
 #include "../registro.h++"
 
-Panel_Desplazamiento::Panel_Desplazamiento(float x, float y, float ancho, float alto, float fila, float margen_fila, Administrador_Recursos *recursos) : Elemento(x, y, ancho, alto)
+Panel_Desplazamiento::Panel_Desplazamiento(float x, float y, float ancho, float alto, float margen_fila, Administrador_Recursos *recursos) : Elemento(x, y, ancho, alto)
 {
+	//Fila Unica
 	m_columna = 0;
 	m_margen_columna = 0;
-	m_fila = fila;
+	m_fila = 0;
 	m_margen_fila = margen_fila;
 
 	this->inicializar(recursos);
@@ -210,6 +211,7 @@ void Panel_Desplazamiento::actualizar_dimension()
 	}
 	float x_actual = x_inicio;
 	float y_actual = this->y();
+	float ultimo_alto = 0;
 	int contador_columnas = 1;
 	for(unsigned int i=0; i<m_elementos.size(); i++)
 	{
@@ -224,12 +226,27 @@ void Panel_Desplazamiento::actualizar_dimension()
 			contador_columnas = 0;
 			x_actual = x_inicio;
 			if(i<m_elementos.size()-1)
-				y_actual += m_fila + m_margen_fila;
+			{
+				//Si fila es 0 entonces el alto depende de cada elemento
+				if(Funciones::comparar_float(m_fila ,0.0f, 0.1f))
+					y_actual += m_elementos[i]->alto() + m_margen_fila;
+				else
+					y_actual += m_fila + m_margen_fila;
+			}
+			else
+			{
+				//El alto del ultimo elemento, no se agrega el margen
+				ultimo_alto = m_elementos[i]->alto();
+			}
 		}
 		contador_columnas++;
 	}
 
-	m_alto_actual = y_actual + m_fila - this->y();
+	//Si fila es 0 entonces el alto depende de cada elemento
+	if(Funciones::comparar_float(m_fila ,0.0f, 0.1f))
+		m_alto_actual = y_actual + ultimo_alto - this->y();
+	else
+		m_alto_actual = y_actual + m_fila - this->y();
 	m_desplazamiento_y = 0;
 
 	m_calcular_posicion = false;

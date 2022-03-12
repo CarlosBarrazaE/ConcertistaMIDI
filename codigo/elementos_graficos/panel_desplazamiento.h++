@@ -3,6 +3,7 @@
 
 #include "elemento.h++"
 #include "../dispositivos/pantalla.h++"
+#include "../util/funciones.h++"
 #include <vector>
 
 class Panel_Desplazamiento : public Elemento
@@ -30,7 +31,7 @@ private:
 	void inicializar(Administrador_Recursos *recursos);
 
 public:
-	Panel_Desplazamiento(float x, float y, float ancho, float alto, float fila, float margen_fila, Administrador_Recursos *recursos);
+	Panel_Desplazamiento(float x, float y, float ancho, float alto, float margen_fila, Administrador_Recursos *recursos);
 	Panel_Desplazamiento(float x, float y, float ancho, float alto, float columna, float fila, float margen_columna, float margen_fila, Administrador_Recursos *recursos);
 	~Panel_Desplazamiento();
 
