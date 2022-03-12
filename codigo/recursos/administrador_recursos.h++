@@ -76,12 +76,12 @@ enum FiguraGeometrica
 
 enum ModeloLetra
 {
-	LetraTituloGrande = 0,
-	LetraTitulo,
-	LetraGrande,
-	LetraMediana,
-	LetraChica,
-	LetraMuyChica,
+	LetraTituloGrande = 35,
+	LetraTitulo = 20,
+	LetraGrande = 16,
+	LetraMediana = 14,
+	LetraChica = 12,
+	LetraMuyChica = 8,
 };
 
 class Administrador_Recursos

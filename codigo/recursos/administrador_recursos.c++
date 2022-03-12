@@ -66,7 +66,7 @@ Administrador_Recursos::Administrador_Recursos()
 
 	m_formato_letras[LetraTituloGrande] = new Tipografia(Normal, 35);
 	m_formato_letras[LetraTitulo] = new Tipografia(Normal, 20);
-	m_formato_letras[LetraGrande] = new Tipografia(Normal, 16);
+	//m_formato_letras[LetraGrande] = new Tipografia(Normal, 16);
 	m_formato_letras[LetraMediana] = new Tipografia(Normal, 14);
 	m_formato_letras[LetraChica] = new Tipografia(Normal, 12);
 	m_formato_letras[LetraMuyChica] = new Tipografia(Normal, 8);
