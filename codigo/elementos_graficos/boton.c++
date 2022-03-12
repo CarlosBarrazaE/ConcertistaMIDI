@@ -1,6 +1,6 @@
 #include "boton.h++"
 
-Boton::Boton(float x, float y, float ancho, float alto, std::string texto, Administrador_Recursos *recursos) : Elemento(x, y, ancho, alto), m_texto(recursos)
+Boton::Boton(float x, float y, float ancho, float alto, std::string texto, Administrador_Recursos *recursos) : Elemento(x, y, ancho, alto)
 {
 	m_rectangulo = recursos->figura(F_Rectangulo);
 	m_textura_boton = recursos->textura(T_Boton);
@@ -8,24 +8,30 @@ Boton::Boton(float x, float y, float ancho, float alto, std::string texto, Admin
 
 	this->inicializar();
 
-	m_texto.texto(texto);
-	m_texto.tipografia(recursos->tipografia(LetraMediana));
-	m_texto.posicion(this->x(), this->y());
-	if(m_texto.largo_texto()+20 > ancho)
+	if(texto.length() > 0)
 	{
-		//El ancho del texto mas 10 pixeles por lado
-		m_texto.dimension(m_texto.largo_texto()+20, alto);
-		this->dimension(m_texto.largo_texto()+20, alto);
+		m_texto = new Etiqueta(recursos);
+		m_texto->texto(texto);
+		m_texto->tipografia(recursos->tipografia(LetraMediana));
+		m_texto->posicion(this->x(), this->y());
+		if(m_texto->largo_texto()+20 > ancho)
+		{
+			//El ancho del texto mas 10 pixeles por lado
+			m_texto->dimension(m_texto->largo_texto()+20, alto);
+			this->dimension(m_texto->largo_texto()+20, alto);
+		}
+		else
+			m_texto->dimension(ancho, alto);
+		m_texto->centrado(true);
+		m_texto->color(m_color_texto);
 	}
 	else
-		m_texto.dimension(ancho, alto);
-	m_texto.centrado(true);
-	m_texto.color(m_color_texto);
+		m_texto = NULL;
 
 	m_habilitado = true;
 }
 
-Boton::Boton(float x, float y, float ancho, float alto, std::string texto, ModeloLetra modelo_letra, Administrador_Recursos *recursos) : Elemento(x, y, ancho, alto), m_texto(recursos)
+Boton::Boton(float x, float y, float ancho, float alto, std::string texto, ModeloLetra modelo_letra, Administrador_Recursos *recursos) : Elemento(x, y, ancho, alto)
 {
 	m_rectangulo = recursos->figura(F_Rectangulo);
 	m_textura_boton = recursos->textura(T_Boton);
@@ -33,25 +39,33 @@ Boton::Boton(float x, float y, float ancho, float alto, std::string texto, Model
 
 	this->inicializar();
 
-	m_texto.texto(texto);
-	m_texto.tipografia(recursos->tipografia(modelo_letra));
-	m_texto.posicion(this->x(), this->y());
-	if(m_texto.largo_texto()+20 > ancho)
+	if(texto.length() > 0)
 	{
-		//El ancho del texto mas 10 pixeles por lado
-		m_texto.dimension(m_texto.largo_texto()+20, alto);
-		this->dimension(m_texto.largo_texto()+20, alto);
+		m_texto = new Etiqueta(recursos);
+		m_texto->texto(texto);
+		m_texto->tipografia(recursos->tipografia(modelo_letra));
+		m_texto->posicion(this->x(), this->y());
+		if(m_texto->largo_texto()+20 > ancho)
+		{
+			//El ancho del texto mas 10 pixeles por lado
+			m_texto->dimension(m_texto->largo_texto()+20, alto);
+			this->dimension(m_texto->largo_texto()+20, alto);
+		}
+		else
+			m_texto->dimension(ancho, alto);
+		m_texto->centrado(true);
+		m_texto->color(m_color_texto);
 	}
 	else
-		m_texto.dimension(ancho, alto);
-	m_texto.centrado(true);
-	m_texto.color(m_color_texto);
+		m_texto = NULL;
 
 	m_habilitado = true;
 }
 
 Boton::~Boton()
 {
+	if(m_texto != NULL)
+		delete m_texto;
 }
 
 void Boton::inicializar()
@@ -79,7 +93,8 @@ void Boton::dibujar()
 	m_rectangulo->dibujar(this->x(), this->y(), this->ancho(), this->alto(), m_color_boton_actual);
 
 	//Dibuja el texto
-	m_texto.dibujar();
+	if(m_texto != NULL)
+		m_texto->dibujar();
 }
 
 void Boton::evento_raton(Raton *raton)
@@ -120,13 +135,15 @@ void Boton::evento_raton(Raton *raton)
 void Boton::posicion(float x, float y)
 {
 	this->_posicion(x, y);
-	m_texto.posicion(this->x(), this->y());
+	if(m_texto != NULL)
+		m_texto->posicion(this->x(), this->y());
 }
 
 void Boton::centrado(bool centrado)
 {
 	this->_centrado(centrado);
-	m_texto.posicion(this->x(), this->y());
+	if(m_texto != NULL)
+		m_texto->posicion(this->x(), this->y());
 }
 
 bool Boton::esta_activado()
@@ -151,12 +168,14 @@ void Boton::color_boton(Color color)
 
 void Boton::color_texto(Color color)
 {
-	m_texto.color(color);
+	if(m_texto != NULL)
+		m_texto->color(color);
 }
 
 void Boton::tipografia(Tipografia *tipografia)
 {
-	m_texto.tipografia(tipografia);
+	if(m_texto != NULL)
+		m_texto->tipografia(tipografia);
 }
 
 void Boton::habilitado(bool estado)
@@ -171,7 +190,7 @@ void Boton::habilitado(bool estado)
 			m_color_texto = m_color_texto + 0.5f;
 			m_color_boton_actual = m_color_boton_normal;
 		}
-
-		m_texto.color(m_color_texto);
+		if(m_texto != NULL)
+			m_texto->color(m_color_texto);
 	}
 }

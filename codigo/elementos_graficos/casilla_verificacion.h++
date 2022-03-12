@@ -10,7 +10,7 @@ private:
 	Textura2D *m_textura_activa, *m_textura_inactiva, *m_textura_sombra;
 	Rectangulo *m_rectangulo;
 
-	Etiqueta m_texto;
+	Etiqueta *m_texto;
 	Color m_color_textura;
 
 	bool m_activo, m_clic, m_cambio_estado;

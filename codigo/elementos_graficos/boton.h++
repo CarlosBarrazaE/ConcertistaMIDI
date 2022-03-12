@@ -11,7 +11,7 @@ private:
 	Textura2D *m_textura_boton;
 	Rectangulo *m_rectangulo;
 
-	Etiqueta m_texto;
+	Etiqueta *m_texto;
 	Color m_color_boton_actual;
 	Color m_color_boton_normal;
 	Color m_color_boton_sobre;
