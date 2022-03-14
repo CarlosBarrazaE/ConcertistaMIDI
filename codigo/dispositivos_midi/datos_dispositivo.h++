@@ -6,6 +6,7 @@ struct Datos_Dispositivo
 	unsigned char cliente = 0;
 	unsigned char puerto = 0;
 	std::string nombre;
+	unsigned char capacidad = 0;
 	unsigned char capacidad_activa = 0;
 	bool habilitado = false;
 	bool sensitivo = true;
