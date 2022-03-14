@@ -157,7 +157,7 @@ std::vector<unsigned char> Dispositivo_Midi::notas_entrada() const
 
 bool Dispositivo_Midi::es_salida()
 {
-	if((m_capacidad & SALIDA) == ENTRADA)
+	if((m_capacidad & SALIDA) == SALIDA)
 		return true;
 	return false;
 }
