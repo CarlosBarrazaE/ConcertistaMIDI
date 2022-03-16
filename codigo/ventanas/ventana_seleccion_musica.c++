@@ -184,7 +184,6 @@ void VentanaSeleccionMusica::crear_tabla(std::string ruta_abrir)
 		Notificacion::Aviso("La carpeta no existe", 5);
 	else
 	{
-		Registro::Depurar("Mostrando la lista de carpetas");
 		//Limpia la lista de archivos
 		m_lista_archivos.clear();
 
