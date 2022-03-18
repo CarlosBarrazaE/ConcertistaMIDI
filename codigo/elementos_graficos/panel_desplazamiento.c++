@@ -40,11 +40,8 @@ void Panel_Desplazamiento::inicializar(Administrador_Recursos *recursos)
 
 	m_sobre_barra = false;
 	m_boton_activado = false;
-	m_enviar_evento = false;
+	m_adentro_panel = false;
 	m_proporcion = 0;
-
-	//Un evento de raton ficticio con una posicion muy lejana
-	m_raton_ficticio.actualizar_posicion(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
 }
 
 void Panel_Desplazamiento::actualizar(unsigned int diferencia_tiempo)
@@ -57,17 +54,15 @@ void Panel_Desplazamiento::actualizar(unsigned int diferencia_tiempo)
 	}
 
 	//0.05 de opacidad por fotograma
-	if(m_enviar_evento && m_animacion < 1)
+	if(m_adentro_panel && m_animacion < 1)
 		m_animacion += (static_cast<float>(diferencia_tiempo)/1000000000.0f) * 3;
-	else if(!m_enviar_evento && m_animacion > 0)
+	else if(!m_adentro_panel && m_animacion > 0)
 		m_animacion -= (static_cast<float>(diferencia_tiempo)/1000000000.0f) * 3;
 }
 
 void Panel_Desplazamiento::dibujar()
 {
-
 	glScissor(static_cast<int>(this->x()), static_cast<int>(Pantalla::Alto-this->y()-this->alto()), static_cast<int>(this->ancho()), static_cast<int>(this->alto()));
-	glEnable(GL_SCISSOR_TEST);
 	Elemento *e;
 	for(unsigned int i=0; i<m_elementos.size(); i++)
 	{
@@ -90,57 +85,70 @@ void Panel_Desplazamiento::dibujar()
 		m_rectangulo->dibujar_estirable(this->x()+this->ancho()-10, this->y()+10-m_desplazamiento_y*m_proporcion, 10, this->alto() * m_proporcion, 0, 10);
 		m_rectangulo->extremos_fijos(false, false);
 	}
-	glDisable(GL_SCISSOR_TEST);
+	glScissor(0, 0, static_cast<int>(Pantalla::Ancho), static_cast<int>(Pantalla::Alto));
 }
 
 void Panel_Desplazamiento::evento_raton(Raton *raton)
 {
 	//Solo si el raton esta dentro del espacio del componente se envian el evento
-	Raton *evento_raton;
+	Raton *raton_actual;
 	if(raton->esta_sobre(this->x(), this->y(), this->ancho(), this->alto()))
 	{
-		evento_raton = raton;
-		m_enviar_evento = true;
+		m_adentro_panel = true;
+		raton_actual = raton;
 	}
 	else
-		evento_raton = &m_raton_ficticio;
+	{
+		m_adentro_panel = false;
+		m_raton_modificado = *raton;
+		int nueva_x = 0, nueva_y = 0;
+		if(raton->x() < static_cast<int>(this->x()))
+			nueva_x = -1000;
+		else if(raton->x() > static_cast<int>(this->x() + this->ancho()))
+			nueva_x = static_cast<int>(Pantalla::Ancho) + 1000;
+		else
+			nueva_x = raton->x();
 
-	//Eventos fuera del area no se envian
-	if(!m_enviar_evento)
-		return;
+		if(raton->y() < static_cast<int>(this->y()))
+			nueva_y = -1000;
+		else if(raton->y() > static_cast<int>(this->y() + this->alto()))
+			nueva_y = static_cast<int>(Pantalla::Alto) + 1000;
+		else
+			nueva_y = raton->y();
 
-	//Se envia un evento de raton ficticio solo una vez para desmarcar los componentes
-	if(evento_raton == &m_raton_ficticio)
-		m_enviar_evento = false;
+		//Cuando sale, mueve la posicion lejos para no seleccionar ningun elemento por fuera del panel
+		m_raton_modificado.actualizar_posicion(nueva_x, nueva_y);
+		raton_actual = &m_raton_modificado;
+	}
 
 	float desplazamiento_nuevo_y = 0;
 	float desplazamiento_anterior_y = 0;
 	if(this->alto() < m_alto_actual)
 	{
 		desplazamiento_anterior_y = m_desplazamiento_y;
-		if(evento_raton->dy() != 0)
+		if(raton_actual->dy() != 0)
 		{
 			//Desplazamiento con ruedita
-			m_desplazamiento_y += static_cast<float>(evento_raton->dy()*20);
+			m_desplazamiento_y += static_cast<float>(raton_actual->dy()*20);
 		}
-		else if(raton->esta_sobre(this->x()+this->ancho()-10, this->y()+10, this->ancho(), this->alto()-20))
+		else if(raton_actual->esta_sobre(this->x()+this->ancho()-10, this->y()+10, this->ancho(), this->alto()-20))
 		{
 			//Desplazamiento con clic en la barra
-			if(evento_raton->activado(BotonIzquierdo) && m_sobre_barra)
+			if(raton_actual->activado(BotonIzquierdo) && m_sobre_barra)
 			{
 				m_boton_activado = true;
 				//El inicio de la barra esta en this->y() + 20, el centro de la barra desplazable esta en (this->alto() * m_proporcion) / 2)
-				m_desplazamiento_y = -(static_cast<float>(evento_raton->y()) - (this->y() + 20 + (this->alto() * m_proporcion) / 2)) / m_proporcion;
+				m_desplazamiento_y = -(static_cast<float>(raton_actual->y()) - (this->y() + 20 + (this->alto() * m_proporcion) / 2)) / m_proporcion;
 			}
-			else if(!evento_raton->activado(BotonIzquierdo))
+			else if(!raton_actual->activado(BotonIzquierdo))
 				m_sobre_barra = true;
 		}
 		else if(m_boton_activado)//Desplazamiento arrastrando la barra
-			m_desplazamiento_y = -(static_cast<float>(evento_raton->y()) - (this->y() + 20 + (this->alto() * m_proporcion) / 2)) / m_proporcion;
+			m_desplazamiento_y = -(static_cast<float>(raton_actual->y()) - (this->y() + 20 + (this->alto() * m_proporcion) / 2)) / m_proporcion;
 		else
 			m_sobre_barra = false;
 
-		if(!evento_raton->activado(BotonIzquierdo) && m_boton_activado)
+		if(!raton_actual->activado(BotonIzquierdo) && m_boton_activado)
 			m_boton_activado = false;
 
 		if(m_desplazamiento_y > 0)
@@ -151,11 +159,19 @@ void Panel_Desplazamiento::evento_raton(Raton *raton)
 		desplazamiento_nuevo_y = m_desplazamiento_y - desplazamiento_anterior_y;
 	}
 
+	Elemento *e;
 	for(unsigned int i=0; i<m_elementos.size(); i++)
 	{
+		e = m_elementos[i];
+		//Desplaza los elementos si es necesario
 		if(this->alto() < m_alto_actual)
-			m_elementos[i]->posicion(m_elementos[i]->x(), m_elementos[i]->y() + desplazamiento_nuevo_y);
-		m_elementos[i]->evento_raton(evento_raton);
+			e->posicion(e->x(), e->y() + desplazamiento_nuevo_y);
+
+		if(e->y() + e->alto() > this->y() && e->y() < this->y() + this->alto() &&
+			e->x() + e->ancho() > this->x() && e->x() < this->x() + this->ancho())
+		{
+			e->evento_raton(raton_actual);
+		}
 	}
 }
 

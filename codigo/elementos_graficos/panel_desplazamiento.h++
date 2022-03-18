@@ -23,8 +23,8 @@ private:
 	float m_animacion = 1;
 	bool m_sobre_barra;
 	bool m_boton_activado;
-	bool m_enviar_evento;
-	Raton m_raton_ficticio;
+	bool m_adentro_panel;
+	Raton m_raton_modificado;
 
 	std::vector<Elemento*> m_elementos;
 

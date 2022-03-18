@@ -16,6 +16,8 @@ set(elementos_graficos
 	${CMAKE_CURRENT_SOURCE_DIR}/casilla_verificacion.c++
 	${CMAKE_CURRENT_SOURCE_DIR}/entrada_texto.c++
 	${CMAKE_CURRENT_SOURCE_DIR}/selector_archivos.c++
+	${CMAKE_CURRENT_SOURCE_DIR}/control_deslizante.c++
+	${CMAKE_CURRENT_SOURCE_DIR}/configuracion_dispositivo.c++
 
 	${CMAKE_CURRENT_SOURCE_DIR}/panel_desplazamiento.c++
 	${CMAKE_CURRENT_SOURCE_DIR}/panel_solapa.c++

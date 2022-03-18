@@ -75,9 +75,10 @@ void Tabla::dibujar()
 
 void Tabla::evento_raton(Raton *raton)
 {
+	m_panel_desplazamiento->evento_raton(raton);
 	if(!raton->esta_sobre(this->x(), this->y(), this->ancho(), this->alto()))
 		return;//Ignora eventos fuera de la tabla
-	m_panel_desplazamiento->evento_raton(raton);
+
 	for(unsigned int x=0; x<m_filas.size(); x++)
 	{
 		if(m_filas[x]->esta_seleccionado() && x != m_fila_seleccionada)

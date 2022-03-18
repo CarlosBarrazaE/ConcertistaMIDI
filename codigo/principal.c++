@@ -122,6 +122,8 @@ void configurar_gl()
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_SCISSOR_TEST);
+	glScissor(0, 0, ANCHO, ALTO);
 }
 
 void controlar_eventos(Controlador_Juego *controlador, SDL_Event *evento)

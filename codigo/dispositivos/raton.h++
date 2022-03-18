@@ -31,6 +31,8 @@ public:
 	int dy();
 
 	bool esta_sobre(float x, float y, float ancho, float alto);
+
+	Raton& operator = (const Raton &r);
 };
 
 #endif

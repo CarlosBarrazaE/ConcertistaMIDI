@@ -93,3 +93,19 @@ bool Raton::esta_sobre(float x, float y, float ancho, float alto)
 		return true;
 	return false;
 }
+
+Raton& Raton::operator = (const Raton &r)
+{
+	if(this != &r)
+	{
+		m_posicion_x = r.m_posicion_x;
+		m_posicion_y = r.m_posicion_y;
+		m_desplazamiento_x = r.m_desplazamiento_x;
+		m_desplazamiento_y = r.m_desplazamiento_y;
+		m_boton_izquierdo = r.m_boton_izquierdo;
+		m_boton_central = r.m_boton_central;
+		m_boton_derecho = r.m_boton_derecho;
+		m_numero_clics = r.m_numero_clics;
+	}
+	return *this;
+}

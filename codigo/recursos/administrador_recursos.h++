@@ -60,6 +60,8 @@ enum Textura
 	T_CasillaSombra,
 	T_FlechaIzquierda,
 	T_FlechaDerecha,
+	T_FlechaAbajo,
+	T_FlechaArriba,
 };
 
 enum SombreadorVF

@@ -48,6 +48,8 @@ Administrador_Recursos::Administrador_Recursos()
 	m_archivo_texturas[T_CasillaSombra] = ruta + "/texturas/casilla_verificacion_sombra.tga";
 	m_archivo_texturas[T_FlechaIzquierda] = ruta + "/texturas/flecha_izquierda.tga";
 	m_archivo_texturas[T_FlechaDerecha] = ruta + "/texturas/flecha_derecha.tga";
+	m_archivo_texturas[T_FlechaAbajo] = ruta + "/texturas/flecha_abajo.tga";
+	m_archivo_texturas[T_FlechaArriba] = ruta + "/texturas/flecha_arriba.tga";
 
 	m_archivo_sombreador_vertice[S_Rectangulo] = ruta + "/sombreadores/rectangulo_sv.glsl";
 	m_archivo_sombreador_fragmento[S_Rectangulo] = ruta + "/sombreadores/rectangulo_sf.glsl";
@@ -149,6 +151,7 @@ void Administrador_Recursos::actualizar_pantalla(float nuevo_ancho, float nuevo_
 	m_ancho = nuevo_ancho;
 	m_alto = nuevo_alto;
 
+	glScissor(0, 0, static_cast<int>(nuevo_ancho), static_cast<int>(nuevo_alto));
 	m_matriz_proyeccion = glm::ortho(0.0f, m_ancho, m_alto, 0.0f, -1.0f, 1.0f);
 
 	for(std::map<SombreadorVF, Sombreador*>::iterator e=m_lista_sombreadores.begin(); e != m_lista_sombreadores.end(); e++)
