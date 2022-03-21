@@ -22,9 +22,10 @@ private:
 	float m_porcentaje_agarre_raton;
 
 	float m_animacion = 1;
+	float m_tiempo_inactividad = 0;
 	bool m_sobre_barra;
 	bool m_boton_activado;
-	bool m_adentro_panel;
+	bool m_mostrar_barra;
 	Raton m_raton_modificado;
 
 	std::vector<Elemento*> m_elementos;

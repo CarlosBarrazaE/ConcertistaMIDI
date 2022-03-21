@@ -21,6 +21,7 @@ public:
 	void actualizar_boton(BotonRaton boton, bool estado, int numero_clics);
 	void actualizar_posicion(int x, int y);
 	void actualizar_desplazamiento(int desplazamiento_x, int desplazamiento_y);
+	void anular_desplazamiento();
 
 	bool activado(BotonRaton boton);
 	BotonRaton boton_activado();

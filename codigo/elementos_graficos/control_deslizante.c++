@@ -67,9 +67,15 @@ void Control_Deslizante::evento_raton(Raton *raton)
 		if(!m_moviendo_barra)
 		{
 			if(raton->dy() > 0)
-				this->cambiar_valor(m_valor_actual + m_valor_paso) ;
+			{
+				this->cambiar_valor(m_valor_actual + m_valor_paso);
+				raton->anular_desplazamiento();//Anula el evento de desplazamiento una vez utilizado
+			}
 			if(raton->dy() < 0)
-				this->cambiar_valor(m_valor_actual - m_valor_paso) ;
+			{
+				this->cambiar_valor(m_valor_actual - m_valor_paso);
+				raton->anular_desplazamiento();//Anula el evento de desplazamiento una vez utilizado
+			}
 		}
 	}
 	else

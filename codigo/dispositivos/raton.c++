@@ -39,6 +39,12 @@ void Raton::actualizar_desplazamiento(int desplazamiento_x, int desplazamiento_y
 	m_desplazamiento_y = desplazamiento_y;
 }
 
+void Raton::anular_desplazamiento()
+{
+	m_desplazamiento_x = 0;
+	m_desplazamiento_y = 0;
+}
+
 bool Raton::activado(BotonRaton boton)
 {
 	if(boton == BotonIzquierdo)

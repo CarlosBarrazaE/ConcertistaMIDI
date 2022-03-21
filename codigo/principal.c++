@@ -133,9 +133,15 @@ void controlar_eventos(Controlador_Juego *controlador, SDL_Event *evento)
 	else if (evento->type == SDL_KEYUP)
 		eventos_taclado(controlador, evento->key.keysym.sym, false);
 	else if(evento->type == SDL_MOUSEBUTTONDOWN)
+	{
+		SDL_CaptureMouse(SDL_TRUE);
 		eventos_raton_botones(controlador, evento->button.button, evento->button.state, evento->button.clicks);
+	}
 	else if(evento->type == SDL_MOUSEBUTTONUP)
+	{
+		SDL_CaptureMouse(SDL_FALSE);
 		eventos_raton_botones(controlador, evento->button.button, evento->button.state, evento->button.clicks);
+	}
 	else if(evento->type == SDL_MOUSEMOTION)
 		eventos_raton_posicion(controlador, evento->button.x, evento->button.y);
 	else if(evento->type == SDL_MOUSEWHEEL)
