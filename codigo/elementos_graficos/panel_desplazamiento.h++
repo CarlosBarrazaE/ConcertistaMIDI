@@ -19,6 +19,7 @@ private:
 	float m_margen_columna, m_margen_fila;
 	bool m_calcular_posicion;
 	float m_proporcion;
+	float m_porcentaje_agarre_raton;
 
 	float m_animacion = 1;
 	bool m_sobre_barra;

@@ -29,9 +29,9 @@ Panel_Desplazamiento::~Panel_Desplazamiento()
 
 void Panel_Desplazamiento::inicializar(Administrador_Recursos *recursos)
 {
-	m_alto_actual = 0;
-	m_desplazamiento_x = 0;
-	m_desplazamiento_y = 0;
+	m_alto_actual = 0.0f;
+	m_desplazamiento_x = 0.0f;
+	m_desplazamiento_y = 0.0f;
 
 	m_calcular_posicion = true;
 
@@ -41,7 +41,8 @@ void Panel_Desplazamiento::inicializar(Administrador_Recursos *recursos)
 	m_sobre_barra = false;
 	m_boton_activado = false;
 	m_adentro_panel = false;
-	m_proporcion = 0;
+	m_proporcion = 0.0f;
+	m_porcentaje_agarre_raton = 0.0f;
 }
 
 void Panel_Desplazamiento::actualizar(unsigned int diferencia_tiempo)
@@ -126,7 +127,7 @@ void Panel_Desplazamiento::evento_raton(Raton *raton)
 	if(this->alto() < m_alto_actual)
 	{
 		desplazamiento_anterior_y = m_desplazamiento_y;
-		if(raton_actual->dy() != 0)
+		if(raton_actual->dy() != 0 && !m_boton_activado)
 		{
 			//Desplazamiento con ruedita
 			m_desplazamiento_y += static_cast<float>(raton_actual->dy()*20);
@@ -134,19 +135,35 @@ void Panel_Desplazamiento::evento_raton(Raton *raton)
 		else if(raton_actual->esta_sobre(this->x()+this->ancho()-10, this->y()+10, this->ancho(), this->alto()-20))
 		{
 			//Desplazamiento con clic en la barra
-			if(raton_actual->activado(BotonIzquierdo) && m_sobre_barra)
+			if(raton_actual->activado(BotonIzquierdo) && m_sobre_barra && !m_boton_activado)
 			{
 				m_boton_activado = true;
-				//El inicio de la barra esta en this->y() + 20, el centro de la barra desplazable esta en (this->alto() * m_proporcion) / 2)
-				m_desplazamiento_y = -(static_cast<float>(raton_actual->y()) - (this->y() + 20 + (this->alto() * m_proporcion) / 2)) / m_proporcion;
+				//El inicio de la barra desplazable esta en this->y() + 10 si el desplazamiento es 0
+				float inicio_barra = this->y()+10-m_desplazamiento_y*m_proporcion;//De la barra desplazable
+				float largo_barra = this->alto() * m_proporcion;//De la barra desplazable
+				float fin_barra = inicio_barra + largo_barra;//De la barra desplazable
+
+				//0% agarro la barra desde arriba y 100% agarró la barra desde abajo
+				if(raton->y() >= static_cast<int>(inicio_barra) && raton->y() <= static_cast<int>(fin_barra))
+					m_porcentaje_agarre_raton = (static_cast<float>(raton->y()) - inicio_barra) / largo_barra;
+				else
+					m_porcentaje_agarre_raton = 0.5f;//Desde el centro porque hizo clic fuera de la barra desplazable
+
+				float posicion_agarre_raton = largo_barra * m_porcentaje_agarre_raton;
+				m_desplazamiento_y = -(static_cast<float>(raton_actual->y()) - (this->y() + 10 + posicion_agarre_raton)) / m_proporcion;
 			}
 			else if(!raton_actual->activado(BotonIzquierdo))
 				m_sobre_barra = true;
 		}
-		else if(m_boton_activado)//Desplazamiento arrastrando la barra
-			m_desplazamiento_y = -(static_cast<float>(raton_actual->y()) - (this->y() + 20 + (this->alto() * m_proporcion) / 2)) / m_proporcion;
 		else
 			m_sobre_barra = false;
+
+		if(m_boton_activado)//Desplazamiento arrastrando la barra
+		{
+			float largo_barra = this->alto() * m_proporcion;
+			float posicion_agarre_raton = largo_barra * m_porcentaje_agarre_raton;
+			m_desplazamiento_y = -(static_cast<float>(raton_actual->y()) - (this->y() + 10 + posicion_agarre_raton)) / m_proporcion;
+		}
 
 		if(!raton_actual->activado(BotonIzquierdo) && m_boton_activado)
 			m_boton_activado = false;
