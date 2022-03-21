@@ -41,6 +41,7 @@ Dispositivo_Midi *Controlador_Midi::dispositivo(unsigned char cliente, unsigned 
 	std::string nombre;
 	if(!exacto)
 		nombre = m_secuenciador->nombre_dispositivo(cliente, puerto);
+
 	Dispositivo_Midi *dispositivo = NULL;
 	for(unsigned long int x=0; x<m_dispositivos.size(); x++)
 	{
@@ -62,7 +63,10 @@ Dispositivo_Midi *Controlador_Midi::dispositivo(unsigned char cliente, unsigned 
 
 		//Se encontro en otro puerto un dispositivo con el mismo nombre pero no se puede estar seguro hasta terminar
 		if(!exacto && m_dispositivos[x]->puerto() == puerto && m_dispositivos[x]->nombre() == nombre)
+		{
+			m_dispositivos[x]->cliente(cliente);//Actualiza el cliente porque esta en otra posición
 			dispositivo = m_dispositivos[x];
+		}
 	}
 	if(dispositivo != NULL)
 		return dispositivo;
