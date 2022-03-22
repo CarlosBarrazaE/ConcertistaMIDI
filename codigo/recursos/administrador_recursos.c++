@@ -50,6 +50,9 @@ Administrador_Recursos::Administrador_Recursos()
 	m_archivo_texturas[T_FlechaDerecha] = ruta + "/texturas/flecha_derecha.tga";
 	m_archivo_texturas[T_FlechaAbajo] = ruta + "/texturas/flecha_abajo.tga";
 	m_archivo_texturas[T_FlechaArriba] = ruta + "/texturas/flecha_arriba.tga";
+	m_archivo_texturas[T_ControlDeslizante_Fondo] = ruta + "/texturas/control_deslizante_fondo.tga";
+	m_archivo_texturas[T_ControlDeslizante_Relleno] = ruta + "/texturas/control_deslizante_relleno.tga";
+	m_archivo_texturas[T_ControlDeslizante_Boton] = ruta + "/texturas/control_deslizante_boton.tga";
 
 	m_archivo_sombreador_vertice[S_Rectangulo] = ruta + "/sombreadores/rectangulo_sv.glsl";
 	m_archivo_sombreador_fragmento[S_Rectangulo] = ruta + "/sombreadores/rectangulo_sf.glsl";

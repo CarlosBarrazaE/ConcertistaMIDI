@@ -9,6 +9,9 @@ class Control_Deslizante : public Elemento
 private:
 	Administrador_Recursos *m_recursos;
 	Rectangulo *m_rectangulo;
+	Textura2D *m_textura_fondo;
+	Textura2D *m_textura_relleno;
+	Textura2D *m_textura_boton;
 
 	//Elementos
 	Etiqueta m_texto_valor;
@@ -20,11 +23,13 @@ private:
 	double m_valor_paso;
 
 	//Control
+	float m_centro_vertical;
 	float m_largo_barra;
 	float m_largo_barra_color;
 	bool m_cambio_valor;
 	bool m_moviendo_pre_activado;
 	bool m_moviendo_barra;
+	float m_posicion_agarre;
 
 	void calcular_valores_nuevos();
 public:

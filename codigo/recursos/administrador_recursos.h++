@@ -62,6 +62,9 @@ enum Textura
 	T_FlechaDerecha,
 	T_FlechaAbajo,
 	T_FlechaArriba,
+	T_ControlDeslizante_Fondo,
+	T_ControlDeslizante_Relleno,
+	T_ControlDeslizante_Boton,
 };
 
 enum SombreadorVF

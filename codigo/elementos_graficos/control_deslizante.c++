@@ -5,13 +5,18 @@ Control_Deslizante::Control_Deslizante(float x, float y, float ancho, float alto
 	m_recursos = recursos;
 	m_rectangulo = recursos->figura(F_Rectangulo);
 
+	m_textura_fondo = recursos->textura(T_ControlDeslizante_Fondo);
+	m_textura_relleno = recursos->textura(T_ControlDeslizante_Relleno);
+	m_textura_boton = recursos->textura(T_ControlDeslizante_Boton);
+
 	m_texto_valor.dimension(10, alto);
 	m_texto_valor.centrado_vertical(true);
 	m_texto_valor.tipografia(recursos->tipografia(LetraChica));
 	m_texto_valor.texto("100%");
 	m_texto_valor.posicion(x+ancho - m_texto_valor.largo_texto(), y);
 
-	m_largo_barra = ancho - (m_texto_valor.largo_texto() + 10);
+	m_centro_vertical = y + alto/2;
+	m_largo_barra = ancho - (m_texto_valor.largo_texto() + 20);
 
 	m_valor_minimo = 0.0;
 	m_valor_maximo = 1.5;
@@ -20,6 +25,7 @@ Control_Deslizante::Control_Deslizante(float x, float y, float ancho, float alto
 	m_cambio_valor = false;
 	m_moviendo_pre_activado = false;
 	m_moviendo_barra = false;
+	m_posicion_agarre = 0.0f;
 
 	this->calcular_valores_nuevos();
 }
@@ -49,18 +55,34 @@ void Control_Deslizante::actualizar(unsigned int /*diferencia_tiempo*/)
 
 void Control_Deslizante::dibujar()
 {
-	m_rectangulo->textura(false);
-	m_rectangulo->dibujar(this->x(), this->y(), m_largo_barra, this->alto(), Color(0.9f, 0.9f, 0.9f));
-	m_rectangulo->dibujar(this->x(), this->y(), m_largo_barra_color, this->alto(), Color(0.0f, 0.5f, 1.0f));
+	//10px es el alto del control deslizante
+	//40x42 es el tamaño del boton incluyendo la sombra escalado
+	m_rectangulo->textura(true);
+	m_rectangulo->extremos_fijos(true, false);
+	m_textura_fondo->activar();
+	m_rectangulo->color(Color(1.0f, 1.0f, 1.0f));
+	m_rectangulo->dibujar_estirable(this->x(), m_centro_vertical-5, m_largo_barra, 10, 20, 0);
+	m_textura_relleno->activar();
+	m_rectangulo->dibujar_estirable(this->x(), m_centro_vertical-5, m_largo_barra_color, 10, 20, 0);
+	m_rectangulo->extremos_fijos(false, false);
+
+	m_textura_boton->activar();
+	m_rectangulo->dibujar(this->x()+m_largo_barra_color-20, m_centro_vertical-20, 40, 42);
 	m_texto_valor.dibujar();
 }
 
 void Control_Deslizante::evento_raton(Raton *raton)
 {
-	if(raton->esta_sobre(this->x(), this->y(), m_largo_barra, this->alto()))
+	//-3 y -4 porque se descarta la sompra por ese motivo el area solo es de 34x34
+	bool sobre_boton = raton->esta_sobre(this->x()+m_largo_barra_color-(20-3), m_centro_vertical-(20-4), 34, 34);
+	if(sobre_boton || raton->esta_sobre(this->x(), m_centro_vertical-5, m_largo_barra, 10))
 	{
 		if(m_moviendo_pre_activado && raton->activado(BotonIzquierdo))
+		{
+			if(sobre_boton && !m_moviendo_barra)
+				m_posicion_agarre = static_cast<float>(raton->x()) - (this->x() + m_largo_barra_color);
 			m_moviendo_barra = true;
+		}
 		else if(!raton->activado(BotonIzquierdo))
 			m_moviendo_pre_activado = true;
 
@@ -82,11 +104,14 @@ void Control_Deslizante::evento_raton(Raton *raton)
 		m_moviendo_pre_activado = false;
 
 	if(!raton->activado(BotonIzquierdo))
+	{
 		m_moviendo_barra = false;
+		m_posicion_agarre = 0.0f;
+	}
 
 	if(m_moviendo_barra)
 	{
-		float posicion_x = static_cast<float>(raton->x()) - this->x();
+		float posicion_x = static_cast<float>(raton->x()) - (this->x() + m_posicion_agarre);
 		if(posicion_x > m_largo_barra)
 			this->cambiar_valor(m_valor_maximo);
 		else if(posicion_x < 0)
@@ -100,12 +125,16 @@ void Control_Deslizante::evento_raton(Raton *raton)
 	}
 }
 
-void Control_Deslizante::posicion(float /*x*/, float /*y*/)
+void Control_Deslizante::posicion(float x, float y)
 {
+	this->_posicion(x, y);
+	m_centro_vertical = this->y() + this->alto()/2;
 }
 
-void Control_Deslizante::dimension(float /*ancho*/, float /*alto*/)
+void Control_Deslizante::dimension(float ancho, float alto)
 {
+	this->_dimension(ancho, alto);
+	m_centro_vertical = this->y() + this->alto()/2;
 }
 
 void Control_Deslizante::valor_minimo(double valor)
