@@ -24,6 +24,7 @@ private:
 
 	//Control
 	float m_centro_vertical;
+	float m_largo_maximo_texto;
 	float m_largo_barra;
 	float m_largo_barra_color;
 	bool m_cambio_valor;

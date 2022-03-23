@@ -9,14 +9,15 @@ Control_Deslizante::Control_Deslizante(float x, float y, float ancho, float alto
 	m_textura_relleno = recursos->textura(T_ControlDeslizante_Relleno);
 	m_textura_boton = recursos->textura(T_ControlDeslizante_Boton);
 
-	m_texto_valor.dimension(10, alto);
+	m_texto_valor.dimension(20, alto);
 	m_texto_valor.centrado_vertical(true);
 	m_texto_valor.tipografia(recursos->tipografia(LetraChica));
 	m_texto_valor.texto("100%");
-	m_texto_valor.posicion(x+ancho - m_texto_valor.largo_texto(), y);
+	m_largo_maximo_texto = m_texto_valor.largo_texto();
+	m_texto_valor.posicion(x+ancho - m_largo_maximo_texto, y);
 
 	m_centro_vertical = y + alto/2;
-	m_largo_barra = ancho - (m_texto_valor.largo_texto() + 20);
+	m_largo_barra = ancho - (m_largo_maximo_texto + 20);
 
 	m_valor_minimo = 0.0;
 	m_valor_maximo = 1.5;
@@ -129,12 +130,16 @@ void Control_Deslizante::posicion(float x, float y)
 {
 	this->_posicion(x, y);
 	m_centro_vertical = this->y() + this->alto()/2;
+	m_texto_valor.posicion(this->x()+this->ancho() - m_largo_maximo_texto, this->y());
 }
 
 void Control_Deslizante::dimension(float ancho, float alto)
 {
 	this->_dimension(ancho, alto);
 	m_centro_vertical = this->y() + this->alto()/2;
+	m_largo_barra = this->ancho() - (m_largo_maximo_texto+20);
+	m_texto_valor.dimension(this->x()+this->ancho() - m_largo_maximo_texto, this->alto());
+	this->calcular_valores_nuevos();
 }
 
 void Control_Deslizante::valor_minimo(double valor)
