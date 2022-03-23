@@ -8,6 +8,8 @@
 #include "../elementos_graficos/lista_opciones.h++"
 #include "../elementos_graficos/tabla.h++"
 #include "../elementos_graficos/selector_archivos.h++"
+#include "../elementos_graficos/panel_desplazamiento.h++"
+#include "../elementos_graficos/configuracion_dispositivo.h++"
 #include "../control/configuracion.h++"
 #include "../util/usuario.h++"
 
@@ -37,8 +39,8 @@ private:
 
 	//Solapa Dispositivos (3)
 	Etiqueta *m_solapa3_titulo;
-	Etiqueta *m_solapa3_texto_entrada, *m_solapa3_texto_salida, *m_solapa3_texto_tamanno_teclado, *m_solapa3_texto_teclas_luminosas;
-	Lista_Opciones *m_solapa3_opcion_entrada, *m_solapa3_opcion_salida, *m_solapa3_tamanno_teclado, *m_solapa3_teclas_luminosas;
+	Panel_Desplazamiento *m_solapa3_panel;
+	std::vector<Configuracion_Dispositivo*> m_solapa3_lista_dispositivos;
 
 	//Solapa Video (4)
 	Etiqueta *m_solapa4_titulo;

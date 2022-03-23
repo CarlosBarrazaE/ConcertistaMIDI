@@ -21,7 +21,7 @@ VentanaConfiguracion::VentanaConfiguracion(Configuracion *configuracion, Adminis
 	//Pestaña de configuracion general
 	m_solapa = new Panel_Solapa(0, 40, 250, Pantalla::Alto, recursos);
 	m_solapa->agregar_solapa("General");
-	m_solapa1_titulo = new Etiqueta(250, 50, Pantalla::Ancho-250, 40, true, "General", LetraTitulo, recursos);
+	m_solapa1_titulo = new Etiqueta(260, 50, Pantalla::Ancho-270, 40, true, "General", LetraTitulo, recursos);
 	m_solapa1_texto_restablecer = new Etiqueta(260, 100, Pantalla::Ancho-270, 30, false, "Volver a la configuración predeterminada", LetraMediana, recursos);
 	m_solapa1_texto_limpiar = new Etiqueta(260, 140, Pantalla::Ancho-270, 30, false, "Limpiar la base de datos", LetraMediana, recursos);
 	m_solapa1_texto_borrar = new Etiqueta(260, 180, Pantalla::Ancho-270, 30, false, "Borrar la base de datos", LetraMediana, recursos);
@@ -44,7 +44,7 @@ VentanaConfiguracion::VentanaConfiguracion(Configuracion *configuracion, Adminis
 
 	//Pestaña de configuracion de carpetas midi
 	m_solapa->agregar_solapa("Carpetas MIDI");
-	m_solapa2_titulo = new Etiqueta(250, 50, Pantalla::Ancho-250, 40, true, "Carpetas MIDI", LetraTitulo, recursos);
+	m_solapa2_titulo = new Etiqueta(260, 50, Pantalla::Ancho-270, 40, true, "Carpetas MIDI", LetraTitulo, recursos);
 	m_solapa2_tabla = new Tabla(260, 100, Pantalla::Ancho-270, Pantalla::Alto-190, 30, recursos);
 	m_solapa2_tabla->agregar_columna("Nombre", false, 1);
 	m_solapa2_tabla->agregar_columna("Ruta", false, 3);
@@ -59,71 +59,22 @@ VentanaConfiguracion::VentanaConfiguracion(Configuracion *configuracion, Adminis
 
 	//Pestaña de configuracion de dispositivos midis
 	m_solapa->agregar_solapa("Dispositivos");
-	m_solapa3_titulo = new Etiqueta(250, 50, Pantalla::Ancho-250, 40, true, "Dispositivos", LetraTitulo, recursos);
-	m_solapa3_texto_entrada = new Etiqueta(260, 100, Pantalla::Ancho-270, 30, false, "Dispositivo de Entrada", LetraMediana, recursos);
-	m_solapa3_texto_salida = new Etiqueta(260, 140, Pantalla::Ancho-270, 30, false, "Dispositivo de Salida", LetraMediana, recursos);
-	m_solapa3_texto_tamanno_teclado = new Etiqueta(260, 180, Pantalla::Ancho-270, 30, false, "Numero de Teclas", LetraMediana, recursos);
-	m_solapa3_texto_teclas_luminosas = new Etiqueta(260, 220, Pantalla::Ancho-270, 30, false, "Teclas Luminosas", LetraMediana, recursos);
-	m_solapa3_opcion_entrada = new Lista_Opciones(500, 100, 300, 20, true, recursos);
-	m_solapa3_opcion_salida = new Lista_Opciones(500, 140, 300, 20, true, recursos);
-	m_solapa3_tamanno_teclado = new Lista_Opciones(500, 180, 300, 20, true, recursos);
-	m_solapa3_teclas_luminosas = new Lista_Opciones(500, 210, 300, 20, true, recursos);
-	//Se agregan las opciones opciones_textos
-	m_solapa3_opcion_entrada->tipografia(recursos->tipografia(LetraMediana));
-	std::vector<std::string> dispositivos_disponibles;
-	std::vector<Dispositivo_Midi*> lista_dispositivos = m_configuracion->controlador_midi()->lista_dispositivos();
-	for(Dispositivo_Midi* d : lista_dispositivos)
-		dispositivos_disponibles.push_back(std::to_string(d->cliente()) + ":" + std::to_string(d->puerto()) + " " + d->nombre());
-	m_solapa3_opcion_entrada->opciones_textos(dispositivos_disponibles);
-	m_solapa3_opcion_salida->tipografia(recursos->tipografia(LetraMediana));
-	//TODO m_solapa3_opcion_salida->opciones_textos(this->obtener_dispositivos(MidiCommOut::GetDeviceList()));
+	m_solapa3_titulo = new Etiqueta(260, 50, Pantalla::Ancho-270, 40, true, "Dispositivos", LetraTitulo, recursos);
+	m_solapa3_panel = new Panel_Desplazamiento(260, 100, Pantalla::Ancho-270, Pantalla::Alto-150, 10, recursos);
 
-	std::vector<std::string> opciones_teclado;
-	opciones_teclado.push_back("Teclado (24 teclas)");
-	opciones_teclado.push_back("Organo de 37 teclas");
-	opciones_teclado.push_back("Organo de 49 teclas");
-	opciones_teclado.push_back("Organo de 61 teclas");
-	opciones_teclado.push_back("Organo de 76 teclas");
-	opciones_teclado.push_back("Organo de 88 teclas");
-
-	m_solapa3_tamanno_teclado->opciones_textos(opciones_teclado);
-	m_solapa3_tamanno_teclado->tipografia(recursos->tipografia(LetraMediana));
-	m_solapa3_teclas_luminosas->tipografia(recursos->tipografia(LetraMediana));
-	m_solapa3_teclas_luminosas->opciones_textos(Teclas_Luminosas::Lista);
-
-	m_solapa3_opcion_entrada->opcion_predeterminada(0);
-	m_solapa3_opcion_salida->opcion_predeterminada(0);
-
-	unsigned int opcion_predeterminada_util = 0;
-	if(m_configuracion->teclado_util().numero_teclas() == 24)
-		opcion_predeterminada_util = 0;
-	else if(m_configuracion->teclado_util().numero_teclas() == 37)
-		opcion_predeterminada_util = 1;
-	else if(m_configuracion->teclado_util().numero_teclas() == 49)
-		opcion_predeterminada_util = 2;
-	else if(m_configuracion->teclado_util().numero_teclas() == 61)
-		opcion_predeterminada_util = 3;
-	else if(m_configuracion->teclado_util().numero_teclas() == 76)
-		opcion_predeterminada_util = 4;
-	else if(m_configuracion->teclado_util().numero_teclas() == 88)
-		opcion_predeterminada_util = 5;
-
-	m_solapa3_tamanno_teclado->opcion_predeterminada(opcion_predeterminada_util);
-	m_solapa3_teclas_luminosas->opcion_predeterminada(0);
+	Controlador_Midi *controlador = m_configuracion->controlador_midi();
+	for(unsigned long int x=0; x<controlador->lista_dispositivos().size(); x++)
+	{
+		m_solapa3_lista_dispositivos.push_back(new Configuracion_Dispositivo(0, 0, Pantalla::Ancho-270, controlador->lista_dispositivos()[x], recursos));
+		m_solapa3_panel->agregar_elemento(m_solapa3_lista_dispositivos[x]);
+	}
 
 	m_solapa->agregar_elemento_solapa(2, m_solapa3_titulo);
-	m_solapa->agregar_elemento_solapa(2, m_solapa3_texto_entrada);
-	m_solapa->agregar_elemento_solapa(2, m_solapa3_texto_salida);
-	m_solapa->agregar_elemento_solapa(2, m_solapa3_texto_tamanno_teclado);
-	m_solapa->agregar_elemento_solapa(2, m_solapa3_texto_teclas_luminosas);
-	m_solapa->agregar_elemento_solapa(2, m_solapa3_opcion_entrada);
-	m_solapa->agregar_elemento_solapa(2, m_solapa3_opcion_salida);
-	m_solapa->agregar_elemento_solapa(2, m_solapa3_tamanno_teclado);
-	m_solapa->agregar_elemento_solapa(2, m_solapa3_teclas_luminosas);
+	m_solapa->agregar_elemento_solapa(2, m_solapa3_panel);
 
 	//Pestaña de configuracion de videos
 	m_solapa->agregar_solapa("Video");
-	m_solapa4_titulo = new Etiqueta(250, 50, Pantalla::Ancho-250, 40, true, "Video", LetraTitulo, recursos);
+	m_solapa4_titulo = new Etiqueta(260, 50, Pantalla::Ancho-270, 40, true, "Video", LetraTitulo, recursos);
 	m_solapa4_casilla_pantalla_completa = new Casilla_Verificacion(260, 100, Pantalla::Ancho-270, 30, "Pantalla Completa (F11)", recursos);
 	m_solapa->agregar_elemento_solapa(3, m_solapa4_titulo);
 	m_solapa->agregar_elemento_solapa(3, m_solapa4_casilla_pantalla_completa);
@@ -161,14 +112,7 @@ VentanaConfiguracion::~VentanaConfiguracion()
 
 
 	delete m_solapa3_titulo;
-	delete m_solapa3_texto_entrada;
-	delete m_solapa3_texto_salida;
-	delete m_solapa3_texto_tamanno_teclado;
-	delete m_solapa3_texto_teclas_luminosas;
-	delete m_solapa3_opcion_entrada;
-	delete m_solapa3_opcion_salida;
-	delete m_solapa3_tamanno_teclado;
-	delete m_solapa3_teclas_luminosas;
+	delete m_solapa3_panel;
 
 	delete m_solapa4_titulo;
 	delete m_solapa4_casilla_pantalla_completa;
@@ -244,6 +188,18 @@ void VentanaConfiguracion::actualizar(unsigned int diferencia_tiempo)
 	if(m_selector_archivos != NULL)
 		m_selector_archivos->actualizar(diferencia_tiempo);
 	m_solapa->actualizar(diferencia_tiempo);
+
+	if(m_solapa->solapa_activa() == 2)
+	{
+		bool cambiar_altura = false;
+		for(unsigned long int x=0; x<m_solapa3_lista_dispositivos.size() && !cambiar_altura; x++)
+		{
+			if(m_solapa3_lista_dispositivos[x]->cambio_altura())
+				cambiar_altura = true;
+		}
+		if(cambiar_altura)
+			m_solapa3_panel->actualizar_dimension();
+	}
 }
 
 void VentanaConfiguracion::dibujar()
@@ -437,10 +393,9 @@ void VentanaConfiguracion::evento_pantalla(float ancho, float alto)
 	m_solapa2_eliminar->posicion(Pantalla::Ancho-160, Pantalla::Alto-80);
 
 	m_solapa3_titulo->dimension(Pantalla::Ancho-250, 40);
-	m_solapa3_opcion_entrada->dimension(ancho - 500, 20); //new Lista_Opciones(500, 100, 300, 20, true, recursos);
-	m_solapa3_opcion_salida->dimension(ancho - 500, 20);//new Lista_Opciones(500, 140, 300, 20, true, recursos);
-	m_solapa3_tamanno_teclado->dimension(ancho - 500, 20);
-	m_solapa3_teclas_luminosas->dimension(ancho - 500, 20);//new Lista_Opciones(500, 180, 300, 20, true, recursos);
+	m_solapa3_panel->dimension(Pantalla::Ancho-270, Pantalla::Alto-150);
+	for(Configuracion_Dispositivo *d : m_solapa3_lista_dispositivos)
+		d->dimension(Pantalla::Ancho-270, 0);
 
 	m_solapa4_titulo->dimension(Pantalla::Ancho-250, 40);
 	m_solapa4_casilla_pantalla_completa->dimension(Pantalla::Ancho-270, 30);
