@@ -55,6 +55,7 @@ public:
 	unsigned long int obtener_seleccion();
 	bool seleccion_activada();
 	bool seleccion();
+	bool seleccion_visible();
 };
 
 #endif

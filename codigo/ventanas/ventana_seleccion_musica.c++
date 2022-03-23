@@ -419,6 +419,8 @@ void VentanaSeleccionMusica::evento_teclado(Tecla tecla, bool estado)
 
 void VentanaSeleccionMusica::evento_pantalla(float ancho, float alto)
 {
+	float alto_tabla_anterior = m_tabla_archivos.alto();
+	bool fila_seleccionada_visible = m_tabla_archivos.seleccion_visible();
 	m_texto_titulo.dimension(ancho, 40);
 	m_ruta_exploracion.dimension(ancho-20, 30);
 	m_tabla_archivos.dimension(ancho-20, alto-140);
@@ -428,5 +430,6 @@ void VentanaSeleccionMusica::evento_pantalla(float ancho, float alto)
 
 	//Actualiza la seleccion en caso que al achicar el tamaño de la ventana
 	//vaya a quedar fuera de la tabla.
-	m_tabla_archivos.seleccionar(m_tabla_archivos.obtener_seleccion());
+	if(alto_tabla_anterior > m_tabla_archivos.alto() && fila_seleccionada_visible)
+		m_tabla_archivos.seleccionar(m_tabla_archivos.obtener_seleccion());
 }

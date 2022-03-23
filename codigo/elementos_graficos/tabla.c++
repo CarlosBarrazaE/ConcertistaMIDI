@@ -235,7 +235,7 @@ void Tabla::cambiar_seleccion(int cambio)
 
 void Tabla::seleccionar(unsigned long int seleccion)
 {
-	//Actualiza las posiciones de los elementos antes de moverlos, normalmente esto se hace
+	//Actualiza las posiciones de los elementos antes de moverlos, normalmente esto lo hace
 	//el panel de desplazamiento una vez al actualizar, pero la llamada a esta función
 	//puede ser realizada antes de actualizar
 	m_panel_desplazamiento->actualizar_dimension();
@@ -278,4 +278,15 @@ bool Tabla::seleccion_activada()
 bool Tabla::seleccion()
 {
 	return m_seleccion;
+}
+
+bool Tabla::seleccion_visible()
+{
+	//Se sale por arriba
+	if(m_filas[m_fila_seleccionada]->y() < this->y()+m_alto_fila)
+		return false;
+	//Se sale por abajo
+	else if(m_filas[m_fila_seleccionada]->y() + m_filas[m_fila_seleccionada]->alto() > this->y()+this->alto())
+		return false;
+	return true;
 }

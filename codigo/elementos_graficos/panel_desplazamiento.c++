@@ -272,7 +272,7 @@ void Panel_Desplazamiento::actualizar_dimension()
 	int contador_columnas = 1;
 	for(unsigned int i=0; i<m_elementos.size(); i++)
 	{
-		m_elementos[i]->posicion(x_actual, y_actual);
+		m_elementos[i]->posicion(x_actual, y_actual+m_desplazamiento_y);
 
 		if(contador_columnas < numero_columnas)
 		{
@@ -304,7 +304,23 @@ void Panel_Desplazamiento::actualizar_dimension()
 		m_alto_actual = y_actual + ultimo_alto - this->y();
 	else
 		m_alto_actual = y_actual + m_fila - this->y();
-	m_desplazamiento_y = 0;
+
+	float altura_faltante = m_alto_actual - this->alto();
+	if(altura_faltante > 0)
+	{
+		if(m_desplazamiento_y * -1 > altura_faltante)
+		{
+			m_desplazamiento_y = -altura_faltante;
+			//No requeria tanto desplazamiento pero no se sabia antes
+			this->actualizar_dimension();
+		}
+	}
+	else if(m_desplazamiento_y < 0)
+	{
+		m_desplazamiento_y = 0;
+		//No requeria desplazamiento pero no se sabia antes
+		this->actualizar_dimension();
+	}
 
 	m_calcular_posicion = false;
 	if(this->alto() < m_alto_actual)
