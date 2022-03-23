@@ -25,12 +25,11 @@ Configuracion_Dispositivo::Configuracion_Dispositivo(float x, float y, float anc
 	m_mostrar_configuracion = false;
 	m_elementos_creados = false;
 	m_alto_minimo = this->alto();
-	m_alto_maximo = 360.0f;
+	m_alto_maximo = this->alto();
+	m_alto_nuevo = 0;
 	m_direccion = 0;
 
 	m_cambio_altura = false;
-
-	m_mostrar_linea = false;
 }
 
 Configuracion_Dispositivo::~Configuracion_Dispositivo()
@@ -50,7 +49,10 @@ Configuracion_Dispositivo::~Configuracion_Dispositivo()
 			delete m_sensitivo;
 			delete m_volumen_entrada;
 			delete m_rango_teclado;
+		}
 
+		if(m_dispositivo->es_salida())
+		{
 			//Salida
 			delete m_texto_salida;
 			delete m_texto_volumen_salida;
@@ -66,7 +68,7 @@ void Configuracion_Dispositivo::crear_nuevos_elementos()
 	m_texto_tipo_dispositivo = new Etiqueta(this->x()+10, this->y()+50, 200, 20, false, "Modo Dispositivo:", LetraMediana, m_recursos);
 	m_texto_tipo_dispositivo->centrado_vertical(true);
 
-	m_opciones_tipo_dispositivo = new Lista_Opciones(this->x()+200, this->y()+50, this->ancho()-220, 20, true, m_recursos);
+	m_opciones_tipo_dispositivo = new Lista_Opciones(this->x()+220, this->y()+50, this->ancho()-240, 20, true, m_recursos);
 	m_opciones_tipo_dispositivo->tipografia(m_recursos->tipografia(LetraMediana));
 
 	std::vector<std::string> opciones_tipo;
@@ -95,41 +97,102 @@ void Configuracion_Dispositivo::crear_nuevos_elementos()
 	m_opciones_tipo_dispositivo->opciones_textos(opciones_tipo);
 	m_opciones_tipo_dispositivo->opcion_predeterminada(opcion_seleccionada);
 
-	m_texto_entrada = new Etiqueta(this->x()+10, this->y()+90, this->ancho()-20, 20, true, "Entrada", LetraMediana, m_recursos);
-	m_texto_sensitivo = new Etiqueta(this->x()+10, this->y()+130, 200, 20, false, "Sensitivo:", LetraMediana, m_recursos);
-	m_texto_volumen_entrada = new Etiqueta(this->x()+10, this->y()+170, 200, 20, false, "Volumen:", LetraMediana, m_recursos);
-	m_texto_rango = new Etiqueta(this->x()+10, this->y()+210, 200, 20, false, "Tamaño del Teclado:", LetraMediana, m_recursos);
+	m_alto_maximo = m_alto_minimo + 40;
+	if(m_dispositivo->es_entrada())
+	{
+		m_texto_entrada = new Etiqueta(this->x()+10, this->y()+90, this->ancho()-20, 20, true, "Entrada", LetraMediana, m_recursos);
+		m_texto_sensitivo = new Etiqueta(this->x()+10, this->y()+130, 200, 20, false, "Sensitivo:", LetraMediana, m_recursos);
+		m_texto_volumen_entrada = new Etiqueta(this->x()+10, this->y()+170, 200, 20, false, "Volumen:", LetraMediana, m_recursos);
+		m_texto_rango = new Etiqueta(this->x()+10, this->y()+210, 200, 20, false, "Tamaño del Teclado:", LetraMediana, m_recursos);
 
-	m_texto_entrada->centrado_vertical(true);
-	m_texto_sensitivo->centrado_vertical(true);
-	m_texto_volumen_entrada->centrado_vertical(true);
-	m_texto_rango->centrado_vertical(true);
+		m_texto_entrada->centrado_vertical(true);
+		m_texto_sensitivo->centrado_vertical(true);
+		m_texto_volumen_entrada->centrado_vertical(true);
+		m_texto_rango->centrado_vertical(true);
 
-	m_sensitivo = new Casilla_Verificacion(this->x()+200, this->y()+125, 30, 30, "", m_recursos);
-	m_volumen_entrada = new Control_Deslizante(this->x()+200, this->y()+170, this->ancho()-220, 20, m_recursos);
-	m_rango_teclado = new Lista_Opciones(this->x()+200, this->y()+210, this->ancho()-220, 20, true, m_recursos);
-	m_rango_teclado->tipografia(m_recursos->tipografia(LetraMediana));
-	std::vector<std::string> opciones_teclado;
-	opciones_teclado.push_back("Teclado (24 teclas)");
-	opciones_teclado.push_back("Organo de 37 teclas");
-	opciones_teclado.push_back("Organo de 49 teclas");
-	opciones_teclado.push_back("Organo de 61 teclas");
-	opciones_teclado.push_back("Organo de 76 teclas");
-	opciones_teclado.push_back("Organo de 88 teclas");
-	m_rango_teclado->opciones_textos(opciones_teclado);
+		m_sensitivo = new Casilla_Verificacion(this->x()+220, this->y()+125, 30, 30, "", m_recursos);
+		m_volumen_entrada = new Control_Deslizante(this->x()+220, this->y()+170, this->ancho()-240, 20, m_recursos);
+		m_rango_teclado = new Lista_Opciones(this->x()+220, this->y()+210, this->ancho()-240, 20, true, m_recursos);
+		m_rango_teclado->tipografia(m_recursos->tipografia(LetraMediana));
+		std::vector<std::string> opciones_teclado;
+		opciones_teclado.push_back("Teclado (24 teclas)");
+		opciones_teclado.push_back("Organo de 37 teclas");
+		opciones_teclado.push_back("Organo de 49 teclas");
+		opciones_teclado.push_back("Organo de 61 teclas");
+		opciones_teclado.push_back("Organo de 76 teclas");
+		opciones_teclado.push_back("Organo de 88 teclas");
+		m_rango_teclado->opciones_textos(opciones_teclado);
 
-	m_texto_salida = new Etiqueta(this->x()+10, this->y()+250, this->ancho()-20, 20, true, "Salida", LetraMediana, m_recursos);
-	m_texto_volumen_salida = new Etiqueta(this->x()+10, this->y()+290, 200, 20, false, "Volumen:", LetraMediana, m_recursos);
-	m_texto_teclado_luminoso = new Etiqueta(this->x()+10, this->y()+330, 200, 20, false, "Teclado Luminoso:", LetraMediana, m_recursos);
+		m_alto_maximo += 160;
+	}
 
-	m_texto_salida->centrado_vertical(true);
-	m_texto_volumen_salida->centrado_vertical(true);
-	m_texto_teclado_luminoso->centrado_vertical(true);
+	if(m_dispositivo->es_salida())
+	{
+		float desplazado = 0;
+		if(this->mostrar_entrada())
+			desplazado = 160;
 
-	m_volumen_salida = new Control_Deslizante(this->x()+200, this->y()+290, this->ancho()-220, 20, m_recursos);
-	m_teclado_luminoso = new Lista_Opciones(this->x()+200, this->y()+330, this->ancho()-220, 20, true, m_recursos);
-	m_teclado_luminoso->tipografia(m_recursos->tipografia(LetraMediana));
-	m_teclado_luminoso->opciones_textos(Teclas_Luminosas::Lista);
+		m_texto_salida = new Etiqueta(this->x()+10, this->y()+desplazado+90, this->ancho()-20, 20, true, "Salida", LetraMediana, m_recursos);
+		m_texto_volumen_salida = new Etiqueta(this->x()+10, this->y()+desplazado+130, 200, 20, false, "Volumen:", LetraMediana, m_recursos);
+		m_texto_teclado_luminoso = new Etiqueta(this->x()+10, this->y()+desplazado+170, 200, 20, false, "Teclado Luminoso:", LetraMediana, m_recursos);
+
+		m_texto_salida->centrado_vertical(true);
+		m_texto_volumen_salida->centrado_vertical(true);
+		m_texto_teclado_luminoso->centrado_vertical(true);
+
+		m_volumen_salida = new Control_Deslizante(this->x()+220, this->y()+desplazado+130, this->ancho()-240, 20, m_recursos);
+		m_teclado_luminoso = new Lista_Opciones(this->x()+220, this->y()+desplazado+170, this->ancho()-240, 20, true, m_recursos);
+		m_teclado_luminoso->tipografia(m_recursos->tipografia(LetraMediana));
+		m_teclado_luminoso->opciones_textos(Teclas_Luminosas::Lista);
+
+		m_alto_maximo += 120;
+	}
+}
+
+bool Configuracion_Dispositivo::mostrar_entrada()
+{
+	if(!m_mostrar_configuracion)
+		return false;
+
+	if(m_dispositivo->es_entrada())
+	{
+		if(m_dispositivo->es_salida())
+		{
+			if(	m_opciones_tipo_dispositivo->opcion_seleccionada() == 0 ||//Entrada
+				m_opciones_tipo_dispositivo->opcion_seleccionada() == 2)//Entrada y Salida
+				return true;
+		}
+		else
+		{
+			if(	m_opciones_tipo_dispositivo->opcion_seleccionada() == 0 ||//Entrada
+				m_opciones_tipo_dispositivo->opcion_seleccionada() == 1)//Entrada y Salida
+				return true;
+		}
+	}
+	return false;
+}
+
+bool Configuracion_Dispositivo::mostrar_salida()
+{
+	if(!m_mostrar_configuracion)
+		return false;
+
+	if(m_dispositivo->es_salida())
+	{
+		if(m_dispositivo->es_entrada())
+		{
+			if(	m_opciones_tipo_dispositivo->opcion_seleccionada() == 1 ||//Salida
+				m_opciones_tipo_dispositivo->opcion_seleccionada() == 2)//Entrada y Salida
+				return true;
+		}
+		else
+		{
+			if(	m_opciones_tipo_dispositivo->opcion_seleccionada() == 0 ||//Salida
+				m_opciones_tipo_dispositivo->opcion_seleccionada() == 1)//Entrada y Salida
+				return true;
+		}
+	}
+	return false;
 }
 
 void Configuracion_Dispositivo::actualizar(unsigned int diferencia_tiempo)
@@ -148,7 +211,7 @@ void Configuracion_Dispositivo::actualizar(unsigned int diferencia_tiempo)
 			float alto_nuevo = this->alto() + (10.0f * (static_cast<float>(diferencia_tiempo)/((1.0f/60.0f)*1000000000.0f)));
 			if(alto_nuevo > m_alto_maximo)
 				alto_nuevo = m_alto_maximo;
-			this->dimension(this->ancho(), alto_nuevo);
+			this->_dimension(this->ancho(), alto_nuevo);
 			m_cambio_altura = true;
 		}
 		else
@@ -156,16 +219,32 @@ void Configuracion_Dispositivo::actualizar(unsigned int diferencia_tiempo)
 	}
 	else if(m_direccion < 0)
 	{
-		if(this->alto() > m_alto_minimo)
+		if(m_direccion == -1)//Ocultar todo
 		{
-			float alto_nuevo = this->alto() - (10.0f * (static_cast<float>(diferencia_tiempo)/((1.0f/60.0f)*1000000000.0f)));
-			if(alto_nuevo < m_alto_minimo)
-				alto_nuevo = m_alto_minimo;
-			this->dimension(this->ancho(), alto_nuevo);
-			m_cambio_altura = true;
+			if(this->alto() > m_alto_minimo)
+			{
+				float alto_nuevo = this->alto() - (10.0f * (static_cast<float>(diferencia_tiempo)/((1.0f/60.0f)*1000000000.0f)));
+				if(alto_nuevo < m_alto_minimo)
+					alto_nuevo = m_alto_minimo;
+				this->_dimension(this->ancho(), alto_nuevo);
+				m_cambio_altura = true;
+			}
+			else
+				m_direccion = 0;
 		}
-		else
-			m_direccion = 0;
+		else if(m_direccion == -2)//Reducir tamaño al nuevo alto maximo
+		{
+			if(this->alto() > m_alto_maximo)
+			{
+				float alto_nuevo = this->alto() - (10.0f * (static_cast<float>(diferencia_tiempo)/((1.0f/60.0f)*1000000000.0f)));
+				if(alto_nuevo < m_alto_maximo)
+					alto_nuevo = m_alto_maximo;
+				this->_dimension(this->ancho(), alto_nuevo);
+				m_cambio_altura = true;
+			}
+			else
+				m_direccion = 0;
+		}
 	}
 }
 
@@ -183,29 +262,35 @@ void Configuracion_Dispositivo::dibujar()
 		m_rectangulo->textura(false);
 		m_rectangulo->dibujar(this->x(), this->y()+40, this->ancho(), 1.0f, Color(0.9f, 0.9f, 0.9f));
 		m_rectangulo->dibujar(this->x(), this->y()+80, this->ancho(), 40.0f, Color(0.9f, 0.9f, 0.9f));
-		//if(m_mostrar_linea)
-		m_rectangulo->dibujar(this->x(), this->y()+240, this->ancho(), 40.0f, Color(0.9f, 0.9f, 0.9f));
+		if(m_dispositivo->es_entrada() && m_dispositivo->es_salida() && m_opciones_tipo_dispositivo->opcion_seleccionada() == 2)
+			m_rectangulo->dibujar(this->x(), this->y()+240, this->ancho(), 40.0f, Color(0.9f, 0.9f, 0.9f));
 
 		m_texto_tipo_dispositivo->dibujar();
 		m_opciones_tipo_dispositivo->dibujar();
 		//m_rectangulo->textura(false);
 		//m_rectangulo->dibujar(m_texto_tipo_dispositivo->x(), m_texto_tipo_dispositivo->y(), m_texto_tipo_dispositivo->ancho(), m_texto_tipo_dispositivo->alto(), Color(0.3f, 0.4f, 0.4f, 0.4f));
 
-		//Entrada
-		m_texto_entrada->dibujar();
-		m_texto_sensitivo->dibujar();
-		m_texto_volumen_entrada->dibujar();
-		m_texto_rango->dibujar();
-		m_sensitivo->dibujar();
-		m_volumen_entrada->dibujar();
-		m_rango_teclado->dibujar();
+		if(this->mostrar_entrada())
+		{
+			//Entrada
+			m_texto_entrada->dibujar();
+			m_texto_sensitivo->dibujar();
+			m_texto_volumen_entrada->dibujar();
+			m_texto_rango->dibujar();
+			m_sensitivo->dibujar();
+			m_volumen_entrada->dibujar();
+			m_rango_teclado->dibujar();
+		}
 
-		//Salida
-		m_texto_salida->dibujar();
-		m_texto_volumen_salida->dibujar();
-		m_texto_teclado_luminoso->dibujar();
-		m_volumen_salida->dibujar();
-		m_teclado_luminoso->dibujar();
+		if(this->mostrar_salida())
+		{
+			//Salida
+			m_texto_salida->dibujar();
+			m_texto_volumen_salida->dibujar();
+			m_texto_teclado_luminoso->dibujar();
+			m_volumen_salida->dibujar();
+			m_teclado_luminoso->dibujar();
+		}
 	}
 }
 
@@ -232,28 +317,113 @@ void Configuracion_Dispositivo::evento_raton(Raton *raton)
 	if(m_mostrar_configuracion && m_elementos_creados)
 	{
 		m_opciones_tipo_dispositivo->evento_raton(raton);
-		m_sensitivo->evento_raton(raton);
-		m_volumen_entrada->evento_raton(raton);
-		m_rango_teclado->evento_raton(raton);
-		m_volumen_salida->evento_raton(raton);
-		m_teclado_luminoso->evento_raton(raton);
+		if(m_opciones_tipo_dispositivo->cambio_opcion_seleccionada())
+		{
+			m_alto_nuevo = m_alto_minimo + 40;
+			if(this->mostrar_entrada())
+				m_alto_nuevo += 160;
+			if(this->mostrar_salida())
+				m_alto_nuevo += 120;
+
+			if(m_alto_nuevo > this->alto())//Aumenta Tamaño
+			{
+				m_direccion = 1;
+				m_alto_maximo = m_alto_nuevo;
+			}
+			else if (m_alto_nuevo < this->alto())//Reduce Tamaño
+			{
+				m_direccion = -2;//Mover hasta el nuevo m_alto_maximo
+				m_alto_maximo = m_alto_nuevo;
+			}
+
+			if(this->mostrar_salida())
+			{
+				//Para actualizar los valores
+				this->posicion(this->x(), this->y());
+			}
+		}
+
+		if(this->mostrar_entrada())
+		{
+			m_sensitivo->evento_raton(raton);
+			m_volumen_entrada->evento_raton(raton);
+			m_rango_teclado->evento_raton(raton);
+		}
+
+		if(this->mostrar_salida())
+		{
+			m_volumen_salida->evento_raton(raton);
+			m_teclado_luminoso->evento_raton(raton);
+		}
 	}
 }
 
 void Configuracion_Dispositivo::posicion(float x, float y)
 {
-	m_desplegar.posicion(x+10, y+10);
-	m_nombre.posicion(x+40, y+13);
-	m_habilitado.posicion(x+this->ancho()-40, y+5);
 	this->_posicion(x, y);
+	m_desplegar.posicion(this->x()+10, this->y()+10);
+	m_nombre.posicion(this->x()+40, this->y()+10);
+	m_habilitado.posicion(this->x()+this->ancho()-40, this->y()+5);
+
+	if(m_elementos_creados)
+	{
+		m_texto_tipo_dispositivo->posicion(this->x()+10, this->y()+50);
+		m_opciones_tipo_dispositivo->posicion(this->x()+220, this->y()+50);
+
+		if(m_dispositivo->es_entrada())
+		{
+			//Entrada
+			m_texto_entrada->posicion(this->x()+10, this->y()+90);
+			m_texto_sensitivo->posicion(this->x()+10, this->y()+130);
+			m_texto_volumen_entrada->posicion(this->x()+10, this->y()+170);
+			m_texto_rango->posicion(this->x()+10, this->y()+210);
+			m_sensitivo->posicion(this->x()+220, this->y()+125);
+			m_volumen_entrada->posicion(this->x()+220, this->y()+170);
+			m_rango_teclado->posicion(this->x()+220, this->y()+210);
+		}
+
+		if(m_dispositivo->es_salida())
+		{
+			float desplazado = 0;
+			if(this->mostrar_entrada())
+				desplazado = 160;
+
+			//Salida
+			m_texto_salida->posicion(this->x()+10, this->y()+desplazado+90);
+			m_texto_volumen_salida->posicion(this->x()+10, this->y()+desplazado+130);
+			m_texto_teclado_luminoso->posicion(this->x()+10, this->y()+desplazado+170);
+
+			m_volumen_salida->posicion(this->x()+220, this->y()+desplazado+130);
+			m_teclado_luminoso->posicion(this->x()+220, this->y()+desplazado+170);
+		}
+	}
 }
-/*
-void Configuracion_Dispositivo::dimension(float ancho, float alto)
+
+void Configuracion_Dispositivo::dimension(float ancho, float /*alto*/)
 {
-	Registro::Aviso("Cambio de dimension");
-	m_habilitado.posicion(m_habilitado.x(), ancho - 10);
-	this->_dimension(ancho, alto);
-}*/
+	this->_dimension(ancho, this->alto());
+	//No se usa el alto en este elemento porque se calcula dependiendo del contenido
+	m_habilitado.posicion(this->x() + ancho - 40, m_habilitado.y());
+
+	if(m_elementos_creados)
+	{
+		m_opciones_tipo_dispositivo->dimension(this->ancho()-240, m_opciones_tipo_dispositivo->alto());
+
+		if(m_dispositivo->es_entrada())
+		{
+			//Entrada
+			m_volumen_entrada->dimension(this->ancho()-240, m_volumen_entrada->alto());
+			m_rango_teclado->dimension(this->ancho()-240, m_rango_teclado->alto());
+		}
+
+		if(m_dispositivo->es_salida())
+		{
+			//Salida
+			m_volumen_salida->dimension(this->ancho()-240, m_volumen_salida->alto());
+			m_teclado_luminoso->dimension(this->ancho()-240, m_teclado_luminoso->alto());
+		}
+	}
+}
 
 bool Configuracion_Dispositivo::cambio_altura()
 {

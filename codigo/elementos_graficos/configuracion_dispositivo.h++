@@ -45,11 +45,12 @@ private:
 	//Control
 	bool m_mostrar_configuracion, m_elementos_creados;
 	bool m_cambio_altura;
-	float m_alto_minimo, m_alto_maximo;
+	float m_alto_minimo, m_alto_maximo, m_alto_nuevo;
 	int m_direccion;
-	bool m_mostrar_linea;
 
 	void crear_nuevos_elementos();
+	bool mostrar_entrada();
+	bool mostrar_salida();
 
 public:
 	Configuracion_Dispositivo(float x, float y, float ancho, Dispositivo_Midi *dispositivo, Administrador_Recursos *recursos);
@@ -60,7 +61,7 @@ public:
 	void evento_raton(Raton *raton) override;
 
 	void posicion(float x, float y) override;
-	//void dimension(float ancho, float alto) override;
+	void dimension(float ancho, float alto) override;
 
 	bool cambio_altura();
 };
