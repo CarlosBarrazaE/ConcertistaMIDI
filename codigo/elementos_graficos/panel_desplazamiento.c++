@@ -64,10 +64,8 @@ void Panel_Desplazamiento::actualizar(unsigned int diferencia_tiempo)
 
 	if(m_tiempo_inactividad < 2 && !m_boton_activado)
 		m_tiempo_inactividad += (static_cast<float>(diferencia_tiempo)/1000000000.0f);
-	else
-	{
+	else if(m_tiempo_inactividad >= 2)
 		m_mostrar_barra = false;
-	}
 }
 
 void Panel_Desplazamiento::dibujar()
@@ -110,9 +108,6 @@ void Panel_Desplazamiento::evento_raton(Raton *raton)
 	}
 	else
 	{
-		//No se oculta la barra mientras se este moviendo
-		if(!m_boton_activado)
-			m_mostrar_barra = false;
 		m_raton_modificado = *raton;
 		int nueva_x = 0, nueva_y = 0;
 		if(raton->x() < static_cast<int>(this->x()))
