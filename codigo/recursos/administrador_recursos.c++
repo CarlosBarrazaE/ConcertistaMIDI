@@ -2,9 +2,7 @@
 
 Administrador_Recursos::Administrador_Recursos()
 {
-	m_ancho = 800;
-	m_alto = 600;
-	m_matriz_proyeccion = glm::ortho(0.0f, m_ancho, m_alto, 0.0f, -1.0f, 1.0f);
+	m_matriz_proyeccion = glm::ortho(0.0f, Pantalla::Ancho, Pantalla::Alto, 0.0f, -1.0f, 1.0f);
 
 	std::string ruta = RUTA_ARCHIVOS;
 	m_archivo_texturas[T_FondoTitulo] = ruta + "/texturas/fondo_titulo.tga";
@@ -149,13 +147,62 @@ Tipografia *Administrador_Recursos::tipografia(ModeloLetra tipo)
 	return m_formato_letras[tipo];
 }
 
+void Administrador_Recursos::recortar_pantalla(float x, float y, float ancho, float alto)
+{
+	//Esta funcion recive una posicion x,y arriba a la izquierda pero glScissor requiere
+	//la posicion x,y abajo a la izquierda así que hay que cambiarlo
+	int int_x = static_cast<int>(x);
+	int int_y = static_cast<int>(Pantalla::Alto-(y+alto));
+	int int_ancho = static_cast<int>(ancho);
+	int int_alto = static_cast<int>(alto);
+
+	int anterior_x = 0;
+	int anterior_y = 0;
+	int anterior_ancho = static_cast<int>(Pantalla::Ancho);
+	int anterior_alto = static_cast<int>(Pantalla::Alto);
+
+	if(m_recortes.size() > 0)
+	{
+		std::array<int, 4> &recorte_actual = m_recortes.top();
+		anterior_x = recorte_actual[0];
+		anterior_y = recorte_actual[1];
+		anterior_ancho = recorte_actual[2];
+		anterior_alto = recorte_actual[3];
+	}
+
+	//Un recorte nuevo no puede ser mayor a un recorte previo
+	if(int_x < anterior_x)
+		int_x = anterior_x;
+	if(int_y < anterior_y)
+		int_y = anterior_y;
+	if(int_ancho > anterior_ancho-(anterior_x - int_x))
+		int_ancho = anterior_ancho-(anterior_x - int_x);
+	if(int_alto > anterior_alto-(anterior_y - int_y))
+		int_alto = anterior_alto-(anterior_y - int_y);
+
+	glScissor(int_x, int_y, int_ancho, int_alto);
+	m_recortes.push({int_x, int_y, int_ancho, int_alto});
+}
+
+void Administrador_Recursos::revertir_recorte()
+{
+	if(m_recortes.size() > 0)
+		m_recortes.pop();//Elimina el ultimo recorte
+
+	if(m_recortes.size() > 0)
+	{
+		//Vuelve a un recorte superior si existe
+		std::array<int, 4> &recorte = m_recortes.top();
+		glScissor(recorte[0], recorte[1], recorte[2], recorte[3]);
+	}
+	else//Restablece el recorte al tamaño de la ventana
+		glScissor(0, 0, static_cast<int>(Pantalla::Ancho), static_cast<int>(Pantalla::Alto));
+}
+
 void Administrador_Recursos::actualizar_pantalla(float nuevo_ancho, float nuevo_alto)
 {
-	m_ancho = nuevo_ancho;
-	m_alto = nuevo_alto;
-
 	glScissor(0, 0, static_cast<int>(nuevo_ancho), static_cast<int>(nuevo_alto));
-	m_matriz_proyeccion = glm::ortho(0.0f, m_ancho, m_alto, 0.0f, -1.0f, 1.0f);
+	m_matriz_proyeccion = glm::ortho(0.0f, nuevo_ancho, nuevo_alto, 0.0f, -1.0f, 1.0f);
 
 	for(std::map<SombreadorVF, Sombreador*>::iterator e=m_lista_sombreadores.begin(); e != m_lista_sombreadores.end(); e++)
 	{

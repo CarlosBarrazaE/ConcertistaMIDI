@@ -2,6 +2,7 @@
 #define ADMINISTRADOR_DE_RECURSOS_H
 
 #include <map>
+#include <stack>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -13,6 +14,7 @@
 
 #include "../archivos/archivo.h++"
 #include "../archivos/imagen_tga.h++"
+#include "../dispositivos/pantalla.h++"
 
 #include "../registro.h++"
 #include "configuracion_cmake.h++"
@@ -102,7 +104,7 @@ private:
 
 	std::map<ModeloLetra, Tipografia*> m_formato_letras;
 
-	float m_ancho, m_alto;
+	std::stack<std::array<int, 4>> m_recortes;
 	glm::mat4 m_matriz_proyeccion;
 public:
 	Administrador_Recursos();
@@ -112,6 +114,9 @@ public:
 	Sombreador *sombreador(SombreadorVF valor);
 	Rectangulo *figura(FiguraGeometrica valor);
 	Tipografia *tipografia(ModeloLetra tipo);
+
+	void recortar_pantalla(float x, float y, float ancho, float alto);
+	void revertir_recorte();
 
 	void actualizar_pantalla(float ancho, float alto);
 };

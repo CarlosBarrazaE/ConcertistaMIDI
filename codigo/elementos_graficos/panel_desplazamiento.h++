@@ -10,6 +10,7 @@ class Panel_Desplazamiento : public Elemento
 {
 private:
 	//Recursos
+	Administrador_Recursos *m_recursos;
 	Rectangulo *m_rectangulo;
 	Textura2D *m_barra;
 
@@ -30,7 +31,7 @@ private:
 
 	std::vector<Elemento*> m_elementos;
 
-	void inicializar(Administrador_Recursos *recursos);
+	void inicializar();
 
 public:
 	Panel_Desplazamiento(float x, float y, float ancho, float alto, float margen_fila, Administrador_Recursos *recursos);

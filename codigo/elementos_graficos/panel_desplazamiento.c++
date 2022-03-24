@@ -9,7 +9,8 @@ Panel_Desplazamiento::Panel_Desplazamiento(float x, float y, float ancho, float 
 	m_fila = 0;
 	m_margen_fila = margen_fila;
 
-	this->inicializar(recursos);
+	m_recursos = recursos;
+	this->inicializar();
 }
 
 Panel_Desplazamiento::Panel_Desplazamiento(float x, float y, float ancho, float alto, float columna, float fila, float margen_columna, float margen_fila, Administrador_Recursos *recursos)
@@ -20,14 +21,15 @@ Panel_Desplazamiento::Panel_Desplazamiento(float x, float y, float ancho, float 
 	m_margen_columna = margen_columna;
 	m_margen_fila = margen_fila;
 
-	this->inicializar(recursos);
+	m_recursos = recursos;
+	this->inicializar();
 }
 
 Panel_Desplazamiento::~Panel_Desplazamiento()
 {
 }
 
-void Panel_Desplazamiento::inicializar(Administrador_Recursos *recursos)
+void Panel_Desplazamiento::inicializar()
 {
 	m_alto_actual = 0.0f;
 	m_desplazamiento_x = 0.0f;
@@ -35,8 +37,8 @@ void Panel_Desplazamiento::inicializar(Administrador_Recursos *recursos)
 
 	m_calcular_posicion = true;
 
-	m_rectangulo = recursos->figura(F_Rectangulo);
-	m_barra = recursos->textura(T_Barra);
+	m_rectangulo = m_recursos->figura(F_Rectangulo);
+	m_barra = m_recursos->textura(T_Barra);
 
 	m_sobre_barra = false;
 	m_boton_activado = false;
@@ -70,7 +72,7 @@ void Panel_Desplazamiento::actualizar(unsigned int diferencia_tiempo)
 
 void Panel_Desplazamiento::dibujar()
 {
-	glScissor(static_cast<int>(this->x()), static_cast<int>(Pantalla::Alto-this->y()-this->alto()), static_cast<int>(this->ancho()), static_cast<int>(this->alto()));
+	m_recursos->recortar_pantalla(this->x(), this->y(), this->ancho(), this->alto());
 	Elemento *e;
 	for(unsigned int i=0; i<m_elementos.size(); i++)
 	{
@@ -93,7 +95,7 @@ void Panel_Desplazamiento::dibujar()
 		m_rectangulo->dibujar_estirable(this->x()+this->ancho()-10, this->y()+10-m_desplazamiento_y*m_proporcion, 10, this->alto() * m_proporcion, 0, 10);
 		m_rectangulo->extremos_fijos(false, false);
 	}
-	glScissor(0, 0, static_cast<int>(Pantalla::Ancho), static_cast<int>(Pantalla::Alto));
+	m_recursos->revertir_recorte();
 }
 
 void Panel_Desplazamiento::evento_raton(Raton *raton)
