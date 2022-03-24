@@ -269,8 +269,6 @@ void Configuracion_Dispositivo::dibujar()
 
 		m_texto_tipo_dispositivo->dibujar();
 		m_opciones_tipo_dispositivo->dibujar();
-		//m_rectangulo->textura(false);
-		//m_rectangulo->dibujar(m_texto_tipo_dispositivo->x(), m_texto_tipo_dispositivo->y(), m_texto_tipo_dispositivo->ancho(), m_texto_tipo_dispositivo->alto(), Color(0.3f, 0.4f, 0.4f, 0.4f));
 
 		if(this->mostrar_entrada())
 		{
@@ -415,6 +413,7 @@ void Configuracion_Dispositivo::dimension(float ancho, float /*alto*/)
 		if(m_dispositivo->es_entrada())
 		{
 			//Entrada
+			m_texto_entrada->dimension(this->ancho()-20, m_texto_entrada->alto());
 			m_volumen_entrada->dimension(this->ancho()-240, m_volumen_entrada->alto());
 			m_rango_teclado->dimension(this->ancho()-240, m_rango_teclado->alto());
 		}
@@ -422,6 +421,7 @@ void Configuracion_Dispositivo::dimension(float ancho, float /*alto*/)
 		if(m_dispositivo->es_salida())
 		{
 			//Salida
+			m_texto_salida->dimension(this->ancho()-20, m_texto_salida->alto());
 			m_volumen_salida->dimension(this->ancho()-240, m_volumen_salida->alto());
 			m_teclado_luminoso->dimension(this->ancho()-240, m_teclado_luminoso->alto());
 		}
