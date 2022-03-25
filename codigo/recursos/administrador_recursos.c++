@@ -170,6 +170,12 @@ void Administrador_Recursos::recortar_pantalla(float x, float y, float ancho, fl
 		anterior_alto = recorte_actual[3];
 	}
 
+	//No se permiten ancho o alto negativo
+	if(int_ancho < 0)
+		int_ancho = 0;
+	if(int_alto < 0)
+		int_alto = 0;
+
 	//Un recorte nuevo no puede ser mayor a un recorte previo
 	if(int_x < anterior_x)
 		int_x = anterior_x;
