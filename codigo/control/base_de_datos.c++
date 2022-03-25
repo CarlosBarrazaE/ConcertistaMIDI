@@ -203,25 +203,28 @@ void Base_de_Datos::crear()
 void Base_de_Datos::actualizar()
 {
 	//Verificar version de la base de datos
-	std::string version = this->leer_configuracion("version_base_de_datos");
-	Registro::Nota("Versión de la base de datos: " + version);
-	if(version != VERSION_BASE_DE_DATOS)
+	std::string version_actual = this->leer_configuracion("version_base_de_datos");
+	std::string version_original = version_actual;
+	Registro::Nota("Versión de la base de datos: " + version_actual);
+	if(version_actual != VERSION_BASE_DE_DATOS)
 	{
-		Registro::Nota("Actualizando la base de datos de la versión: " + version + " a la versión " + VERSION_BASE_DE_DATOS);
-		this->escribir_configuracion("version_base_de_datos", VERSION_BASE_DE_DATOS);
-		if(version == "1.0")
+		bool actualizado = false;
+		if(version_actual == "1.0")
 		{
+			actualizado = true;
 			this->consulta("CREATE TABLE seleccion (ruta TEXT NOT NULL PRIMARY KEY, seleccion INT DEFAULT 0, ruta_seleccion TEXT)");
-			version = "1.1";
+			version_actual = "1.1";
 		}
-		if(version == "1.1")
+		if(version_actual == "1.1")
 		{
+			actualizado = true;
 			//No existia ruta de instalacion
 			this->escribir_configuracion("ruta_instalacion", "..");
-			version = "1.2";
+			version_actual = "1.2";
 		}
-		if(version == "1.2")
+		if(version_actual == "1.2")
 		{
+			actualizado = true;
 			this->iniciar_transaccion();
 			//No vale la pena intentar recuperar el dispositivo seleccionado
 			this->consulta("DELETE FROM configuracion WHERE 	atributo = 'dispositivo_entrada'"
@@ -288,8 +291,13 @@ void Base_de_Datos::actualizar()
 			timidity.habilitado = true;
 			this->agregar_dispositivo(timidity);
 
-			version = "1.3";
+			version_actual = "1.3";
 			this->finalizar_transaccion();
+		}
+		if(actualizado)
+		{
+			Registro::Nota("Se actualizó la base de datos de la versión: " + version_original + " a la versión " + VERSION_BASE_DE_DATOS);
+			this->escribir_configuracion("version_base_de_datos", VERSION_BASE_DE_DATOS);
 		}
 	}
 
