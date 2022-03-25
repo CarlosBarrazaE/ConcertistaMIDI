@@ -259,8 +259,8 @@ void Configuracion_Dispositivo::dibujar()
 
 	if(m_mostrar_configuracion && m_elementos_creados)
 	{
-		//Recorta solo la parte que se desplega
-		m_recursos->recortar_pantalla(this->x(), this->y()+40, this->ancho(), this->alto()-40);
+		//Recorta solo la parte que se desplega y deja un margen de 10px abajo
+		m_recursos->recortar_pantalla(this->x(), this->y()+40, this->ancho(), this->alto()-50);
 		m_rectangulo->textura(false);
 		m_rectangulo->dibujar(this->x(), this->y()+40, this->ancho(), 1.0f, Color(0.9f, 0.9f, 0.9f));
 		m_rectangulo->dibujar(this->x(), this->y()+80, this->ancho(), 40.0f, Color(0.9f, 0.9f, 0.9f));
