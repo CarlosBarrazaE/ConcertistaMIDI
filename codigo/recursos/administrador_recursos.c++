@@ -151,10 +151,10 @@ void Administrador_Recursos::recortar_pantalla(float x, float y, float ancho, fl
 {
 	//Esta funcion recive una posicion x,y arriba a la izquierda pero glScissor requiere
 	//la posicion x,y abajo a la izquierda así que hay que cambiarlo
-	int int_x = static_cast<int>(x);
-	int int_y = static_cast<int>(Pantalla::Alto-(y+alto));
-	int int_ancho = static_cast<int>(ancho);
-	int int_alto = static_cast<int>(alto);
+	int int_x = static_cast<int>(std::round(x));
+	int int_y = static_cast<int>(std::round(Pantalla::Alto-(y+alto)));
+	int int_ancho = static_cast<int>(std::round(ancho));
+	int int_alto = static_cast<int>(std::round(alto));
 
 	int anterior_x = 0;
 	int anterior_y = 0;
