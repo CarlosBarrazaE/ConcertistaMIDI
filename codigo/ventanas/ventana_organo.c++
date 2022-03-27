@@ -690,7 +690,7 @@ bool VentanaOrgano::hay_nota_nueva(unsigned int id_nota)
 unsigned long int VentanaOrgano::encontrar_nota_tocada(unsigned long int pista, unsigned int id_nota)
 {
 	//Retorna la posicion de las nota que estan bloqueadas y pasaron de largo
-	//Si no la encuentra retorna -1
+	//Si no la encuentra retorna ULONG_MAX
 	//Las pista modo Fondo no se pueden tocar
 	if(m_pistas->at(pista).modo() == Fondo)
 		return ULONG_MAX;
@@ -729,7 +729,7 @@ void VentanaOrgano::desbloquear_nota(unsigned long int pista, unsigned long int 
 void VentanaOrgano::desbloquear_notas(bool desbloquear_todas)
 {
 	//2 modos, desbloquear todo y desbloquear solo algunas (para el modo aprender)
-	//Para el modo de NO desbloquear todo es para desbloquear las notas
+	//Para el modo de "NO desbloquear todo" es para desbloquear las notas
 	//que se bloquearon por tocarla antes de tiempo y son requeridas para continuar
 	//en el modo aprender, si la nota esta siendo tocada no se desbloquea.
 	if(m_notas_bloqueadas > 0)
@@ -759,7 +759,7 @@ void VentanaOrgano::desbloquear_notas(bool desbloquear_todas)
 					}
 					else
 					{
-						//Se desbloquea solo si es requerida
+						//Se desbloquea solo si es requerida, LLONG_MIN indica que esta siendo tocada
 						std::map<unsigned int, Color>::iterator resultado = m_notas_requeridas.find(pista_actual[n].id_nota);
 						if(pista_actual[n].fin_tocado > LLONG_MIN && resultado != m_notas_requeridas.end())
 						{
