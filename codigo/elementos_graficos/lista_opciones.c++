@@ -220,9 +220,26 @@ void Lista_Opciones::opcion_predeterminada(unsigned long int opcion)
 	}
 }
 
+void Lista_Opciones::opcion_predeterminada(const std::string &texto)
+{
+	for(unsigned long int x=0; x<m_opciones.size(); x++)
+	{
+		if(m_opciones[x] == texto)
+		{
+			this->opcion_predeterminada(x);
+			x = m_opciones.size();
+		}
+	}
+}
+
 unsigned long int Lista_Opciones::opcion_seleccionada()
 {
 	return m_opcion_actual;
+}
+
+std::string Lista_Opciones::opcion_seleccionada_texto()
+{
+	return m_opciones[m_opcion_actual];
 }
 
 bool Lista_Opciones::cambio_opcion_seleccionada()

@@ -59,7 +59,9 @@ public:
 	void tipografia(Tipografia *tipografia);
 	void color_texto(const Color &color);
 	void opcion_predeterminada(unsigned long int opcion);
+	void opcion_predeterminada(const std::string &texto);
 	unsigned long int opcion_seleccionada();
+	std::string opcion_seleccionada_texto();
 	bool cambio_opcion_seleccionada();
 };
 
