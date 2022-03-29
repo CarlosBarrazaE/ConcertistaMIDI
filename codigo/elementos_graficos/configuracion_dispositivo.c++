@@ -151,7 +151,7 @@ void Configuracion_Dispositivo::crear_nuevos_elementos()
 
 bool Configuracion_Dispositivo::mostrar_entrada()
 {
-	if(!m_mostrar_configuracion)
+	if(!m_mostrar_configuracion && this->alto() <= 40)
 		return false;
 
 	if(m_dispositivo->es_entrada())
@@ -174,7 +174,7 @@ bool Configuracion_Dispositivo::mostrar_entrada()
 
 bool Configuracion_Dispositivo::mostrar_salida()
 {
-	if(!m_mostrar_configuracion)
+	if(!m_mostrar_configuracion && this->alto() <= 40)
 		return false;
 
 	if(m_dispositivo->es_salida())
@@ -257,7 +257,7 @@ void Configuracion_Dispositivo::dibujar()
 	m_nombre.dibujar();
 	m_habilitado.dibujar();
 
-	if(m_mostrar_configuracion && m_elementos_creados)
+	if((m_mostrar_configuracion || this->y() > 40) && m_elementos_creados)
 	{
 		//Recorta solo la parte que se desplega y deja un margen de 10px abajo
 		m_recursos->recortar_pantalla(this->x(), this->y()+40, this->ancho(), this->alto()-50);
