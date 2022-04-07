@@ -180,23 +180,24 @@ void Base_de_Datos::crear()
 	this->escribir_configuracion("ruta_instalacion", RUTA_ARCHIVOS);
 	this->agregar_carpeta("Canciones", std::string(RUTA_ARCHIVOS) + "/musica/");
 
-	Datos_Dispositivo teclado_y_raton;
-	teclado_y_raton.cliente = 129;
-	teclado_y_raton.puerto = 2;
-	teclado_y_raton.nombre = "Teclado y Ratón";
-	teclado_y_raton.capacidad = ENTRADA;
-	teclado_y_raton.capacidad_activa = ENTRADA;
-	teclado_y_raton.habilitado = true;
-	teclado_y_raton.rango_teclado = "48,24";
+	Dispositivo_Midi teclado_y_raton;
+	teclado_y_raton.cliente(129);
+	teclado_y_raton.puerto(2);
+	teclado_y_raton.nombre("Teclado y Ratón");
+	teclado_y_raton.capacidad(ENTRADA);
+	teclado_y_raton.capacidad_activa(ENTRADA);
+	teclado_y_raton.habilitado(true);
+	teclado_y_raton.sensitivo(false);
+	teclado_y_raton.rango_teclado("48,24");
 	this->agregar_dispositivo(teclado_y_raton);
 
-	Datos_Dispositivo timidity;
-	timidity.cliente = 128;
-	timidity.puerto = 0;
-	timidity.nombre = "TiMidity";
-	timidity.capacidad = SALIDA;
-	timidity.capacidad_activa = SALIDA;
-	timidity.habilitado = true;
+	Dispositivo_Midi timidity;
+	timidity.cliente(128);
+	timidity.puerto(0);
+	timidity.nombre("TiMidity");
+	timidity.capacidad(SALIDA);
+	timidity.capacidad_activa(SALIDA);
+	timidity.habilitado(true);
 	this->agregar_dispositivo(timidity);
 }
 
@@ -272,23 +273,24 @@ void Base_de_Datos::actualizar()
 														"teclado_luminoso INTEGER DEFAULT 0,"
 														"PRIMARY KEY(cliente, puerto, nombre))");
 
-			Datos_Dispositivo teclado_y_raton;
-			teclado_y_raton.cliente = 129;
-			teclado_y_raton.puerto = 2;
-			teclado_y_raton.nombre = "Teclado y Ratón";
-			teclado_y_raton.capacidad = ENTRADA;
-			teclado_y_raton.capacidad_activa = ENTRADA;
-			teclado_y_raton.habilitado = true;
-			teclado_y_raton.rango_teclado = "48,24";
+			Dispositivo_Midi teclado_y_raton;
+			teclado_y_raton.cliente(129);
+			teclado_y_raton.puerto(2);
+			teclado_y_raton.nombre("Teclado y Ratón");
+			teclado_y_raton.capacidad(ENTRADA);
+			teclado_y_raton.capacidad_activa(ENTRADA);
+			teclado_y_raton.habilitado(true);
+			teclado_y_raton.sensitivo(false);
+			teclado_y_raton.rango_teclado("48,24");
 			this->agregar_dispositivo(teclado_y_raton);
 
-			Datos_Dispositivo timidity;
-			timidity.cliente = 128;
-			timidity.puerto = 0;
-			timidity.nombre = "TiMidity";
-			timidity.capacidad = SALIDA;
-			timidity.capacidad_activa = SALIDA;
-			timidity.habilitado = true;
+			Dispositivo_Midi timidity;
+			timidity.cliente(128);
+			timidity.puerto(0);
+			timidity.nombre("TiMidity");
+			timidity.capacidad(SALIDA);
+			timidity.capacidad_activa(SALIDA);
+			timidity.habilitado(true);
 			this->agregar_dispositivo(timidity);
 
 			version_actual = "1.3";
@@ -354,54 +356,54 @@ std::string Base_de_Datos::leer_configuracion(const std::string &atributo)
 	return this->consulta_texto("SELECT valor FROM configuracion WHERE atributo = '"+atributo+"' LIMIT 1");
 }
 
-void Base_de_Datos::agregar_dispositivo(const Datos_Dispositivo &dispositivo)
+void Base_de_Datos::agregar_dispositivo(const Dispositivo_Midi &dispositivo)
 {
 	this->consulta("INSERT INTO dispositivos (cliente, puerto, nombre, capacidad, capacidad_activa, "
 												"habilitado, sensitivo, volumen_entrada, rango_teclado, "
 												"volumen_salida, teclado_luminoso) "
-							"VALUES ('"+std::to_string(static_cast<unsigned int>(dispositivo.cliente))+"', "
-									"'"+std::to_string(static_cast<unsigned int>(dispositivo.puerto))+"', "
-									"'"+dispositivo.nombre+"', "
-									"'"+std::to_string(static_cast<unsigned int>(dispositivo.capacidad))+"', "
-									"'"+std::to_string(static_cast<unsigned int>(dispositivo.capacidad_activa))+"', "
-									"'"+std::to_string(static_cast<unsigned int>(dispositivo.habilitado))+"', "
-									"'"+std::to_string(static_cast<unsigned int>(dispositivo.sensitivo))+"', "
-									"'"+std::to_string(dispositivo.volumen_entrada)+"', "
-									"'"+dispositivo.rango_teclado+"', "
-									"'"+std::to_string(dispositivo.volumen_salida)+"', "
-									"'"+std::to_string(static_cast<unsigned int>(dispositivo.teclas_luminosas))+"')");
+							"VALUES ('"+std::to_string(static_cast<unsigned int>(dispositivo.cliente()))+"', "
+									"'"+std::to_string(static_cast<unsigned int>(dispositivo.puerto()))+"', "
+									"'"+dispositivo.nombre()+"', "
+									"'"+std::to_string(static_cast<unsigned int>(dispositivo.capacidad()))+"', "
+									"'"+std::to_string(static_cast<unsigned int>(dispositivo.capacidad_activa()))+"', "
+									"'"+std::to_string(static_cast<unsigned int>(dispositivo.habilitado()))+"', "
+									"'"+std::to_string(static_cast<unsigned int>(dispositivo.sensitivo()))+"', "
+									"'"+std::to_string(dispositivo.volumen_entrada())+"', "
+									"'"+dispositivo.rango_teclado().texto()+"', "
+									"'"+std::to_string(dispositivo.volumen_salida())+"', "
+									"'"+std::to_string(static_cast<unsigned int>(dispositivo.teclas_luminosas()->identificador()))+"')");
 }
 
-std::vector<Datos_Dispositivo> Base_de_Datos::lista_dispositivos()
+std::vector<Dispositivo_Midi> Base_de_Datos::lista_dispositivos()
 {
 	std::vector<std::vector<std::string>> datos = this->consulta_tabla("SELECT 	cliente, puerto, nombre, capacidad, capacidad_activa, "
 																				"habilitado, sensitivo, volumen_entrada, rango_teclado, "
 																				"volumen_salida, teclado_luminoso "
 																		"FROM dispositivos", 11);
-	std::vector<Datos_Dispositivo> dispositivos;
+	std::vector<Dispositivo_Midi> dispositivos;
 
 	for(unsigned long int x=0; x<datos.size(); x++)
 	{
-		Datos_Dispositivo nuevo;
+		Dispositivo_Midi nuevo;
 
 		if(datos[x][0].size() <= 3)
-			nuevo.cliente = static_cast<unsigned char>(std::stoi(datos[x][0]));
+			nuevo.cliente(static_cast<unsigned char>(std::stoi(datos[x][0])));
 		if(datos[x][1].size() <= 3)
-			nuevo.puerto = static_cast<unsigned char>(std::stoi(datos[x][1]));
-		nuevo.nombre = datos[x][2];
+			nuevo.puerto(static_cast<unsigned char>(std::stoi(datos[x][1])));
+		nuevo.nombre(datos[x][2]);
 		if(datos[x][3].size() <= 1)
-			nuevo.capacidad = static_cast<unsigned char>(std::stoi(datos[x][3]));
+			nuevo.capacidad(static_cast<unsigned char>(std::stoi(datos[x][3])));
 		if(datos[x][4].size() <= 1)
-			nuevo.capacidad_activa = static_cast<unsigned char>(std::stoi(datos[x][4]));
+			nuevo.capacidad_activa(static_cast<unsigned char>(std::stoi(datos[x][4])));
 		if(datos[x][5].size() <= 1)
-			nuevo.habilitado = static_cast<unsigned char>(std::stoi(datos[x][5]));
+			nuevo.habilitado(static_cast<bool>(std::stoi(datos[x][5])));
 		if(datos[x][6].size() <= 1)
-			nuevo.sensitivo = static_cast<unsigned char>(std::stoi(datos[x][6]));
-		nuevo.volumen_entrada = static_cast<unsigned char>(std::stod(datos[x][7]));
-		nuevo.rango_teclado = datos[x][8];
-		nuevo.volumen_salida = static_cast<unsigned char>(std::stod(datos[x][9]));
+			nuevo.sensitivo(static_cast<bool>(std::stoi(datos[x][6])));
+		nuevo.volumen_entrada(static_cast<double>(std::stod(datos[x][7])));
+		nuevo.rango_teclado(datos[x][8]);
+		nuevo.volumen_salida(static_cast<double>(std::stod(datos[x][9])));
 		if(datos[x][10].size() <= 3)
-			nuevo.teclas_luminosas = static_cast<unsigned int>(std::stoi(datos[x][10]));
+			nuevo.teclas_luminosas(static_cast<unsigned int>(std::stoi(datos[x][10])));
 
 		dispositivos.push_back(nuevo);
 	}

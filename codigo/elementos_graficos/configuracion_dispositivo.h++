@@ -12,8 +12,6 @@
 class Configuracion_Dispositivo : public Elemento
 {
 private:
-	Dispositivo_Midi *m_dispositivo;
-
 	Administrador_Recursos *m_recursos;
 	Rectangulo *m_rectangulo;
 	Textura2D *m_flecha_abajo, *m_flecha_arriba;
@@ -48,12 +46,17 @@ private:
 	float m_alto_minimo, m_alto_maximo, m_alto_nuevo;
 	int m_direccion;
 
+	//Datos
+	Dispositivo_Midi m_datos_dispositivo;
+	bool m_dispositivo_cambiado;
+	bool m_cambio_estado_conexion;
+
 	void crear_nuevos_elementos();
 	bool mostrar_entrada();
 	bool mostrar_salida();
 
 public:
-	Configuracion_Dispositivo(float x, float y, float ancho, Dispositivo_Midi *dispositivo, Administrador_Recursos *recursos);
+	Configuracion_Dispositivo(float x, float y, float ancho, Dispositivo_Midi dispositivo, Administrador_Recursos *recursos);
 	~Configuracion_Dispositivo();
 
 	void actualizar(unsigned int diferencia_tiempo) override;
@@ -64,6 +67,10 @@ public:
 	void dimension(float ancho, float alto) override;
 
 	bool cambio_altura();
+
+	Dispositivo_Midi configuracion();
+	bool dispositivo_cambiado();
+	bool cambio_estado_conexion();
 };
 
 #endif

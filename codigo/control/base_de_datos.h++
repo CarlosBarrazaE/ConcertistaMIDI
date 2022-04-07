@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "../util/texto.h++"
-#include "../dispositivos_midi/datos_dispositivo.h++"
 #include "../dispositivos_midi/dispositivo_midi.h++"
 
 #include "../registro.h++"
@@ -38,8 +37,8 @@ class Base_de_Datos
 		std::string leer_configuracion(const std::string &atributo);
 
 		//Tabla dispositivos
-		void agregar_dispositivo(const Datos_Dispositivo &dispositivo);
-		std::vector<Datos_Dispositivo> lista_dispositivos();
+		void agregar_dispositivo(const Dispositivo_Midi &dispositivo);
+		std::vector<Dispositivo_Midi> lista_dispositivos();
 
 		//Tabla carpetas
 		bool agregar_carpeta(const std::string &nombre, const std::string &ruta);

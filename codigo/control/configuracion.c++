@@ -24,26 +24,19 @@ Configuracion::Configuracion()
 		m_datos.abrir(ruta_base_de_datos);
 		m_datos.actualizar();//Actualiza la base de datos
 
-		std::vector<Datos_Dispositivo> lista_dispositivos = m_datos.lista_dispositivos();
+		std::vector<Dispositivo_Midi> lista_dispositivos = m_datos.lista_dispositivos();
 
 		//Tamaño minimo para quedarme con el mayor de todos los rangos
 		if(lista_dispositivos.size() > 0)
 			m_teclado_util.cambiar(0, 24);
 
 		bool nuevo_rango = false;
-		for(Datos_Dispositivo &d : lista_dispositivos)
+		for(Dispositivo_Midi &datos : lista_dispositivos)
 		{
-			if(d.habilitado)
+			if(datos.habilitado())
 			{
-				Dispositivo_Midi *dispositivo = m_controlador_midi.configurar_dispositivo(d.cliente, d.puerto, d.capacidad, d.nombre);
-				dispositivo->capacidad_activa(d.capacidad_activa);
-				dispositivo->habilitado(d.habilitado);
-				dispositivo->sensitivo(d.sensitivo);
-				dispositivo->volumen_entrada(d.volumen_entrada);
-				dispositivo->rango_teclado(d.rango_teclado);
-				dispositivo->volumen_salida(d.volumen_salida);
-				dispositivo->teclas_luminosas(d.teclas_luminosas);
-
+				Dispositivo_Midi *dispositivo = m_controlador_midi.configurar_dispositivo(datos.cliente(), datos.puerto(), datos.capacidad(), datos.nombre());
+				dispositivo->copiar_configuracion(datos);
 				m_controlador_midi.conectar(dispositivo, false);
 
 				//Se queda con el teclado mas grande

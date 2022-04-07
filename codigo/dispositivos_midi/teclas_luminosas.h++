@@ -26,8 +26,8 @@ public:
 	Evento_Midi encender(unsigned char id_nota);
 	Evento_Midi apagar(unsigned char id_nota);
 
-	unsigned int identificador();
-	bool quedan_luces_activas();
+	unsigned int identificador() const;
+	bool quedan_luces_activas() const;
 	Evento_Midi apagar_siguiente();
 };
 

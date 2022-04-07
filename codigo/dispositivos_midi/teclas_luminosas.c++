@@ -88,12 +88,12 @@ Evento_Midi Teclas_Luminosas::apagar(unsigned char id_nota)
 	return this->apagar_virtual(id_nota);
 }
 
-unsigned int Teclas_Luminosas::identificador()
+unsigned int Teclas_Luminosas::identificador() const
 {
 	return m_identificador;
 }
 
-bool Teclas_Luminosas::quedan_luces_activas()
+bool Teclas_Luminosas::quedan_luces_activas() const
 {
 	if(m_luces_encendidas.size() > 0)
 		return true;

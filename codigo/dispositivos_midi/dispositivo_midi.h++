@@ -34,44 +34,57 @@ private:
 	Teclas_Luminosas *m_teclas_luminosas;
 	std::map<unsigned char, unsigned int> m_notas_salida;
 
+	void inicializar();
+
 public:
+	Dispositivo_Midi();
+	Dispositivo_Midi(const Dispositivo_Midi &dispositivo);
 	Dispositivo_Midi(unsigned char cliente, unsigned char puerto, unsigned char capacidad, const std::string &nombre, bool conectado);
 	~Dispositivo_Midi();
 
 	void cliente(unsigned char cliente);
-	unsigned char cliente();
-	unsigned char puerto();
+	unsigned char cliente() const;
+	void puerto(unsigned char puerto);
+	unsigned char puerto() const;
+	void capacidad(unsigned char capacidad);
+	unsigned char capacidad() const;
 	void capacidad_activa(unsigned char capacidad);
-	std::string nombre();
+	unsigned char capacidad_activa() const;
+	void nombre(const std::string &nombre);
+	std::string nombre() const;
 
 	void conectado(bool estado);
-	bool conectado();
+	bool conectado() const;
 	void habilitado(bool estado);
-	bool habilitado();
+	bool habilitado() const;
 	void reenviar_programa(bool valor);
-	bool reenviar_programa();
+	bool reenviar_programa() const;
 
-	bool es_entrada();
-	bool entrada_activa();
+	bool es_entrada() const;
+	bool entrada_activa() const;
 	void sensitivo(bool estado);
-	bool sensitivo();
+	bool sensitivo() const;
 	void volumen_entrada(double valor);
-	double volumen_entrada();
+	double volumen_entrada() const;
 	void rango_teclado(const std::string &rango);
-	Teclado_Organo rango_teclado();
+	Teclado_Organo rango_teclado() const;
 	void nota_entrada(unsigned char id_nota, bool encendida);
 	std::vector<unsigned char> notas_entrada() const;
 
-	bool es_salida();
-	bool salida_activa();
+	bool es_salida() const;
+	bool salida_activa() const;
 	void volumen_salida(double valor);
-	double volumen_salida();
+	double volumen_salida() const;
 	void teclas_luminosas(unsigned int identificador);
-	Teclas_Luminosas *teclas_luminosas();
+	Teclas_Luminosas *teclas_luminosas() const;
+	unsigned int id_teclas_luminosas() const;
 	void nota_salida(unsigned char canal, bool encendida);
 	std::map<unsigned char, unsigned int> notas_salida() const;
 
+	void copiar_configuracion(const Dispositivo_Midi &datos);
 	void limpiar();
+
+	Dispositivo_Midi& operator = (const Dispositivo_Midi &dispositivo);
 };
 
 #endif

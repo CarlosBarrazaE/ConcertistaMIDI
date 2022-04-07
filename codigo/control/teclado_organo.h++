@@ -15,11 +15,11 @@ public:
 	Teclado_Organo();
 	void cambiar(unsigned char inicial, unsigned char largo);
 
-	unsigned char tecla_inicial();
+	unsigned char tecla_inicial() const;
 	void tecla_inicial(unsigned char inicial);
-	unsigned char tecla_final();
+	unsigned char tecla_final() const;
 
-	unsigned char numero_teclas();
+	unsigned char numero_teclas() const;
 	void numero_teclas(unsigned char largo);
 
 	void cargar(std::string datos);

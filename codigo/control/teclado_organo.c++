@@ -10,7 +10,7 @@ void Teclado_Organo::cambiar(unsigned char inicial, unsigned char largo)
 	this->tecla_inicial(inicial);
 }
 
-unsigned char Teclado_Organo::tecla_inicial()
+unsigned char Teclado_Organo::tecla_inicial() const
 {
 	return m_tecla_inicial;
 }
@@ -22,12 +22,12 @@ void Teclado_Organo::tecla_inicial(unsigned char inicial)
 		m_tecla_inicial = inicial;
 }
 
-unsigned char Teclado_Organo::tecla_final()
+unsigned char Teclado_Organo::tecla_final() const
 {
 	return static_cast<unsigned char>(m_tecla_inicial + m_numero_teclas - 1);
 }
 
-unsigned char Teclado_Organo::numero_teclas()
+unsigned char Teclado_Organo::numero_teclas() const
 {
 	return m_numero_teclas;
 }

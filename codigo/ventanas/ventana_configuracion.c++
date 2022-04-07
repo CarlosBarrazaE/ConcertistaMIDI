@@ -65,7 +65,7 @@ VentanaConfiguracion::VentanaConfiguracion(Configuracion *configuracion, Adminis
 	Controlador_Midi *controlador = m_configuracion->controlador_midi();
 	for(unsigned long int x=0; x<controlador->lista_dispositivos().size(); x++)
 	{
-		m_solapa3_lista_dispositivos.push_back(new Configuracion_Dispositivo(0, 0, Pantalla::Ancho-270, controlador->lista_dispositivos()[x], recursos));
+		m_solapa3_lista_dispositivos.push_back(new Configuracion_Dispositivo(0, 0, Pantalla::Ancho-270, *controlador->lista_dispositivos()[x], recursos));
 		m_solapa3_panel->agregar_elemento(m_solapa3_lista_dispositivos[x]);
 	}
 
