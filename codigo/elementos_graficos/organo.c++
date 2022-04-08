@@ -1,6 +1,6 @@
 #include "organo.h++"
 
-Organo::Organo(float x, float y, float ancho, Teclado_Organo *teclado_visible, Teclado_Organo *teclado_util, Administrador_Recursos *recursos) : Elemento(x, y, ancho, 0)
+Organo::Organo(float x, float y, float ancho, Rango_Organo *teclado_visible, Rango_Organo *teclado_util, Administrador_Recursos *recursos) : Elemento(x, y, ancho, 0)
 {
 	//El origen del organo esta abajo a la izquierda
 	m_teclado_visible = teclado_visible;

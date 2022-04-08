@@ -6,7 +6,7 @@
 #include "../recursos/rectangulo.h++"
 #include "../util/octava.h++"
 #include "../control/pista.h++"
-#include "../control/teclado_organo.h++"
+#include "../control/rango_organo.h++"
 #include "../control/tiempos_nota.h++"
 #include "../libmidi/Midi.h++"
 
@@ -28,7 +28,7 @@ private:
 	Tipografia *m_tipografia;
 	std::map<int, Etiqueta*> m_texto_numeros;
 
-	Teclado_Organo *m_teclado_visible, *m_teclado_util;
+	Rango_Organo *m_teclado_visible, *m_teclado_util;
 	microseconds_t m_tiempo_actual_midi;
 	float m_ancho_blanca, m_ancho_negra;
 	unsigned int m_duracion_nota;
@@ -50,7 +50,7 @@ private:
 	void dibujar_notas_subir(unsigned int pista);
 
 public:
-	Tablero_Notas(float x, float y, float ancho, float alto, Teclado_Organo *teclado_visible, Teclado_Organo *teclado_util, std::map<unsigned long int, std::vector<Tiempos_Nota>> *evaluacion, Administrador_Recursos *recursos);
+	Tablero_Notas(float x, float y, float ancho, float alto, Rango_Organo *teclado_visible, Rango_Organo *teclado_util, std::map<unsigned long int, std::vector<Tiempos_Nota>> *evaluacion, Administrador_Recursos *recursos);
 	~Tablero_Notas();
 
 	void actualizar(unsigned int diferencia_tiempo) override;

@@ -2,7 +2,7 @@
 #define DISPOSITIVO_MIDI
 
 #include "teclas_luminosas.h++"
-#include "../control/teclado_organo.h++"
+#include "../control/rango_organo.h++"
 
 #include <string>
 #include <map>
@@ -26,7 +26,7 @@ private:
 	//Entrada
 	bool m_sensitivo;
 	double m_volumen_entrada;
-	Teclado_Organo m_rango_teclado;
+	Rango_Organo m_rango_teclado;
 	std::vector<unsigned char> m_notas_entrada;
 
 	//Salida
@@ -67,7 +67,7 @@ public:
 	void volumen_entrada(double valor);
 	double volumen_entrada() const;
 	void rango_teclado(const std::string &rango);
-	Teclado_Organo rango_teclado() const;
+	Rango_Organo rango_teclado() const;
 	void nota_entrada(unsigned char id_nota, bool encendida);
 	std::vector<unsigned char> notas_entrada() const;
 

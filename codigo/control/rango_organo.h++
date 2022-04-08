@@ -1,18 +1,18 @@
-#ifndef TECLADO_ORGANO
-#define TECLADO_ORGANO
+#ifndef RANGO_ORGANO
+#define RANGO_ORGANO
 
 #define PROPORCION_ANCHO_NEGRA 0.666667f
 
 #include "../util/texto.h++"
 #include <vector>
 
-class Teclado_Organo
+class Rango_Organo
 {
 private:
 	unsigned char m_tecla_inicial = 0;
 	unsigned char m_numero_teclas = 128;
 public:
-	Teclado_Organo();
+	Rango_Organo();
 	void cambiar(unsigned char inicial, unsigned char largo);
 
 	unsigned char tecla_inicial() const;
@@ -25,12 +25,12 @@ public:
 	void cargar(std::string datos);
 	std::string texto();
 
-	bool operator == (const Teclado_Organo &tc) const;
-	bool operator != (const Teclado_Organo &tc) const;
-	bool operator < (const Teclado_Organo &tc) const;
-	bool operator <= (const Teclado_Organo &tc) const;
-	bool operator > (const Teclado_Organo &tc) const;
-	bool operator >= (const Teclado_Organo &tc) const;
+	bool operator == (const Rango_Organo &tc) const;
+	bool operator != (const Rango_Organo &tc) const;
+	bool operator < (const Rango_Organo &tc) const;
+	bool operator <= (const Rango_Organo &tc) const;
+	bool operator > (const Rango_Organo &tc) const;
+	bool operator >= (const Rango_Organo &tc) const;
 };
 
 #endif

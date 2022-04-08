@@ -192,7 +192,7 @@ void Dispositivo_Midi::rango_teclado(const std::string &rango)
 	m_rango_teclado.cargar(rango);
 }
 
-Teclado_Organo Dispositivo_Midi::rango_teclado() const
+Rango_Organo Dispositivo_Midi::rango_teclado() const
 {
 	return m_rango_teclado;
 }

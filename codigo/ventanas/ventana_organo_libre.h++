@@ -7,7 +7,7 @@
 #include "../elementos_graficos/tablero_notas.h++"
 #include "../elementos_graficos/organo.h++"
 #include "../control/configuracion.h++"
-#include "../control/teclado_organo.h++"
+#include "../control/rango_organo.h++"
 #include "../control/nota_activa.h++"
 #include "../control/pista.h++"
 //#include "../libmidi/Midi.h++"
@@ -27,7 +27,7 @@ private:
 	//Datos
 	Configuracion *m_configuracion;
 	Controlador_Midi *m_controlador_midi;
-	Teclado_Organo m_teclado_visible, m_teclado_util;
+	Rango_Organo m_teclado_visible, m_teclado_util;
 	std::array<Color, 128> m_color_teclas;
 	std::map<unsigned int, Nota_Activa*> m_notas_activas;
 

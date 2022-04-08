@@ -268,12 +268,12 @@ bool Configuracion::subtitulos()
 	return m_subtitulos;
 }
 
-Teclado_Organo Configuracion::teclado_visible()
+Rango_Organo Configuracion::teclado_visible()
 {
 	return m_teclado_visible;
 }
 
-Teclado_Organo Configuracion::teclado_util()
+Rango_Organo Configuracion::teclado_util()
 {
 	return m_teclado_util;
 }

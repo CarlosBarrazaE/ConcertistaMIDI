@@ -123,7 +123,7 @@ void Configuracion_Dispositivo::crear_nuevos_elementos()
 
 		m_sensitivo->estado(m_datos_dispositivo.sensitivo());
 		m_volumen_entrada->cambiar_valor(m_datos_dispositivo.volumen_entrada());
-		Teclado_Organo rango_teclado = m_datos_dispositivo.rango_teclado();
+		Rango_Organo rango_teclado = m_datos_dispositivo.rango_teclado();
 
 		if(rango_teclado.numero_teclas() == 24)
 			m_rango_teclado->opcion_predeterminada(0);

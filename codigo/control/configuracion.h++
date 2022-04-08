@@ -3,7 +3,7 @@
 
 #include "base_de_datos.h++"
 #include "../util/usuario.h++"
-#include "../control/teclado_organo.h++"
+#include "../control/rango_organo.h++"
 #include "../elementos_graficos/notificacion.h++"
 #include "../dispositivos_midi/controlador_midi.h++"
 #include "../dispositivos_midi/teclas_luminosas.h++"
@@ -29,8 +29,8 @@ private:
 	double m_velocidad, m_velocidad_original;
 	unsigned int m_duracion_nota, m_duracion_nota_original;
 	bool m_subtitulos, m_subtitulos_original;
-	Teclado_Organo m_teclado_visible, m_teclado_visible_original;
-	Teclado_Organo m_teclado_util;
+	Rango_Organo m_teclado_visible, m_teclado_visible_original;
+	Rango_Organo m_teclado_util;
 
 	std::string leer(std::string atributo, std::string predeterminado);
 	unsigned int leer(std::string atributo, unsigned int predeterminado);
@@ -70,8 +70,8 @@ public:
 	double velocidad();
 	unsigned int duracion_nota();
 	bool subtitulos();
-	Teclado_Organo teclado_visible();
-	Teclado_Organo teclado_util();
+	Rango_Organo teclado_visible();
+	Rango_Organo teclado_util();
 };
 
 #endif

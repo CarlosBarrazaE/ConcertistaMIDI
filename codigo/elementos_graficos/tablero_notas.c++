@@ -1,6 +1,6 @@
 #include "tablero_notas.h++"
 
-Tablero_Notas::Tablero_Notas(float x, float y, float ancho, float alto, Teclado_Organo *teclado_visible, Teclado_Organo *teclado_util, std::map<unsigned long int, std::vector<Tiempos_Nota>> *evaluacion, Administrador_Recursos *recursos)
+Tablero_Notas::Tablero_Notas(float x, float y, float ancho, float alto, Rango_Organo *teclado_visible, Rango_Organo *teclado_util, std::map<unsigned long int, std::vector<Tiempos_Nota>> *evaluacion, Administrador_Recursos *recursos)
 : Elemento(x, y, ancho, alto)
 {
 	m_duracion_nota = 6500;

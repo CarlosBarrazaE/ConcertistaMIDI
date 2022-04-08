@@ -9,7 +9,7 @@
 #include "../elementos_graficos/titulo.h++"
 #include "../elementos_graficos/puntuacion.h++"
 #include "../control/pista.h++"
-#include "../control/teclado_organo.h++"
+#include "../control/rango_organo.h++"
 #include "../control/configuracion.h++"
 #include "../control/datos_musica.h++"
 #include "../control/nota_activa.h++"
@@ -51,7 +51,7 @@ private:
 
 	//Datos
 	Controlador_Midi *m_controlador_midi;
-	Teclado_Organo m_teclado_visible, m_teclado_util;
+	Rango_Organo m_teclado_visible, m_teclado_util;
 	Configuracion *m_configuracion;
 	Datos_Musica *m_musica;
 	NotasPistas m_notas;
