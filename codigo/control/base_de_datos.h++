@@ -37,7 +37,10 @@ class Base_de_Datos
 		std::string leer_configuracion(const std::string &atributo);
 
 		//Tabla dispositivos
+		bool existe_dispositivo(const Dispositivo_Midi &dispositivo);
 		void agregar_dispositivo(const Dispositivo_Midi &dispositivo);
+		void eliminar_dispositivo(const Dispositivo_Midi &dispositivo);
+		void actualizar_cliente_dispositivo(unsigned char cliente_antiguo, const Dispositivo_Midi &dispositivo);
 		std::vector<Dispositivo_Midi> lista_dispositivos();
 
 		//Tabla carpetas

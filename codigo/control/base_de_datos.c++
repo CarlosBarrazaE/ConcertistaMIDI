@@ -182,7 +182,7 @@ void Base_de_Datos::crear()
 
 	Dispositivo_Midi teclado_y_raton;
 	teclado_y_raton.cliente(129);
-	teclado_y_raton.puerto(2);
+	teclado_y_raton.puerto(0);
 	teclado_y_raton.nombre("Teclado y Ratón");
 	teclado_y_raton.capacidad(ENTRADA);
 	teclado_y_raton.capacidad_activa(ENTRADA);
@@ -275,7 +275,7 @@ void Base_de_Datos::actualizar()
 
 			Dispositivo_Midi teclado_y_raton;
 			teclado_y_raton.cliente(129);
-			teclado_y_raton.puerto(2);
+			teclado_y_raton.puerto(0);
 			teclado_y_raton.nombre("Teclado y Ratón");
 			teclado_y_raton.capacidad(ENTRADA);
 			teclado_y_raton.capacidad_activa(ENTRADA);
@@ -356,8 +356,20 @@ std::string Base_de_Datos::leer_configuracion(const std::string &atributo)
 	return this->consulta_texto("SELECT valor FROM configuracion WHERE atributo = '"+atributo+"' LIMIT 1");
 }
 
+bool Base_de_Datos::existe_dispositivo(const Dispositivo_Midi &dispositivo)
+{
+	std::string respuesta = this->consulta_texto("SELECT nombre FROM dispositivos "
+												"WHERE cliente = '"+ std::to_string(static_cast<unsigned int>(dispositivo.cliente()))+"' AND "
+													"puerto = '"+ std::to_string(static_cast<unsigned int>(dispositivo.puerto()))+"' AND "
+													"nombre = '"+dispositivo.nombre()+"'");
+	if(respuesta.length() > 0)
+		return true;
+	return false;
+}
+
 void Base_de_Datos::agregar_dispositivo(const Dispositivo_Midi &dispositivo)
 {
+	//Inserta dispositivo nuevo
 	this->consulta("INSERT INTO dispositivos (cliente, puerto, nombre, capacidad, capacidad_activa, "
 												"habilitado, sensitivo, volumen_entrada, rango_teclado, "
 												"volumen_salida, teclado_luminoso) "
@@ -371,7 +383,24 @@ void Base_de_Datos::agregar_dispositivo(const Dispositivo_Midi &dispositivo)
 									"'"+std::to_string(dispositivo.volumen_entrada())+"', "
 									"'"+dispositivo.rango_teclado().texto()+"', "
 									"'"+std::to_string(dispositivo.volumen_salida())+"', "
-									"'"+std::to_string(static_cast<unsigned int>(dispositivo.teclas_luminosas()->identificador()))+"')");
+									"'"+std::to_string(static_cast<unsigned int>(dispositivo.id_teclas_luminosas()))+"')");
+}
+
+void Base_de_Datos::eliminar_dispositivo(const Dispositivo_Midi &dispositivo)
+{
+	this->consulta("DELETE FROM dispositivos "
+							"WHERE cliente = '"+ std::to_string(static_cast<unsigned int>(dispositivo.cliente()))+"' AND "
+									"puerto = '"+ std::to_string(static_cast<unsigned int>(dispositivo.puerto()))+"' AND "
+									"nombre = '"+dispositivo.nombre()+"'");
+}
+
+void Base_de_Datos::actualizar_cliente_dispositivo(unsigned char cliente_antiguo, const Dispositivo_Midi &dispositivo)
+{
+	//El dispositivo es encontrado en otro id cliente y hay que actualizarlo
+	this->consulta("UPDATE dispositivos SET cliente = '"+ std::to_string(static_cast<unsigned int>(cliente_antiguo))+"' "
+									"WHERE cliente = '"+ std::to_string(static_cast<unsigned int>(dispositivo.cliente()))+"' AND "
+											"puerto = '"+ std::to_string(static_cast<unsigned int>(dispositivo.puerto()))+"' AND "
+											"nombre = '"+dispositivo.nombre()+"'");
 }
 
 std::vector<Dispositivo_Midi> Base_de_Datos::lista_dispositivos()
