@@ -10,6 +10,7 @@ Raton::Raton()
 	m_boton_central = false;
 	m_boton_derecho = false;
 	m_numero_clics = 0;
+	m_ultimo_evento = EventoVacio;
 }
 
 void Raton::actualizar_boton(BotonRaton boton, bool estado, int numero_clics)
@@ -25,18 +26,21 @@ void Raton::actualizar_boton(BotonRaton boton, bool estado, int numero_clics)
 
 	m_desplazamiento_x = 0;
 	m_desplazamiento_y = 0;
+	m_ultimo_evento = EventoClic;
 }
 
 void Raton::actualizar_posicion(int x, int y)
 {
 	m_posicion_x = x;
 	m_posicion_y = y;
+	m_ultimo_evento = EventoPosicion;
 }
 
 void Raton::actualizar_desplazamiento(int desplazamiento_x, int desplazamiento_y)
 {
 	m_desplazamiento_x = desplazamiento_x;
 	m_desplazamiento_y = desplazamiento_y;
+	m_ultimo_evento = EventoDesplazamiento;
 }
 
 void Raton::anular_desplazamiento()
@@ -45,7 +49,7 @@ void Raton::anular_desplazamiento()
 	m_desplazamiento_y = 0;
 }
 
-bool Raton::activado(BotonRaton boton)
+bool Raton::activado(BotonRaton boton) const
 {
 	if(boton == BotonIzquierdo)
 		return m_boton_izquierdo;
@@ -56,7 +60,7 @@ bool Raton::activado(BotonRaton boton)
 	return false;
 }
 
-BotonRaton Raton::boton_activado()
+BotonRaton Raton::boton_activado() const
 {
 	if(m_boton_izquierdo)
 		return BotonIzquierdo;
@@ -67,32 +71,40 @@ BotonRaton Raton::boton_activado()
 	return Ninguno;
 }
 
-int Raton::numero_clics()
+int Raton::numero_clics() const
 {
 	return m_numero_clics;
 }
 
-int Raton::x()
+int Raton::x() const
 {
 	return m_posicion_x;
 }
 
-int Raton::y()
+int Raton::y() const
 {
 	return m_posicion_y;
 }
 
-int Raton::dx()
+int Raton::dx() const
 {
 	return m_desplazamiento_x;
 }
 
-int Raton::dy()
+int Raton::dy() const
 {
 	return m_desplazamiento_y;
 }
 
-bool Raton::esta_sobre(float x, float y, float ancho, float alto)
+bool Raton::ultimo_evento_fue(const EventoRaton &tipo) const
+{
+	//Retorna
+	if(m_ultimo_evento == tipo)
+		return true;
+	return false;
+}
+
+bool Raton::esta_sobre(float x, float y, float ancho, float alto) const
 {
 	if(this->x() >= static_cast<int>(x) && this->x() < static_cast<int>(x + ancho) &&
 		this->y() >= static_cast<int>(y) && this->y() < static_cast<int>(y + alto))

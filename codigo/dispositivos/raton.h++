@@ -9,6 +9,14 @@ enum BotonRaton
 	Ninguno
 };
 
+enum EventoRaton
+{
+	EventoVacio,
+	EventoPosicion,
+	EventoClic,
+	EventoDesplazamiento,
+};
+
 class Raton
 {
 private:
@@ -16,6 +24,7 @@ private:
 	int m_desplazamiento_x, m_desplazamiento_y;
 	bool m_boton_izquierdo, m_boton_central, m_boton_derecho;
 	int m_numero_clics;
+	EventoRaton m_ultimo_evento;
 public:
 	Raton();
 	void actualizar_boton(BotonRaton boton, bool estado, int numero_clics);
@@ -23,15 +32,16 @@ public:
 	void actualizar_desplazamiento(int desplazamiento_x, int desplazamiento_y);
 	void anular_desplazamiento();
 
-	bool activado(BotonRaton boton);
-	BotonRaton boton_activado();
-	int numero_clics();
-	int x();
-	int y();
-	int dx();
-	int dy();
+	bool activado(BotonRaton boton) const;
+	BotonRaton boton_activado() const;
+	int numero_clics() const;
+	int x() const;
+	int y() const;
+	int dx() const;
+	int dy() const;
+	bool ultimo_evento_fue(const EventoRaton &tipo) const;
 
-	bool esta_sobre(float x, float y, float ancho, float alto);
+	bool esta_sobre(float x, float y, float ancho, float alto) const;
 
 	Raton& operator = (const Raton &r);
 };
