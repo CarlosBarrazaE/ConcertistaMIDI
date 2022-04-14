@@ -7,6 +7,11 @@ VentanaOrganoLibre::VentanaOrganoLibre(Configuracion *configuracion, Administrad
 	m_controlador_midi = m_configuracion->controlador_midi();
 
 	m_teclado_visible = m_configuracion->teclado_visible();
+
+	//Actualiza el rango util si hay cambios en los dispositivos
+	if(m_configuracion->controlador_midi()->hay_cambios_de_dispositivos())
+		m_configuracion->actualizar_rango_util_organo();
+
 	m_teclado_util = m_configuracion->teclado_util();
 
 	m_organo = new Organo(0, Pantalla::Alto, Pantalla::Ancho, &m_teclado_visible, &m_teclado_util, recursos);
@@ -60,6 +65,13 @@ void VentanaOrganoLibre::eliminar_nota(unsigned int id_nota)
 
 void VentanaOrganoLibre::actualizar(unsigned int diferencia_tiempo)
 {
+	//Actualiza el rango util si hay cambios en los dispositivos
+	if(m_configuracion->controlador_midi()->hay_cambios_de_dispositivos())
+	{
+		m_configuracion->actualizar_rango_util_organo();
+		m_teclado_util.cambiar(m_configuracion->teclado_util().tecla_inicial(), m_configuracion->teclado_util().numero_teclas());
+	}
+
 	//m_tablero->tiempo(diferencia_tiempo);
 
 	m_organo->actualizar(diferencia_tiempo);
@@ -107,6 +119,11 @@ void VentanaOrganoLibre::evento_raton(Raton *raton)
 {
 	m_tablero->evento_raton(raton);
 	m_organo->evento_raton(raton);
+	while(m_organo->hay_eventos())
+	{
+		std::pair<unsigned char, bool> evento = m_organo->obtener_evento();
+		m_controlador_midi->enviar_nota(evento.first, evento.second);
+	}
 }
 
 void VentanaOrganoLibre::evento_teclado(Tecla tecla, bool estado)
