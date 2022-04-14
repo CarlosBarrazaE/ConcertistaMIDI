@@ -51,6 +51,7 @@ private:
 
 	void cargar_tabla_carpetas();
 	unsigned int limpiar_base_de_datos();
+	void guardar_configuracion_dispositivos();
 
 public:
 	VentanaConfiguracion(Configuracion *configuracion, Administrador_Recursos *recursos);

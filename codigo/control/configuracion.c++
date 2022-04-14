@@ -26,30 +26,23 @@ Configuracion::Configuracion()
 
 		std::vector<Dispositivo_Midi> lista_dispositivos = m_datos.lista_dispositivos();
 
-		//Tamaño minimo para quedarme con el mayor de todos los rangos
-		if(lista_dispositivos.size() > 0)
-			m_teclado_util.cambiar(0, 24);
-
-		bool nuevo_rango = false;
 		for(Dispositivo_Midi &datos : lista_dispositivos)
 		{
 			if(datos.habilitado())
 			{
 				Dispositivo_Midi *dispositivo = m_controlador_midi.configurar_dispositivo(datos.cliente(), datos.puerto(), datos.capacidad(), datos.nombre());
-				dispositivo->copiar_configuracion(datos);
-				m_controlador_midi.conectar(dispositivo, false);
 
-				//Se queda con el teclado mas grande
-				if(dispositivo->es_entrada() && m_teclado_util <= dispositivo->rango_teclado())
-				{
-					m_teclado_util = dispositivo->rango_teclado();
-					nuevo_rango = true;
-				}
+				//Si cambio el id del cliente se actualiza la base de datos
+				if(dispositivo->cambio_cliente())
+					m_datos.actualizar_cliente_dispositivo(datos.cliente(), *dispositivo);
+
+				//Carga la configuracion de la base de datos
+				dispositivo->copiar_configuracion(datos);
+				m_controlador_midi.conectar(dispositivo);
 			}
 		}
-		//Si no hay dispositivo de entrada o no estan habilitados se muestra una rango predeterminado
-		if(!nuevo_rango)
-			m_teclado_util.cambiar(21, 88);
+
+		this->actualizar_rango_util_organo();
 
 		//Configuracion General
 		m_pantalla_completa_original = this->leer("pantalla_completa", m_pantalla_completa_original);
@@ -168,6 +161,32 @@ void Configuracion::guardar_configuracion()
 	if(m_teclado_visible_original != m_teclado_visible)
 		m_datos.escribir_configuracion("teclado_visible", m_teclado_visible.texto());
 	m_datos.finalizar_transaccion();
+}
+
+void Configuracion::actualizar_rango_util_organo()
+{
+	std::vector<Dispositivo_Midi*> dispositivos = m_controlador_midi.lista_dispositivos();
+
+	//Tamaño minimo para quedarme con el mayor de todos los rangos
+	if(dispositivos.size() > 0)
+		m_teclado_util.cambiar(0, 24);//El menor de todos
+
+	bool nuevo_rango = false;
+	for(Dispositivo_Midi *d : dispositivos)
+	{
+		if(d->habilitado())
+		{
+			//Se queda con el teclado mas grande
+			if(d->conectado() && d->es_entrada() && m_teclado_util <= d->rango_teclado())
+			{
+				m_teclado_util.cambiar(d->rango_teclado().tecla_inicial(), d->rango_teclado().numero_teclas());
+				nuevo_rango = true;
+			}
+		}
+	}
+	//Si no hay dispositivo de entrada o no estan habilitados se muestra una rango predeterminado
+	if(!nuevo_rango)
+		m_teclado_util.cambiar(21, 88);
 }
 
 Controlador_Midi *Configuracion::controlador_midi()

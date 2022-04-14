@@ -110,7 +110,6 @@ VentanaConfiguracion::~VentanaConfiguracion()
 	delete m_solapa2_agregar;
 	delete m_solapa2_eliminar;
 
-
 	delete m_solapa3_titulo;
 	delete m_solapa3_panel;
 
@@ -183,6 +182,44 @@ unsigned int VentanaConfiguracion::limpiar_base_de_datos()
 	return registros_eliminados;
 }
 
+void VentanaConfiguracion::guardar_configuracion_dispositivos()
+{
+	m_configuracion->base_de_datos()->iniciar_transaccion();
+	bool hay_cambios = false;
+	for(unsigned long int x=0; x<m_solapa3_lista_dispositivos.size(); x++)
+	{
+
+		Configuracion_Dispositivo *actual = m_solapa3_lista_dispositivos[x];
+		if(actual->dispositivo_cambiado())
+		{
+			hay_cambios = true;
+			Dispositivo_Midi datos = actual->configuracion();
+			Dispositivo_Midi *dispositivo = m_configuracion->controlador_midi()->obtener_dispositivo(datos.cliente(), datos.puerto());
+
+			if(dispositivo != NULL)
+			{
+				if(dispositivo->conectado())
+					m_configuracion->controlador_midi()->desconectar(dispositivo);
+				dispositivo->copiar_configuracion(datos);//Carga la nueva configuracion
+			}
+			if(datos.habilitado())
+			{
+				//Si existe, se borra la configuración anterior para guardar la nueva configuracion
+				if(m_configuracion->base_de_datos()->existe_dispositivo(datos))
+					m_configuracion->base_de_datos()->eliminar_dispositivo(datos);
+				m_configuracion->base_de_datos()->agregar_dispositivo(datos);
+				if(dispositivo != NULL)
+					m_configuracion->controlador_midi()->conectar(dispositivo);
+			}
+			else
+				m_configuracion->base_de_datos()->eliminar_dispositivo(datos);
+		}
+	}
+	m_configuracion->base_de_datos()->finalizar_transaccion();
+	if(hay_cambios)
+		m_configuracion->actualizar_rango_util_organo();
+}
+
 void VentanaConfiguracion::actualizar(unsigned int diferencia_tiempo)
 {
 	if(m_selector_archivos != NULL)
@@ -191,14 +228,40 @@ void VentanaConfiguracion::actualizar(unsigned int diferencia_tiempo)
 
 	if(m_solapa->solapa_activa() == 2)
 	{
-		bool cambiar_altura = false;
-		for(unsigned long int x=0; x<m_solapa3_lista_dispositivos.size() && !cambiar_altura; x++)
+		if(m_configuracion->controlador_midi()->hay_cambios_de_dispositivos())
 		{
-			if(m_solapa3_lista_dispositivos[x]->cambio_altura())
-				cambiar_altura = true;
+			//Guarda los cambios de la configuracion, porque se borrara todo y se cargaran nuevamente
+			this->guardar_configuracion_dispositivos();
+
+			//Elimina todos los elementos de configuracion de dispositivos
+			for(unsigned long int x=0; x<m_solapa3_lista_dispositivos.size(); x++)
+				delete m_solapa3_lista_dispositivos[x];
+			m_solapa3_lista_dispositivos.clear();
+			m_solapa3_panel->vaciar();
+
+			//Crea nuevamente la lista de dispositivos
+			Controlador_Midi *controlador = m_configuracion->controlador_midi();
+			for(unsigned long int x=0; x<controlador->lista_dispositivos().size(); x++)
+			{
+				m_solapa3_lista_dispositivos.push_back(new Configuracion_Dispositivo(0, 0, Pantalla::Ancho-270, *controlador->lista_dispositivos()[x], m_recursos));
+				m_solapa3_panel->agregar_elemento(m_solapa3_lista_dispositivos[x]);
+			}
+
+			//Actualiza las posiciones, reenvia el evento porque se creeo todo de nuevo, normalmente esto lo hace
+			//el panel m_solapa
+			m_solapa3_panel->actualizar(diferencia_tiempo);
 		}
-		if(cambiar_altura)
-			m_solapa3_panel->actualizar_dimension();
+		else
+		{
+			bool cambiar_altura = false;
+			for(unsigned long int x=0; x<m_solapa3_lista_dispositivos.size() && !cambiar_altura; x++)
+			{
+				if(m_solapa3_lista_dispositivos[x]->cambio_altura())
+					cambiar_altura = true;
+			}
+			if(cambiar_altura)
+				m_solapa3_panel->actualizar_dimension();
+		}
 	}
 }
 
@@ -248,7 +311,11 @@ void VentanaConfiguracion::evento_raton(Raton *raton)
 	m_solapa->evento_raton(raton);
 	m_boton_atras->evento_raton(raton);
 	if(m_boton_atras->esta_activado())
+	{
+		//Se guardan los cambios en los dispositivos
+		this->guardar_configuracion_dispositivos();
 		m_accion = CambiarATitulo;
+	}
 
 	if(m_solapa->solapa_activa() == 0)
 	{
@@ -317,18 +384,23 @@ void VentanaConfiguracion::evento_raton(Raton *raton)
 	}
 	else if(m_solapa->solapa_activa() == 2)
 	{
-		/*if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 0)
-			m_configuracion->teclado_util(48, 24);
-		else if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 1)
-			m_configuracion->teclado_util(48, 37);
-		else if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 2)
-			m_configuracion->teclado_util(36, 49);
-		else if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 3)
-			m_configuracion->teclado_util(36, 61);
-		else if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 4)
-			m_configuracion->teclado_util(28, 76);
-		else if(m_solapa3_tamanno_teclado->opcion_seleccionada() == 5)
-			m_configuracion->teclado_util(21, 88);*/
+		if(raton->ultimo_evento_fue(EventoClic) && raton->numero_clics() >= 1 && !raton->activado(BotonIzquierdo))
+		{
+			//Cuando suelta el clic se revisa si cambio el estado del dispositivo a habilitado
+			for(unsigned long int x=0; x<m_solapa3_lista_dispositivos.size(); x++)
+			{
+				Configuracion_Dispositivo *actual = m_solapa3_lista_dispositivos[x];
+				if(actual->cambio_estado_conexion())
+				{
+					//Si se habilita un dispositivo, se guarda todo en caso que sea desconectado
+					//Esto se hace de forma inmediata para no perder informacion, si justo despues de habilitarlo
+					//es desconectado, el controlador midi eliminaria el dispositivo y no se podrian guardar los cambios
+					//NO se guarda por cada cambio porque seria muy lento.
+					if(actual->configuracion().habilitado())
+						this->guardar_configuracion_dispositivos();
+				}
+			}
+		}
 	}
 	else if(m_solapa->solapa_activa() == 3)
 	{

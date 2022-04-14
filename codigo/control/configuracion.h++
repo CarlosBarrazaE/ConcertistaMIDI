@@ -43,9 +43,8 @@ public:
 
 	//Base de datos
 	Base_de_Datos* base_de_datos();
-	//std::string leer(std::string atributo);
-	//bool escribir(std::string atributo, std::string valor);
 	void guardar_configuracion();
+	void actualizar_rango_util_organo();
 
 	//Configuracion MIDI
 	Controlador_Midi *controlador_midi();

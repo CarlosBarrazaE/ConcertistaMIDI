@@ -135,6 +135,7 @@ void Controlador_Juego::actualizar()
 		m_fps_dinamico = true;
 		m_ventana_actual = new VentanaConfiguracion(&m_configuracion, m_recursos);
 		cambio_ventana = true;
+		m_consumir_eventos = true;
 	}
 	else if(accion_actual == Salir)
 		this->evento_salir();

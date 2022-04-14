@@ -15,6 +15,7 @@ Dispositivo_Midi::Dispositivo_Midi(const Dispositivo_Midi &dispositivo)
 
 	m_conectado = dispositivo.m_conectado;
 	m_habilitado = dispositivo.m_habilitado;
+	m_cambio_cliente = dispositivo.m_cambio_cliente;
 	m_reenviar_programa = dispositivo.m_reenviar_programa;
 
 	//Entrada
@@ -55,6 +56,7 @@ void Dispositivo_Midi::inicializar()
 
 	m_conectado = false;
 	m_habilitado = false;
+	m_cambio_cliente = false;
 	m_reenviar_programa = false;
 
 	//Entrada
@@ -136,6 +138,16 @@ void Dispositivo_Midi::habilitado(bool estado)
 bool Dispositivo_Midi::habilitado() const
 {
 	return m_habilitado;
+}
+
+void Dispositivo_Midi::cambio_cliente(bool estado)
+{
+	m_cambio_cliente = estado;
+}
+
+bool Dispositivo_Midi::cambio_cliente() const
+{
+	return m_cambio_cliente;
 }
 
 void Dispositivo_Midi::reenviar_programa(bool valor)
@@ -311,6 +323,7 @@ Dispositivo_Midi& Dispositivo_Midi::operator = (const Dispositivo_Midi &disposit
 
 		m_conectado = dispositivo.conectado();;
 		m_habilitado = dispositivo.m_habilitado;
+		m_cambio_cliente = dispositivo.m_cambio_cliente;
 		m_reenviar_programa = dispositivo.m_reenviar_programa;
 
 		//Entrada

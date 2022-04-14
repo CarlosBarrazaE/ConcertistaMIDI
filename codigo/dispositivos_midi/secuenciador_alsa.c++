@@ -20,6 +20,10 @@ Secuenciador_Alsa::Secuenciador_Alsa()
 
 	estado = snd_seq_set_client_name(m_secuenciador_alsa, "Concertista MIDI");//Nombre del cliente
 	this->mostrar_estado_alsa(estado, "No se ha podido asignar el nombre");
+	//Crea el puerto para el teclado y ratón
+	//Bandera_entrada porque la salida se conecta a la entrada del otro dispositivo
+	m_puerto_virtual = static_cast<unsigned char>(snd_seq_create_simple_port(m_secuenciador_alsa, "Teclado y Ratón", Bandera_entrada, SND_SEQ_PORT_TYPE_MIDI_GENERIC));
+
 	//Crea el puerto de entrada
 	//Bandera_salida porque la entrada se conecta a la salida del otro dispositivo
 	m_puerto_entrada = static_cast<unsigned char>(snd_seq_create_simple_port(m_secuenciador_alsa, "Concertista MIDI Entrada", Bandera_salida, SND_SEQ_PORT_TYPE_MIDI_GENERIC));
@@ -27,10 +31,6 @@ Secuenciador_Alsa::Secuenciador_Alsa()
 	//Crea el puerto de salida
 	//Bandera_entrada porque la salida se conecta a la entrada del otro dispositivo
 	m_puerto_salida = static_cast<unsigned char>(snd_seq_create_simple_port(m_secuenciador_alsa, "Concertista MIDI Salida", Bandera_entrada, SND_SEQ_PORT_TYPE_MIDI_GENERIC));
-
-	//Crea el puerto para el teclado y ratón
-	//Bandera_entrada porque la salida se conecta a la entrada del otro dispositivo
-	m_puerto_virtual = static_cast<unsigned char>(snd_seq_create_simple_port(m_secuenciador_alsa, "Teclado y Ratón", Bandera_entrada, SND_SEQ_PORT_TYPE_MIDI_GENERIC));
 
 	//Crea el puerto de anuncio
 	unsigned int bandera_anuncio = SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_NO_EXPORT;

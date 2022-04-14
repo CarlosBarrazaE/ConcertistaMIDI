@@ -67,6 +67,8 @@ void VentanaTitulo::actualizar(unsigned int diferencia_tiempo)
 
 		m_texto_dispositivo_entrada.texto("Entrada: " + entrada);
 		m_texto_dispositivo_salida.texto("Salida: " + salida);
+
+		m_configuracion->actualizar_rango_util_organo();
 	}
 }
 

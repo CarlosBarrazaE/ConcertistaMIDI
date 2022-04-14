@@ -9,13 +9,6 @@
 
 #include <map>
 
-enum Habilitado
-{
-	Indeterminado,
-	Activo,
-	Inactivo,
-};
-
 class Controlador_Midi
 {
 private:
@@ -30,7 +23,7 @@ private:
 	std::map<unsigned char, unsigned char> m_ultimo_programa;//canal,programa
 	std::vector<std::string> m_mensajes;
 
-	Dispositivo_Midi *dispositivo(unsigned char cliente, unsigned char puerto, bool conectado, Habilitado habilitado, bool exacto);
+	Dispositivo_Midi *dispositivo(unsigned char cliente, unsigned char puerto, bool conectado, bool exacto);
 	Dispositivo_Midi *dispositivo_activo(unsigned char cliente, unsigned char puerto, unsigned char capacidad);
 
 	void reenviar_programas(Dispositivo_Midi *dispositivo);
@@ -41,8 +34,10 @@ public:
 	~Controlador_Midi();
 
 	Dispositivo_Midi* configurar_dispositivo(unsigned char cliente, unsigned char puerto, unsigned char capacidad, const std::string &nombre);
-	void conectar(Dispositivo_Midi *dispositivo, bool conexion_fisica);
-	void desconectar(Dispositivo_Midi *dispositivo, bool desconexion_fisica, bool conexion_perdida);
+	Dispositivo_Midi* obtener_dispositivo(unsigned char cliente, unsigned char puerto);
+	void conectar(Dispositivo_Midi *dispositivo);
+	void desconectar(Dispositivo_Midi *dispositivo);
+	void eliminar_dispositivo(Dispositivo_Midi *dispositivo);
 
 	bool hay_eventos();
 	Evento_Midi leer();

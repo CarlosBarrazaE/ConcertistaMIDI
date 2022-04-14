@@ -331,7 +331,6 @@ void Configuracion_Dispositivo::evento_raton(Raton *raton)
 				m_datos_dispositivo.capacidad_activa(ENTRADA | SALIDA);
 
 			m_dispositivo_cambiado = true;
-			m_cambio_estado_conexion = true;
 
 			m_alto_nuevo = m_alto_minimo + 40;
 			if(this->mostrar_entrada())
@@ -349,25 +348,59 @@ void Configuracion_Dispositivo::evento_raton(Raton *raton)
 				m_direccion = -2;//Mover hasta el nuevo m_alto_maximo
 				m_alto_maximo = m_alto_nuevo;
 			}
-
-			if(this->mostrar_salida())
-			{
-				//Para actualizar los valores
-				this->posicion(this->x(), this->y());
-			}
 		}
 
 		if(this->mostrar_entrada())
 		{
 			m_sensitivo->evento_raton(raton);
+			if(m_sensitivo->cambio_estado())
+			{
+				m_datos_dispositivo.sensitivo(m_sensitivo->activado());
+				m_dispositivo_cambiado = true;
+			}
+
 			m_volumen_entrada->evento_raton(raton);
+			if(m_volumen_entrada->cambio_valor())
+			{
+				m_datos_dispositivo.volumen_entrada(m_volumen_entrada->valor_actual());
+				m_dispositivo_cambiado = true;
+			}
+
 			m_rango_teclado->evento_raton(raton);
+			if(m_rango_teclado->cambio_opcion_seleccionada())
+			{
+				if(m_rango_teclado->opcion_seleccionada() == 0)
+					m_datos_dispositivo.rango_teclado("48,24");
+				else if(m_rango_teclado->opcion_seleccionada() == 1)
+					m_datos_dispositivo.rango_teclado("48,37");
+				else if(m_rango_teclado->opcion_seleccionada() == 2)
+					m_datos_dispositivo.rango_teclado("36,49");
+				else if(m_rango_teclado->opcion_seleccionada() == 3)
+					m_datos_dispositivo.rango_teclado("36,61");
+				else if(m_rango_teclado->opcion_seleccionada() == 4)
+					m_datos_dispositivo.rango_teclado("28,76");
+				else if(m_rango_teclado->opcion_seleccionada() == 5)
+					m_datos_dispositivo.rango_teclado("21,88");
+
+				m_dispositivo_cambiado = true;
+			}
 		}
 
 		if(this->mostrar_salida())
 		{
 			m_volumen_salida->evento_raton(raton);
+			if(m_volumen_salida->cambio_valor())
+			{
+				m_datos_dispositivo.volumen_salida(m_volumen_salida->valor_actual());
+				m_dispositivo_cambiado = true;
+			}
+
 			m_teclado_luminoso->evento_raton(raton);
+			if(m_teclado_luminoso->cambio_opcion_seleccionada())
+			{
+				m_datos_dispositivo.teclas_luminosas(static_cast<unsigned int>(m_teclado_luminoso->opcion_seleccionada()));
+				m_dispositivo_cambiado = true;
+			}
 		}
 	}
 }

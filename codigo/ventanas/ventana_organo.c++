@@ -16,6 +16,10 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 	m_duracion_nota = m_configuracion->duracion_nota();
 	m_mostrar_subtitulo = m_configuracion->subtitulos();
 	m_teclado_visible = m_configuracion->teclado_visible();
+
+	if(m_configuracion->controlador_midi()->hay_cambios_de_dispositivos())
+		m_configuracion->actualizar_rango_util_organo();
+
 	m_teclado_util = m_configuracion->teclado_util();
 
 	if(m_volumen > 0)
@@ -100,6 +104,12 @@ VentanaOrgano::~VentanaOrgano()
 
 void VentanaOrgano::actualizar(unsigned int diferencia_tiempo)
 {
+	if(m_configuracion->controlador_midi()->hay_cambios_de_dispositivos())
+	{
+		m_configuracion->actualizar_rango_util_organo();
+		m_teclado_util = m_configuracion->teclado_util();
+	}
+
 	//Cuando termina la cancion se retrocede a la ventana anterior
 	if(m_musica->musica()->IsSongOver())
 	{

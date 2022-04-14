@@ -32,7 +32,7 @@ Controlador_Midi::~Controlador_Midi()
 	m_dispositivos.clear();
 }
 
-Dispositivo_Midi *Controlador_Midi::dispositivo(unsigned char cliente, unsigned char puerto, bool conectado, Habilitado habilitado, bool exacto)
+Dispositivo_Midi *Controlador_Midi::dispositivo(unsigned char cliente, unsigned char puerto, bool conectado, bool exacto)
 {
 	//Encuentra un dispositivo que cumpla las condiciones establecidas
 	if(m_secuenciador == NULL)
@@ -47,10 +47,6 @@ Dispositivo_Midi *Controlador_Midi::dispositivo(unsigned char cliente, unsigned 
 	{
 		//El estado de conexion tiene que ser lo pedido
 		if(m_dispositivos[x]->conectado() != conectado)
-			continue;
-
-		if(	(habilitado == Activo && !m_dispositivos[x]->habilitado()) ||
-			(habilitado == Inactivo && m_dispositivos[x]->habilitado()))
 			continue;
 
 		//Si ya lo encotro lo retorna, usado al desconectar cuando no se tiene el nombre
@@ -168,9 +164,12 @@ Dispositivo_Midi *Controlador_Midi::configurar_dispositivo(unsigned char cliente
 		}
 	}
 	//Retorna el dispositivo que coincide por nombre
-	//pero esta en otro cliente o puerto
-	if(dispositivo != NULL)
+	//pero esta en otro cliente y mismo puerto
+	if(dispositivo != NULL && dispositivo->puerto() == puerto)
+	{
+		dispositivo->cambio_cliente(true);
 		return dispositivo;
+	}
 	else
 	{
 		//Crea un dispositivo para guardar los datos
@@ -180,17 +179,25 @@ Dispositivo_Midi *Controlador_Midi::configurar_dispositivo(unsigned char cliente
 	}
 }
 
-void Controlador_Midi::conectar(Dispositivo_Midi *dispositivo, bool conexion_fisica)
+Dispositivo_Midi* Controlador_Midi::obtener_dispositivo(unsigned char cliente, unsigned char puerto)
+{
+	for(unsigned long int x=0; x<m_dispositivos.size(); x++)
+	{
+		if(m_dispositivos[x]->cliente() == cliente && m_dispositivos[x]->puerto() == puerto)
+		{
+			return m_dispositivos[x];
+		}
+	}
+	return NULL;
+}
+
+void Controlador_Midi::conectar(Dispositivo_Midi *dispositivo)
 {
 	//Conecta o habilita el dispositivo
 	//Habilitar el dispositivo significa que se puede usar si esta disponible y se conectara automaticamente
 	//cuando lo este, de lo contrario sera ignorado.
 	if(m_secuenciador == NULL)
 		return;
-
-	//Conecta el dispositivo si esta disponible
-	if(conexion_fisica)
-		dispositivo->conectado(true);
 
 	if(!dispositivo->conectado() || !dispositivo->habilitado())
 		return;
@@ -210,7 +217,7 @@ void Controlador_Midi::conectar(Dispositivo_Midi *dispositivo, bool conexion_fis
 	}
 }
 
-void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexion_fisica, bool conexion_perdida)
+void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo)
 {
 	//Al perder la conexion ya no se puede desconectar del secuenciador
 	if(m_secuenciador == NULL)
@@ -222,7 +229,7 @@ void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexi
 		if(dispositivo->entrada_activa())
 		{
 			//Se desconecta el dispositivo de la entrada
-			if(!conexion_perdida)
+			if(dispositivo->conectado())
 				m_secuenciador->desconectar(dispositivo->cliente(), dispositivo->puerto(), Entrada);
 
 			//Se borra de los dispositivos activos
@@ -240,7 +247,7 @@ void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexi
 		if(dispositivo->salida_activa())
 		{
 			//Se desconecta el dispositivo de la salida
-			if(!conexion_perdida)
+			if(dispositivo->conectado())
 				m_secuenciador->desconectar(dispositivo->cliente(), dispositivo->puerto(), Salida);
 
 			//Se borra de los dispositivos activos
@@ -255,9 +262,23 @@ void Controlador_Midi::desconectar(Dispositivo_Midi *dispositivo, bool desconexi
 			}
 		}
 	}
+}
 
-	if(desconexion_fisica)
-		dispositivo->conectado(false);
+void Controlador_Midi::eliminar_dispositivo(Dispositivo_Midi *dispositivo)
+{
+	if(!dispositivo->habilitado() && !dispositivo->conectado())
+	{
+		//Se borra de la lista porque no esta habilitado ni esta conectado
+		bool borrado = false;
+		for(unsigned int x=0; x<m_dispositivos.size() && !borrado; x++)
+		{
+			if(dispositivo == m_dispositivos[x])
+			{
+				m_dispositivos.erase(m_dispositivos.begin()+x);
+				borrado = true;
+			}
+		}
+	}
 }
 
 bool Controlador_Midi::hay_eventos()
@@ -339,17 +360,22 @@ Evento_Midi Controlador_Midi::leer()
 	{
 		//Primero se desconecta el puerto y luego el cliente, cuando llega a este punto ya esta desconectado el puerto
 		m_cambio_dispositivos = true;
-		Dispositivo_Midi *nuevo = dispositivo(evento.cliente(), evento.puerto(), false, Indeterminado, true);
+		Dispositivo_Midi *nuevo = dispositivo(evento.cliente(), evento.puerto(), false, true);
 		if(nuevo != NULL)
 			m_mensajes.push_back(nuevo->nombre() + " - desconectado");
 	}
 	else if(evento.tipo_evento() == EventoMidi_PuertoConectado)
 	{
-		Dispositivo_Midi *nuevo = dispositivo(evento.cliente(), evento.puerto(), false, Activo, false);
+		Dispositivo_Midi *nuevo = dispositivo(evento.cliente(), evento.puerto(), false, false);
 		if(nuevo != NULL)
-			this->conectar(nuevo, true);
+		{
+			nuevo->conectado(true);//Conectado fisicamente
+			if(nuevo->conectado())//Se conecta a un dispositivo existente
+				this->conectar(nuevo);
+		}
 		else
 		{
+			//Crea un dispositivo nuevo
 			Dispositivo_Midi *nuevo_dispositivo = m_secuenciador->crear_nuevo_dispositivo(evento.cliente(), evento.puerto());
 			if(nuevo_dispositivo != NULL)
 				m_dispositivos.push_back(nuevo_dispositivo);
@@ -358,13 +384,15 @@ Evento_Midi Controlador_Midi::leer()
 	else if(evento.tipo_evento() == EventoMidi_PuertoDesconectado)
 	{
 		//Desactiva un puerto de la lista
-		Dispositivo_Midi *origen = dispositivo(evento.cliente(), evento.puerto(), true, Indeterminado, true);
+		Dispositivo_Midi *origen = dispositivo(evento.cliente(), evento.puerto(), true, true);
 		if(origen != NULL)
 		{
+			origen->conectado(false);//Desconectado fisicamente
 			//Revisa si el dispositivo que se desconecto dejo notas encendidas que hay que apagar
 			if(origen->notas_entrada().size() > 0)
 				m_desconectado_pendiente++;
-			this->desconectar(origen, true, true);
+			this->desconectar(origen);
+			this->eliminar_dispositivo(origen);
 		}
 	}
 	else if(evento.tipo_evento() == EventoMidi_PuertoSuscrito)
@@ -580,6 +608,7 @@ std::vector<Dispositivo_Midi*> Controlador_Midi::lista_dispositivos()
 
 bool Controlador_Midi::hay_cambios_de_dispositivos()
 {
+	//Registro::Nota("Preguntando");
 	bool cambios = m_cambio_dispositivos;
 	m_cambio_dispositivos = false;
 	return cambios;

@@ -22,8 +22,6 @@
 #include "control/configuracion.h++"
 #include "control/datos_musica.h++"
 
-//#include "libmidi/MidiComm.h++"
-
 #include <SDL2/SDL.h>
 
 class Controlador_Juego

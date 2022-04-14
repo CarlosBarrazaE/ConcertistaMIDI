@@ -21,6 +21,7 @@ private:
 
 	bool m_conectado;
 	bool m_habilitado;
+	bool m_cambio_cliente;
 	bool m_reenviar_programa;
 
 	//Entrada
@@ -57,6 +58,8 @@ public:
 	bool conectado() const;
 	void habilitado(bool estado);
 	bool habilitado() const;
+	void cambio_cliente(bool estado);
+	bool cambio_cliente() const;
 	void reenviar_programa(bool valor);
 	bool reenviar_programa() const;
 
