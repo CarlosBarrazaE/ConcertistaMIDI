@@ -1,9 +1,10 @@
 #include "puntuacion.h++"
 
-Puntuacion::Puntuacion(float x, float y, float ancho, float alto, Administrador_Recursos *recursos) : Elemento(x, y, ancho, alto), m_texto_puntaje(recursos), m_texto_aciertos(recursos), m_texto_maxcombo(recursos), m_texto_errores(recursos)
+Puntuacion::Puntuacion(float x, float y, float ancho, float alto, const Rango_Organo &rango, Administrador_Recursos *recursos) : Elemento(x, y, ancho, alto), m_texto_puntaje(recursos), m_texto_aciertos(recursos), m_texto_maxcombo(recursos), m_texto_errores(recursos)
 {
 	m_rectangulo = recursos->figura(F_Rectangulo);
 
+	m_rango_organo = rango;
 	m_ultimo_tiempo = 0;
 	m_puntaje_total = 0;
 	m_notas_totales = 0;
@@ -32,6 +33,11 @@ Puntuacion::Puntuacion(float x, float y, float ancho, float alto, Administrador_
 	m_texto_errores.tipografia(recursos->tipografia(LetraMediana));
 	m_texto_errores.posicion(this->x()+5, this->y()+65);//Margen para el texto
 	m_texto_errores.color(color_letra);
+
+	m_actualizar_texto_puntajes = false;
+	m_actualizar_texto_aciertos = false;
+	m_actualizar_texto_maxcombo = false;
+	m_actualizar_texto_errores = false;
 }
 
 Puntuacion::~Puntuacion()
@@ -40,6 +46,32 @@ Puntuacion::~Puntuacion()
 
 void Puntuacion::actualizar(unsigned int /*diferencia_tiempo*/)
 {
+	if(m_notas_totales > 0)
+	{
+		if(m_actualizar_texto_puntajes)
+		{
+			m_texto_puntaje.texto("Puntaje: " + std::to_string(m_puntaje_total));
+			m_actualizar_texto_puntajes = false;
+		}
+
+		if(m_actualizar_texto_aciertos)
+		{
+			m_texto_aciertos.texto("Notas: " + std::to_string(m_notas_tocadas) + "/" + std::to_string(m_notas_totales));
+			m_actualizar_texto_aciertos = false;
+		}
+
+		if(m_actualizar_texto_errores)
+		{
+			m_texto_errores.texto("Errores: " + std::to_string(m_errores));
+			m_actualizar_texto_errores = false;
+		}
+
+		if(m_actualizar_texto_maxcombo)
+		{
+			m_texto_maxcombo.texto("Maximo Combo: " + std::to_string(m_maximo_combo));
+			m_actualizar_texto_maxcombo = false;
+		}
+	}
 }
 
 void Puntuacion::dibujar()
@@ -59,30 +91,31 @@ void Puntuacion::evento_raton(Raton */*raton*/)
 {
 }
 
-void Puntuacion::nota_correcta(unsigned int cantidad, microseconds_t tiempo, double velocidad)
+void Puntuacion::nota_correcta(unsigned char id_nota, microseconds_t tiempo_inicio, double velocidad_reproducion)
 {
-	m_ultimo_tiempo = tiempo;
-	Puntos puntaje_nuevo;
-	puntaje_nuevo.tiempo = tiempo;
+	Puntos nota;
+	nota.id_nota = id_nota;
+	nota.tiempo = tiempo_inicio;
+	m_ultimo_tiempo = tiempo_inicio;
 
 	//En el modo aprender la velocidad no importa por lo que envia 0
-	if(velocidad <= 0)
-		velocidad = 1;
+	if(velocidad_reproducion <= 0)
+		velocidad_reproducion = 1;
 	if(m_combos > 0)
-		puntaje_nuevo.puntaje = static_cast<int>(static_cast<float>(cantidad) * 100.0f * static_cast<float>(velocidad)) + static_cast<int>(m_combos);
+		nota.puntaje = static_cast<int>(100.0f * static_cast<float>(velocidad_reproducion)) + static_cast<int>(m_combos);
 	else
-		puntaje_nuevo.puntaje = static_cast<int>(static_cast<float>(cantidad) * 100.0f * static_cast<float>(velocidad));
-	m_notas_tocadas += cantidad;
-	m_puntaje_total += puntaje_nuevo.puntaje;
-	m_puntuacion.push_back(puntaje_nuevo);
-	m_texto_puntaje.texto("Puntaje: " + std::to_string(m_puntaje_total));
-	m_texto_aciertos.texto("Notas: " + std::to_string(m_notas_tocadas) + "/" + std::to_string(m_notas_totales));
+		nota.puntaje = static_cast<int>(100.0f * static_cast<float>(velocidad_reproducion));
+	m_notas_tocadas ++;
+	m_puntaje_total += nota.puntaje;
+	m_puntuacion.push_back(nota);
+	m_actualizar_texto_puntajes = true;
+	m_actualizar_texto_aciertos = true;
 }
 
 void Puntuacion::notas_totales(unsigned int total_nota)
 {
 	m_notas_totales = total_nota;
-	m_texto_aciertos.texto("Notas: " + std::to_string(m_notas_tocadas) + "/" + std::to_string(m_notas_totales));
+	m_actualizar_texto_aciertos = true;
 }
 
 void Puntuacion::cambiar_a(microseconds_t tiempo_nuevo)
@@ -102,10 +135,14 @@ void Puntuacion::cambiar_a(microseconds_t tiempo_nuevo)
 					eliminar = true;
 					posicion_eliminar = static_cast<long int>(x);
 				}
-				//Quita el puntaje que esta despues cuando de retrocede
+				//Quita el puntaje que esta despues cuando se retrocede, contando solo dentro del rango del organo
 				//Los errores se quedan
-				m_puntaje_total -= m_puntuacion[x].puntaje;
-				m_notas_tocadas--;
+				if(m_puntuacion[x].id_nota >= m_rango_organo.tecla_inicial() &&
+					m_puntuacion[x].id_nota <= m_rango_organo.tecla_final())
+				{
+					m_puntaje_total -= m_puntuacion[x].puntaje;
+					m_notas_tocadas--;
+				}
 			}
 			else
 			{
@@ -116,8 +153,8 @@ void Puntuacion::cambiar_a(microseconds_t tiempo_nuevo)
 		if(eliminar)
 		{
 			m_puntuacion.erase(m_puntuacion.begin() + posicion_eliminar, m_puntuacion.end());
-			m_texto_puntaje.texto("Puntaje: " + std::to_string(m_puntaje_total));
-			m_texto_aciertos.texto("Notas: " + std::to_string(m_notas_tocadas) + "/" + std::to_string(m_notas_totales));
+			m_actualizar_texto_puntajes = true;
+			m_actualizar_texto_aciertos = true;
 		}
 	}
 }
@@ -126,8 +163,35 @@ void Puntuacion::sumar_error()
 {
 	m_puntaje_total--;
 	m_errores++;
-	m_texto_puntaje.texto("Puntaje: " + std::to_string(m_puntaje_total));
-	m_texto_errores.texto("Errores: " + std::to_string(m_errores));
+	m_actualizar_texto_puntajes = true;
+	m_actualizar_texto_errores = true;
+}
+
+void Puntuacion::cambiar_rango(const Rango_Organo &rango)
+{
+	if(m_rango_organo != rango)
+	{
+		m_rango_organo = rango;
+
+		m_puntaje_total = 0;
+		m_notas_tocadas = 0;
+
+		//Recalcular
+		for(unsigned long int x=0; x<m_puntuacion.size(); x++)
+		{
+			//No se borra, solo no se cuenta si esta fuera de rango
+			if(m_puntuacion[x].id_nota >= m_rango_organo.tecla_inicial() &&
+				m_puntuacion[x].id_nota <= m_rango_organo.tecla_final())
+			{
+				m_puntaje_total += m_puntuacion[x].puntaje;
+				m_ultimo_tiempo = m_puntuacion[x].tiempo;
+				m_notas_tocadas++;
+			}
+		}
+
+		m_actualizar_texto_puntajes = true;
+		m_actualizar_texto_aciertos = true;
+	}
 }
 
 void Puntuacion::combo(unsigned int combo)
@@ -136,7 +200,7 @@ void Puntuacion::combo(unsigned int combo)
 	if(m_combos > m_maximo_combo)
 	{
 		m_maximo_combo = m_combos;
-		m_texto_maxcombo.texto("Maximo Combo: " + std::to_string(m_maximo_combo));
+		m_actualizar_texto_maxcombo = true;
 	}
 }
 

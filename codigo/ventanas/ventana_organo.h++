@@ -67,6 +67,7 @@ private:
 	microseconds_t m_tiempo_actual_midi;
 
 	void inicializar();
+	void recalcular_puntaje();
 	void reproducir_eventos(unsigned int microsegundos_actualizar);
 	void escuchar_eventos();
 	void reproducir_subtitulos(const MidiEvent &evento);

@@ -17,6 +17,7 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 	m_mostrar_subtitulo = m_configuracion->subtitulos();
 	m_teclado_visible = m_configuracion->teclado_visible();
 
+	//Actualiza el rango util si hay cambios en los dispositivos
 	if(m_configuracion->controlador_midi()->hay_cambios_de_dispositivos())
 		m_configuracion->actualizar_rango_util_organo();
 
@@ -34,7 +35,7 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 	m_titulo_musica = new Titulo(0, m_barra->alto()+40, Pantalla::Ancho, Pantalla::Alto - (m_organo->alto() + m_barra->alto() + 40), recursos);
 	m_titulo_musica->datos(musica);
 
-	m_puntaje = new Puntuacion(20, 100, 200, 84, recursos);
+	m_puntaje = new Puntuacion(20, 100, 200, 84, m_teclado_util, recursos);
 
 	m_texto_velocidad.texto(std::to_string(static_cast<int>(m_velocidad_musica*100)) + "%");
 	m_texto_velocidad.tipografia(recursos->tipografia(LetraTitulo));
@@ -104,10 +105,12 @@ VentanaOrgano::~VentanaOrgano()
 
 void VentanaOrgano::actualizar(unsigned int diferencia_tiempo)
 {
+	//Actualiza el rango util si hay cambios en los dispositivos
 	if(m_configuracion->controlador_midi()->hay_cambios_de_dispositivos())
 	{
 		m_configuracion->actualizar_rango_util_organo();
-		m_teclado_util = m_configuracion->teclado_util();
+		m_teclado_util.cambiar(m_configuracion->teclado_util().tecla_inicial(), m_configuracion->teclado_util().numero_teclas());
+		this->recalcular_puntaje();
 	}
 
 	//Cuando termina la cancion se retrocede a la ventana anterior
@@ -142,6 +145,7 @@ void VentanaOrgano::actualizar(unsigned int diferencia_tiempo)
 		m_color_teclas[valor.second->id_nota] = valor.second->color;
 
 	//Actualiza la etiqueta de combos
+	m_puntaje->actualizar(diferencia_tiempo);
 	if(m_puntaje->combo() > COMBO_MINIMO_MOSTRAR)
 		m_texto_combos.texto("¡Combo " + std::to_string(m_puntaje->combo()) + "!");
 
@@ -207,6 +211,12 @@ void VentanaOrgano::inicializar()
 	{
 		if(m_pistas->at(i).modo() != Fondo)
 		{
+			bool existe_pista = false;
+			//La pista puede haber sido cargada en una reproducción anterior
+			std::map<unsigned long int, std::vector<Tiempos_Nota>>::iterator pista_buscada = m_evaluacion->find(i);
+			if(pista_buscada != m_evaluacion->end())
+				existe_pista = true;
+
 			for(unsigned int j=0; j<m_notas[i].size(); j++)
 			{
 				//Cuenta solo las notas que se pueden tocar con el teclado_util actual
@@ -216,15 +226,62 @@ void VentanaOrgano::inicializar()
 				)
 					notas_jugables ++;
 
-				Tiempos_Nota nota_nueva;
-				nota_nueva.id_nota = m_notas[i][j].note_id;
-				nota_nueva.inicio = m_notas[i][j].start;
-				nota_nueva.fin = m_notas[i][j].end;
-				(*m_evaluacion)[i].push_back(nota_nueva);
+				if(!existe_pista)
+				{
+					Tiempos_Nota nota_nueva;
+					nota_nueva.id_nota = m_notas[i][j].note_id;
+					nota_nueva.inicio = m_notas[i][j].start;
+					nota_nueva.fin = m_notas[i][j].end;
+					(*m_evaluacion)[i].push_back(nota_nueva);
+				}
 			}
 		}
 	}
 	m_notas_bloqueadas = 0;
+	m_puntaje->notas_totales(notas_jugables);
+}
+
+void VentanaOrgano::recalcular_puntaje()
+{
+	//Cuenta el numero de notas totales que seran jugadas
+	unsigned int notas_jugables = 0;
+	for(std::pair<unsigned long int, std::vector<Tiempos_Nota>>  pista : *m_evaluacion)
+	{
+		if(m_pistas->at(pista.first).modo() != Fondo)
+		{
+			for(unsigned long int t=0; t<pista.second.size(); t++)
+			{
+				//Cuenta solo las notas que se pueden tocar con el teclado_util actual
+				if(pista.second[t].id_nota >= m_teclado_util.tecla_inicial() &&
+					pista.second[t].id_nota <= m_teclado_util.tecla_final() &&
+					pista.second[t].fin > pista.second[t].inicio)
+				{
+					notas_jugables ++;
+				}
+				else if(pista.second[t].tocada)
+				{
+					//Desbloquea la nota que quedo fuera de rango y la descuenta
+					pista.second[t].tocada = false;
+					m_notas_bloqueadas--;
+				}
+			}
+		}
+	}
+	//Borra las notas requeridas fura de rango
+	std::map<unsigned int, Color>::iterator iterador = m_notas_requeridas.begin();
+	while(iterador != m_notas_requeridas.end())
+	{
+		if(iterador->first < m_teclado_util.tecla_inicial() ||
+			iterador->first > m_teclado_util.tecla_final())
+		{
+			//Apagando luces
+			m_controlador_midi->tecla_luninosa(iterador->first, false);
+			iterador = m_notas_requeridas.erase(iterador);
+		}
+		else
+			iterador++;
+	}
+	m_puntaje->cambiar_rango(m_teclado_util);
 	m_puntaje->notas_totales(notas_jugables);
 }
 
@@ -434,7 +491,7 @@ void VentanaOrgano::escuchar_eventos()
 				if(m_pistas->at(pista_encontrada).modo() != Aprender)
 				{
 					m_puntaje->combo(1);//Suma 1
-					m_puntaje->nota_correcta(1, m_tiempo_actual_midi, m_velocidad_musica);
+					m_puntaje->nota_correcta(static_cast<unsigned char>(nota_encontrada->note_id), m_tiempo_actual_midi, m_velocidad_musica);
 				}
 
 				nuevas_notas_tocadas = true;
@@ -809,10 +866,10 @@ void VentanaOrgano::borrar_notas_requeridas()
 		{
 			//Apagando luces
 			m_controlador_midi->tecla_luninosa(valor.first, false);
+			m_puntaje->nota_correcta(static_cast<unsigned char>(valor.first), m_tiempo_actual_midi, 0);
 		}
 		//Todas son tocadas correctamente por lo que se suman al combo
 		m_puntaje->combo(static_cast<unsigned int>(m_notas_requeridas.size()));
-		m_puntaje->nota_correcta(static_cast<unsigned int>(m_notas_requeridas.size()), m_tiempo_actual_midi, 0);
 		m_notas_requeridas.clear();
 	}
 }
