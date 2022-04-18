@@ -1,6 +1,6 @@
 #include "tablero_notas.h++"
 
-Tablero_Notas::Tablero_Notas(float x, float y, float ancho, float alto, Rango_Organo *teclado_visible, Rango_Organo *teclado_util, std::map<unsigned long int, std::vector<Tiempos_Nota>> *evaluacion, Administrador_Recursos *recursos)
+Tablero_Notas::Tablero_Notas(float x, float y, float ancho, float alto, Rango_Organo *teclado_visible, Rango_Organo *teclado_util, Evaluacion *evaluacion, Administrador_Recursos *recursos)
 : Elemento(x, y, ancho, alto)
 {
 	m_duracion_nota = 6500;
@@ -208,11 +208,16 @@ void Tablero_Notas::dibujar_notas_bajar(unsigned int pista)
 		if(m_pistas->at(pista).modo() != Fondo && numero_nota >= m_teclado_util->tecla_inicial() && numero_nota <= m_teclado_util->tecla_final())
 		{
 			//Cambia de color a la nota tocada correctamente
-			if((*m_evaluacion)[pista][n].tocada && (*m_evaluacion)[pista][n].fin_tocado == LLONG_MIN)
-				m_rectangulo->color(Color(color_nota_actual.rojo()+0.1f, color_nota_actual.verde()+0.1f, color_nota_actual.azul()+0.1f));
-			//Nota ploma al no tocarla cuando se termina el tiempo
-			else if (!(*m_evaluacion)[pista][n].tocada && (*m_evaluacion)[pista][n].inicio + TIEMPO_DETECCION_FINAL < m_tiempo_actual_midi)
-				m_rectangulo->color(Pista::Colores_pista[0]);
+			Evaluacion::iterator pista_buscada = m_evaluacion->find(pista);
+			if(pista_buscada != m_evaluacion->end() && pista_buscada->second.size() > n)
+			{
+				std::vector<Tiempos_Nota> &pista_actual = pista_buscada->second;
+				if(pista_actual[n].tocada && pista_actual[n].fin_tocado == LLONG_MIN)
+					m_rectangulo->color(Color(color_nota_actual.rojo()+0.1f, color_nota_actual.verde()+0.1f, color_nota_actual.azul()+0.1f));
+				//Nota ploma al no tocarla cuando se termina el tiempo
+				else if (!pista_actual[n].tocada && pista_actual[n].inicio + TIEMPO_DETECCION_FINAL < m_tiempo_actual_midi)
+					m_rectangulo->color(Pista::Colores_pista[0]);
+			}
 		}
 
 		unsigned char numero_blancas = Octava::blancas_desde_inicio(numero_nota) - numero_notas_omitir;
@@ -234,6 +239,7 @@ void Tablero_Notas::dibujar_notas_bajar(unsigned int pista)
 		//Muestra lo que realmente toco el jugador
 		if(m_pistas->at(pista).modo() != Fondo)
 		{
+			//AVISO no se esta verificando si (*m_evaluacion)[pista][n] existe
 			microseconds_t inicio_tocado = (*m_evaluacion)[pista][n].inicio_tocado;
 			microseconds_t fin_tocado = (*m_evaluacion)[pista][n].fin_tocado;
 

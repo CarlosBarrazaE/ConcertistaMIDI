@@ -38,7 +38,7 @@ void Datos_Musica::pistas(std::vector<Pista> pistas)
 	m_pistas = pistas;
 }
 
-std::map<unsigned long int, std::vector<Tiempos_Nota>> *Datos_Musica::evaluacion()
+Evaluacion *Datos_Musica::evaluacion()
 {
 	return &m_evaluacion;
 }

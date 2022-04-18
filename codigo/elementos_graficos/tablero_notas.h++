@@ -5,6 +5,7 @@
 #include "etiqueta.h++"
 #include "../recursos/rectangulo.h++"
 #include "../util/octava.h++"
+#include "../control/datos_musica.h++"
 #include "../control/pista.h++"
 #include "../control/rango_organo.h++"
 #include "../control/tiempos_nota.h++"
@@ -37,7 +38,7 @@ private:
 
 	std::vector<unsigned int> m_ultima_nota;//Ultima nota por cada pista
 	std::vector<Pista> *m_pistas;
-	std::map<unsigned long int, std::vector<Tiempos_Nota>> *m_evaluacion;
+	Evaluacion *m_evaluacion;
 
 	Direccion m_desplazamiento;
 
@@ -50,7 +51,7 @@ private:
 	void dibujar_notas_subir(unsigned int pista);
 
 public:
-	Tablero_Notas(float x, float y, float ancho, float alto, Rango_Organo *teclado_visible, Rango_Organo *teclado_util, std::map<unsigned long int, std::vector<Tiempos_Nota>> *evaluacion, Administrador_Recursos *recursos);
+	Tablero_Notas(float x, float y, float ancho, float alto, Rango_Organo *teclado_visible, Rango_Organo *teclado_util, Evaluacion *evaluacion, Administrador_Recursos *recursos);
 	~Tablero_Notas();
 
 	void actualizar(unsigned int diferencia_tiempo) override;

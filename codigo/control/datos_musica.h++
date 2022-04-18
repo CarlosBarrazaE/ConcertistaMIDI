@@ -9,12 +9,14 @@
 #include <vector>
 #include <map>
 
+typedef std::map<unsigned long int, std::vector<Tiempos_Nota>> Evaluacion;
+
 class Datos_Musica
 {
 private:
 	Midi *m_musica;
 	std::vector<Pista> m_pistas;
-	std::map<unsigned long int, std::vector<Tiempos_Nota>> m_evaluacion;
+	Evaluacion m_evaluacion;
 
 	std::string m_nombre_musica;
 	std::string m_autor;
@@ -32,7 +34,7 @@ public:
 
 	Midi *musica();
 	std::vector<Pista> *pistas();
-	std::map<unsigned long int, std::vector<Tiempos_Nota>> *evaluacion();
+	Evaluacion *evaluacion();
 
 	std::string nombre_musica();
 	std::string autor();

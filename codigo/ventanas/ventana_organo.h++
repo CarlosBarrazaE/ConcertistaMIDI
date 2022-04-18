@@ -20,8 +20,6 @@
 #include <map>
 #include <array>
 
-typedef std::map<unsigned long int, std::vector<Tiempos_Nota>> Evaluacion;
-
 class VentanaOrgano : public Ventana
 {
 private:

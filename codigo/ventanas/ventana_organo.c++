@@ -478,7 +478,7 @@ void VentanaOrgano::escuchar_eventos()
 
 
 			//Se guarda la nota tocada por el jugador
-			if(nota_encontrada != NULL && !m_pausa)//Evaluacion::iterator pista_buscada = m_evaluacion->find(pista_encontrada);
+			if(nota_encontrada != NULL && !m_pausa)
 			{
 				//Nota correcta
 				this->insertar_nota_activa(nota_encontrada->note_id, nota_encontrada->channel, pista_encontrada, posicion_encontrada, m_pistas->at(pista_encontrada).color(), m_pistas->at(pista_encontrada).sonido(), true);
