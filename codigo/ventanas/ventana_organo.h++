@@ -20,6 +20,8 @@
 #include <map>
 #include <array>
 
+typedef std::map<unsigned long int, std::vector<Tiempos_Nota>> Evaluacion;
+
 class VentanaOrgano : public Ventana
 {
 private:
@@ -57,7 +59,7 @@ private:
 	NotasPistas m_notas;
 	std::string m_subtitulo_texto;
 	std::map<unsigned int, Nota_Activa*> m_notas_activas;
-	std::map<unsigned long int, std::vector<Tiempos_Nota>> *m_evaluacion;
+	Evaluacion *m_evaluacion;
 	unsigned int m_notas_bloqueadas;
 	std::array<Color, 128> m_color_teclas;
 	std::array<float, 128> m_tiempo_espera;
