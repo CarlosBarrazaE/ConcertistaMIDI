@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.7 FATAL_ERROR)
 project(concertistamidi VERSION 1.2.0 LANGUAGES C CXX DESCRIPTION "Juego para aprender a tocar piano")
 configure_file(codigo/version.h++.in version.h++)
 
-#Se requiere C++17 para utilizar std::filesystem
-set(CMAKE_CXX_STANDARD 17)
+#Al menos se requiere C++17 para utilizar std::filesystem
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(OpenGL_GL_PREFERENCE "GLVND")
 
