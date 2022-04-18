@@ -28,21 +28,7 @@ Evento_Midi::Evento_Midi(const Evento_Midi &evento)
 	m_cliente = evento.m_cliente;
 	m_puerto = evento.m_puerto;
 }
-/*
-enum EventoMidi
-{
-	EventoMidi_Nulo,
-	EventoMidi_ExclusivoDelSistema = 0xF0,
-	EventoMidi_SecuenciaDeEscape = 0xF7,
-	EventoMidi_Metaevento = 0xFF,
 
-	EventoMidi_ClienteConectado,
-	EventoMidi_ClienteDesconectado,
-	EventoMidi_PuertoConectado,
-	EventoMidi_PuertoDesconectado,
-	EventoMidi_PuertoSuscrito,
-};
-*/
 Evento_Midi::Evento_Midi(EventoMidi tipo_evento)
 {
 	m_delta_pulso = 0;
