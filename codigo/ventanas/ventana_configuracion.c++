@@ -111,6 +111,9 @@ VentanaConfiguracion::~VentanaConfiguracion()
 	delete m_solapa2_eliminar;
 
 	delete m_solapa3_titulo;
+	//Elimina todos los elementos de configuracion de dispositivos
+	for(unsigned long int x=0; x<m_solapa3_lista_dispositivos.size(); x++)
+		delete m_solapa3_lista_dispositivos[x];
 	delete m_solapa3_panel;
 
 	delete m_solapa4_titulo;
