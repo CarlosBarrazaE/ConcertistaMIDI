@@ -9,10 +9,10 @@ Control_Deslizante::Control_Deslizante(float x, float y, float ancho, float alto
 	m_textura_relleno = recursos->textura(T_ControlDeslizante_Relleno);
 	m_textura_boton = recursos->textura(T_ControlDeslizante_Boton);
 
-	m_texto_valor.dimension(20, alto);
 	m_texto_valor.centrado_vertical(true);
 	m_texto_valor.tipografia(recursos->tipografia(LetraChica));
 	m_texto_valor.texto("100%");
+	m_texto_valor.dimension(m_texto_valor.largo_texto(), alto);
 	m_largo_maximo_texto = m_texto_valor.largo_texto();
 	m_texto_valor.posicion(x+ancho - m_largo_maximo_texto, y);
 
