@@ -168,7 +168,10 @@ void Evento_Midi::velocidad_nota(unsigned char velocidad)
 		m_tipo_evento != EventoMidi_NotaEncendida)
 		return;
 
-	m_datos[2] = velocidad & 0x7F;
+	if(velocidad > 127)
+		m_datos[2] = 127;
+	else
+		m_datos[2] = velocidad;
 }
 
 unsigned char Evento_Midi::velocidad_nota() const
@@ -191,7 +194,10 @@ void Evento_Midi::presion_nota(unsigned char presion)
 	if(	m_tipo_evento != EventoMidi_DespuesDeTocarNota)
 		return;
 
-	m_datos[2] = presion & 0x7F;
+	if(presion > 127)
+		m_datos[2] = 127;
+	else
+		m_datos[2] = presion;
 }
 
 unsigned char Evento_Midi::presion_nota() const
@@ -213,7 +219,10 @@ void Evento_Midi::presion_canal(unsigned char presion)
 	if(	m_tipo_evento != EventoMidi_DespuesDeTocarCanal)
 		return;
 
-	m_datos[1] = presion & 0x7F;
+	if(presion > 127)
+		m_datos[1] = 127;
+	else
+		m_datos[1] = presion;
 }
 
 unsigned char Evento_Midi::presion_canal() const
