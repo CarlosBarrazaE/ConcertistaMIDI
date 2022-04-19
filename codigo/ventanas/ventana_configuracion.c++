@@ -420,7 +420,11 @@ void VentanaConfiguracion::evento_raton(Raton *raton)
 void VentanaConfiguracion::evento_teclado(Tecla tecla, bool estado)
 {
 	if(tecla == TECLA_ESCAPE && !estado)
+	{
+		//Se guardan los cambios en los dispositivos
+		this->guardar_configuracion_dispositivos();
 		m_accion = CambiarATitulo;
+	}
 	//Modo desarrollo activado desde teclado
 	if(m_solapa1_casilla_desarrollo->activado() != Pantalla::ModoDesarrollo)
 		m_solapa1_casilla_desarrollo->estado(Pantalla::ModoDesarrollo);
