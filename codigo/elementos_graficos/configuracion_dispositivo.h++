@@ -18,7 +18,7 @@ private:
 
 	//Elementos minimos
 	Boton m_desplegar;
-	Etiqueta m_nombre;
+	Etiqueta m_nombre, m_aviso;
 	Casilla_Verificacion m_habilitado;
 
 	//Elementos

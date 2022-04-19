@@ -1,6 +1,6 @@
 #include "configuracion_dispositivo.h++"
 
-Configuracion_Dispositivo::Configuracion_Dispositivo(float x, float y, float ancho, Dispositivo_Midi dispositivo, Administrador_Recursos *recursos) : Elemento(x, y, ancho, 40), m_desplegar(x+10, y+10, 20, 20, "", recursos), m_nombre(recursos), m_habilitado(x+ancho-40, y+5, 30, 30, "", recursos)
+Configuracion_Dispositivo::Configuracion_Dispositivo(float x, float y, float ancho, Dispositivo_Midi dispositivo, Administrador_Recursos *recursos) : Elemento(x, y, ancho, 40), m_desplegar(x+10, y+10, 20, 20, "", recursos), m_nombre(recursos), m_aviso(recursos), m_habilitado(x+ancho-40, y+5, 30, 30, "", recursos)
 {
 	m_datos_dispositivo = dispositivo;
 	m_recursos = recursos;
@@ -13,8 +13,20 @@ Configuracion_Dispositivo::Configuracion_Dispositivo(float x, float y, float anc
 	std::string t_cliente = std::to_string(static_cast<unsigned int>(dispositivo.cliente()));
 	std::string t_puerto = std::to_string(static_cast<unsigned int>(dispositivo.puerto()));
 
+	if(!dispositivo.conectado())
+	{
+		m_aviso.centrado_vertical(true);
+		m_aviso.texto("(Sin conexión)");
+		m_aviso.tipografia(recursos->tipografia(LetraMediana));
+		m_aviso.color(Color(1.0f, 0.0f, 0.0f));
+		m_aviso.posicion(x+ancho-(m_aviso.largo_texto()+50), y+10);
+		m_aviso.dimension(m_aviso.largo_texto(), 20);
+
+		m_nombre.color(Color(1.0f, 0.0f, 0.0f));
+	}
+
 	m_nombre.posicion(x+40, y+10);
-	m_nombre.dimension(x+ancho-40, 20);
+	m_nombre.dimension(ancho-90, 20);
 	m_nombre.centrado_vertical(true);
 	m_nombre.texto(dispositivo.nombre() + " - Puerto " + t_cliente + ":" + t_puerto);
 	m_nombre.tipografia(recursos->tipografia(LetraMediana));
@@ -250,6 +262,8 @@ void Configuracion_Dispositivo::dibujar()
 	m_rectangulo->dibujar(this->x(), this->y(), this->ancho(), this->alto());
 	m_desplegar.dibujar();
 	m_nombre.dibujar();
+	if(m_aviso.texto().size() > 0)
+		m_aviso.dibujar();
 	m_habilitado.dibujar();
 
 	if((m_mostrar_configuracion || this->y() > 40) && m_elementos_creados)
@@ -410,6 +424,7 @@ void Configuracion_Dispositivo::posicion(float x, float y)
 	this->_posicion(x, y);
 	m_desplegar.posicion(this->x()+10, this->y()+10);
 	m_nombre.posicion(this->x()+40, this->y()+10);
+	m_aviso.posicion(x+this->ancho()-(m_aviso.largo_texto()+50), y+10);
 	m_habilitado.posicion(this->x()+this->ancho()-40, this->y()+5);
 
 	if(m_elementos_creados)
@@ -450,6 +465,8 @@ void Configuracion_Dispositivo::dimension(float ancho, float /*alto*/)
 {
 	this->_dimension(ancho, this->alto());
 	//No se usa el alto en este elemento porque se calcula dependiendo del contenido
+	m_nombre.dimension(ancho-90, 20);
+	m_aviso.posicion(this->x()+ancho-(m_aviso.largo_texto()+50), this->y()+10);
 	m_habilitado.posicion(this->x() + ancho - 40, m_habilitado.y());
 
 	if(m_elementos_creados)
