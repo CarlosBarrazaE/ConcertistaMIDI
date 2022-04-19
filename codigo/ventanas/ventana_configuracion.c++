@@ -197,12 +197,14 @@ void VentanaConfiguracion::guardar_configuracion_dispositivos()
 		{
 			hay_cambios = true;
 			Dispositivo_Midi datos = actual->configuracion();
-			Dispositivo_Midi *dispositivo = m_configuracion->controlador_midi()->obtener_dispositivo(datos.cliente(), datos.puerto());
+			Dispositivo_Midi *dispositivo = m_configuracion->controlador_midi()->obtener_dispositivo(datos.cliente(), datos.puerto(), datos.nombre());
 
 			if(dispositivo != NULL)
 			{
 				if(dispositivo->conectado())
 					m_configuracion->controlador_midi()->desconectar(dispositivo);
+				else if(!datos.habilitado())//Si el dispositivo no estaba conectado y se deshabilita se elimina del controlador MIDI
+					m_configuracion->controlador_midi()->eliminar_dispositivo(dispositivo);
 				dispositivo->copiar_configuracion(datos);//Carga la nueva configuracion
 			}
 			if(datos.habilitado())

@@ -179,11 +179,13 @@ Dispositivo_Midi *Controlador_Midi::configurar_dispositivo(unsigned char cliente
 	}
 }
 
-Dispositivo_Midi* Controlador_Midi::obtener_dispositivo(unsigned char cliente, unsigned char puerto)
+Dispositivo_Midi* Controlador_Midi::obtener_dispositivo(unsigned char cliente, unsigned char puerto, const std::string &nombre)
 {
 	for(unsigned long int x=0; x<m_dispositivos.size(); x++)
 	{
-		if(m_dispositivos[x]->cliente() == cliente && m_dispositivos[x]->puerto() == puerto)
+		if(	m_dispositivos[x]->cliente() == cliente &&
+			m_dispositivos[x]->puerto() == puerto &&
+			m_dispositivos[x]->nombre() == nombre)
 		{
 			return m_dispositivos[x];
 		}

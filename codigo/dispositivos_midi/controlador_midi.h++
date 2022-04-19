@@ -34,7 +34,7 @@ public:
 	~Controlador_Midi();
 
 	Dispositivo_Midi* configurar_dispositivo(unsigned char cliente, unsigned char puerto, unsigned char capacidad, const std::string &nombre);
-	Dispositivo_Midi* obtener_dispositivo(unsigned char cliente, unsigned char puerto);
+	Dispositivo_Midi* obtener_dispositivo(unsigned char cliente, unsigned char puerto, const std::string &nombre);
 	void conectar(Dispositivo_Midi *dispositivo);
 	void desconectar(Dispositivo_Midi *dispositivo);
 	void eliminar_dispositivo(Dispositivo_Midi *dispositivo);
