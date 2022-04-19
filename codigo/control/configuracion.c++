@@ -262,7 +262,7 @@ void Configuracion::subtitulos(bool estado)
 	m_subtitulos = estado;
 }
 
-void Configuracion::teclado_visible(unsigned int inicial, unsigned int largo)
+void Configuracion::teclado_visible(unsigned char inicial, unsigned char largo)
 {
 	m_teclado_visible.cambiar(inicial, largo);
 }

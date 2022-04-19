@@ -83,7 +83,7 @@ void Organo::dibujar_blancas(float x, float y, unsigned char tecla_inicial, unsi
 		//Dibuja un punto indicando que debe tocar la nota
 		if(m_notas_requeridas != NULL)
 		{
-			std::map<unsigned int, Color>::iterator respuesta = m_notas_requeridas->find(n);
+			std::map<unsigned char, Color>::iterator respuesta = m_notas_requeridas->find(n);
 			if(respuesta != m_notas_requeridas->end())
 			{
 				m_rectangulo->color(respuesta->second);
@@ -140,7 +140,7 @@ void Organo::dibujar_negras(float x, float y, unsigned char tecla_inicial, unsig
 		if(m_notas_requeridas == NULL)
 			continue;
 
-		std::map<unsigned int, Color>::iterator respuesta = m_notas_requeridas->find(n);
+		std::map<unsigned char, Color>::iterator respuesta = m_notas_requeridas->find(n);
 		if(respuesta != m_notas_requeridas->end())
 		{
 			m_rectangulo->color(static_cast<Color>(respuesta->second)-0.2f);
@@ -268,7 +268,7 @@ void Organo::notas_activas(std::array<Color, 128> *notas)
 	m_notas_activas = notas;
 }
 
-void Organo::notas_requeridas(std::map<unsigned int, Color> *notas_requeridas)
+void Organo::notas_requeridas(std::map<unsigned char, Color> *notas_requeridas)
 {
 	m_notas_requeridas = notas_requeridas;
 }

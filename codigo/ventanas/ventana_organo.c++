@@ -268,7 +268,7 @@ void VentanaOrgano::recalcular_puntaje()
 		}
 	}
 	//Borra las notas requeridas fura de rango
-	std::map<unsigned int, Color>::iterator iterador = m_notas_requeridas.begin();
+	std::map<unsigned char, Color>::iterator iterador = m_notas_requeridas.begin();
 	while(iterador != m_notas_requeridas.end())
 	{
 		if(iterador->first < m_teclado_util.tecla_inicial() ||
@@ -321,13 +321,13 @@ void VentanaOrgano::reproducir_eventos(unsigned int microsegundos_actualizar)
 			{
 				if(m_pistas->at(i->first).modo() == Aprender)
 				{
-					this->agregar_nota_requerida(i->second.NoteNumber(), m_pistas->at(i->first).color());
+					this->agregar_nota_requerida(static_cast<unsigned char>(i->second.NoteNumber()), m_pistas->at(i->first).color());
 					notas_requeridas_nuevas = true;
 				}
 				else if(m_pistas->at(i->first).modo() == Tocar)
 				{
 					//Activa la nota luminosa
-					m_controlador_midi->tecla_luninosa(i->second.NoteNumber(), true);
+					m_controlador_midi->tecla_luninosa(static_cast<unsigned char>(i->second.NoteNumber()), true);
 				}
 			}
 		}
@@ -359,7 +359,7 @@ void VentanaOrgano::reproducir_eventos(unsigned int microsegundos_actualizar)
 						m_puntaje->reiniciar_combo();
 				}
 				if(m_pistas->at(i->first).modo() == Tocar)
-					m_controlador_midi->tecla_luninosa(i->second.NoteNumber(), false);
+					m_controlador_midi->tecla_luninosa(static_cast<unsigned char>(i->second.NoteNumber()), false);
 			}
 		}
 
@@ -862,7 +862,7 @@ void VentanaOrgano::desbloquear_notas(bool desbloquear_todas)
 					else
 					{
 						//Se desbloquea solo si es requerida, LLONG_MIN indica que esta siendo tocada
-						std::map<unsigned int, Color>::iterator resultado = m_notas_requeridas.find(pista_actual[n].id_nota);
+						std::map<unsigned char, Color>::iterator resultado = m_notas_requeridas.find(static_cast<unsigned char>(pista_actual[n].id_nota));
 						if(pista_actual[n].fin_tocado > LLONG_MIN && resultado != m_notas_requeridas.end())
 						{
 							pista_actual[n].tocada = false;
@@ -878,7 +878,7 @@ void VentanaOrgano::desbloquear_notas(bool desbloquear_todas)
 	}
 }
 
-void VentanaOrgano::agregar_nota_requerida(unsigned int id_nota, const Color &color)
+void VentanaOrgano::agregar_nota_requerida(unsigned char id_nota, const Color &color)
 {
 	m_controlador_midi->tecla_luninosa(id_nota, true);
 	m_notas_requeridas[id_nota] = color;
@@ -889,7 +889,7 @@ void VentanaOrgano::borrar_notas_requeridas()
 	//Borra las notas requerida solo si todas estan activas al mismo tiempo
 	if(m_notas_requeridas.size() > 0)
 	{
-		for(std::pair<unsigned int, Color> valor : m_notas_requeridas)
+		for(std::pair<unsigned char, Color> valor : m_notas_requeridas)
 		{
 			//Si falta alguna nota o no se toco a tiempo, entonces no se borra nada
 			std::map<unsigned int, Nota_Activa*>::iterator respuesta = m_notas_activas.find(valor.first);
@@ -897,7 +897,7 @@ void VentanaOrgano::borrar_notas_requeridas()
 				return;//La nota se toco antes de tiempo (ploma) o no fue tocada
 		}
 
-		for(std::pair<unsigned int, Color> valor : m_notas_requeridas)
+		for(std::pair<unsigned char, Color> valor : m_notas_requeridas)
 		{
 			//Apagando luces
 			m_controlador_midi->tecla_luninosa(valor.first, false);

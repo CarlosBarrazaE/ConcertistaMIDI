@@ -61,7 +61,7 @@ private:
 	unsigned int m_notas_bloqueadas;
 	std::array<Color, 128> m_color_teclas;
 	std::array<float, 128> m_tiempo_espera;
-	std::map<unsigned int, Color> m_notas_requeridas;
+	std::map<unsigned char, Color> m_notas_requeridas;
 	std::vector<unsigned long int> m_primera_nota;//Ultima nota por cada pista
 	std::vector<Pista> *m_pistas;
 	microseconds_t m_tiempo_actual_midi;
@@ -82,7 +82,7 @@ private:
 	void desbloquear_nota(unsigned long int pista, unsigned long int numero_nota);
 	void desbloquear_notas(bool desbloquear_todas);
 
-	void agregar_nota_requerida(unsigned int id_nota, const Color &color);
+	void agregar_nota_requerida(unsigned char id_nota, const Color &color);
 	void borrar_notas_requeridas();
 	bool hay_notas_requeridas();
 

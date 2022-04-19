@@ -64,7 +64,7 @@ public:
 	void velocidad(double valor);
 	void duracion_nota(unsigned int duracion);
 	void subtitulos(bool estado);
-	void teclado_visible(unsigned int inicial, unsigned int largo);
+	void teclado_visible(unsigned char inicial, unsigned char largo);
 	double volumen();
 	double velocidad();
 	unsigned int duracion_nota();

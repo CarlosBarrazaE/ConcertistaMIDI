@@ -24,7 +24,7 @@ namespace Octava
 
 		unsigned char octava = id_nota / 12;
 		//Hay 7 blancas por octava y se cuenta desde la octava 0
-		return octava*7 + numero_blanca_octava[id_nota % 12];
+		return static_cast<unsigned char>(octava*7) + numero_blanca_octava[id_nota % 12];
 	}
 
 	unsigned char negras_desde_inicio(unsigned char id_nota)
@@ -34,7 +34,7 @@ namespace Octava
 			id_nota = 0;
 		unsigned char octava = id_nota / 12;
 		//Hay 5 negras por octava y se cuenta desde la octava 0
-		return octava*5 + numero_negras_octava[id_nota % 12];
+		return static_cast<unsigned char>(octava*5) + numero_negras_octava[id_nota % 12];
 	}
 
 	unsigned char numero_blancas(unsigned char inicio, unsigned char largo)
@@ -43,7 +43,7 @@ namespace Octava
 		unsigned char blancas_omitidas = 0;
 		if(inicio > 0)
 			blancas_omitidas = blancas_desde_inicio(inicio-1);
-		unsigned char blancas_totales = blancas_desde_inicio(inicio+largo-1);
+		unsigned char blancas_totales = blancas_desde_inicio(static_cast<unsigned char>(inicio+largo-1));
 		return blancas_totales - blancas_omitidas;
 	}
 
@@ -53,7 +53,7 @@ namespace Octava
 		unsigned char negras_omitidas = 0;
 		if(inicio > 0)
 			negras_omitidas = negras_desde_inicio(inicio-1);
-		unsigned char negras_totales = negras_desde_inicio(inicio+largo-1);
+		unsigned char negras_totales = negras_desde_inicio(static_cast<unsigned char>(inicio+largo-1));
 		return negras_totales - negras_omitidas;
 	}
 
@@ -61,7 +61,7 @@ namespace Octava
 	{
 		//Retorna el id de la nota (0-127) desde el numero de blancas hasta la actual
 		unsigned char octava_actual = blanca_actual / 7;
-		return octava_actual*12 + suma_id_nota[blanca_actual % 7];
+		return static_cast<unsigned char>(octava_actual*12) + suma_id_nota[blanca_actual % 7];
 	}
 
 	float desplazamiento_negra(unsigned char nota)

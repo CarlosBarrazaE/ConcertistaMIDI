@@ -151,7 +151,7 @@ void Tablero_Notas::dibujar_notas_bajar(unsigned int pista)
 	for(unsigned int n=m_ultima_nota[pista]; n<m_notas[pista].size(); n++)
 	{
 		//Numero_nota incluye blancas y negras
-		numero_nota = m_notas[pista][n].note_id;
+		numero_nota = static_cast<unsigned char>(m_notas[pista][n].note_id);
 
 		//Se salta las notas fuera de la pantalla hacia los lados
 		if(numero_nota < m_teclado_visible->tecla_inicial() || numero_nota >= m_teclado_visible->tecla_inicial() + m_teclado_visible->numero_teclas())
@@ -184,7 +184,7 @@ void Tablero_Notas::dibujar_notas_bajar(unsigned int pista)
 
 		//Notas tocadas por el jugador
 		Color color_nota_actual = m_pistas->at(pista).color();
-		if(Octava::es_blanca(m_notas[pista][n].note_id))
+		if(Octava::es_blanca(static_cast<unsigned char>(m_notas[pista][n].note_id)))
 		{
 			//Dibuja las notas blancas
 			ancho_tecla = m_ancho_blanca;
@@ -271,7 +271,7 @@ void Tablero_Notas::dibujar_notas_subir(unsigned int pista)
 	for(unsigned int n=m_ultima_nota[pista]; n<m_notas[pista].size(); n++)
 	{
 		//Numero_nota incluye blancas y negras
-		numero_nota = m_notas[pista][n].note_id;
+		numero_nota = static_cast<unsigned char>(m_notas[pista][n].note_id);
 
 		//Se salta las notas fuera de la pantalla hacia los lados
 		if(numero_nota < m_teclado_visible->tecla_inicial() || numero_nota >= m_teclado_visible->tecla_inicial() + m_teclado_visible->numero_teclas())
@@ -305,7 +305,7 @@ void Tablero_Notas::dibujar_notas_subir(unsigned int pista)
 
 		//Notas tocadas por el jugador
 		Color color_nota_actual = m_pistas->at(pista).color();
-		if(Octava::es_blanca(m_notas[pista][n].note_id))
+		if(Octava::es_blanca(static_cast<unsigned char>(m_notas[pista][n].note_id)))
 		{
 			//Dibuja las notas blancas
 			ancho_tecla = m_ancho_blanca;

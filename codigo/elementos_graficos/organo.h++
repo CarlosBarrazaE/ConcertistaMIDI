@@ -39,7 +39,7 @@ private:
 	float m_alto_tecla_blanca, m_alto_tecla_negra;
 
 	std::array<Color, 128> *m_notas_activas;
-	std::map<unsigned int, Color> *m_notas_requeridas;
+	std::map<unsigned char, Color> *m_notas_requeridas;
 	unsigned char m_nota_enviada_anterior;
 	std::vector<std::pair<unsigned char, bool>> m_eventos;
 
@@ -58,7 +58,7 @@ public:
 	void dimension(float ancho, float alto) override;
 
 	void notas_activas(std::array<Color, 128> *notas);
-	void notas_requeridas(std::map<unsigned int, Color> *notas_requeridas);
+	void notas_requeridas(std::map<unsigned char, Color> *notas_requeridas);
 
 	void calcular_tamannos();
 	bool hay_eventos();
