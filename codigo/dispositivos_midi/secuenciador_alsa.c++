@@ -452,15 +452,20 @@ void Secuenciador_Alsa::enviar_nota(unsigned char id_nota, bool estado) const
 	evento.queue = SND_SEQ_QUEUE_DIRECT;
 
 	if(estado)
+	{
 		evento.type = SND_SEQ_EVENT_NOTEON;
+		evento.data.note.velocity = VELOCIDAD_NORMAL;
+	}
 	else
+	{
 		evento.type = SND_SEQ_EVENT_NOTEOFF;
+		evento.data.note.velocity = 0;
+	}
 
 	evento.flags &= static_cast<unsigned char>(~SND_SEQ_EVENT_LENGTH_MASK);
 	evento.flags |= SND_SEQ_EVENT_LENGTH_FIXED;
 	evento.data.note.channel = 0;
 	evento.data.note.note = id_nota;
-	evento.data.note.velocity = VELOCIDAD_NORMAL;
 
 	int estado1 = snd_seq_event_output(m_secuenciador_alsa, &evento);
 	this->mostrar_estado_alsa(estado1, "No se ha podido enviar el evento del teclado virtual");
