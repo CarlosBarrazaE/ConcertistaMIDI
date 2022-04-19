@@ -18,20 +18,27 @@ Concertista MIDI es un juego para aprender a tocar piano facilmente usando el te
 		* Aprender: Espera a que el jugador toque la nota correcta
 	* Color de pista con 9 colores diferentes
 	* Sonido
-* Teclado midi completo de 128 teclas
+* Teclado MIDI completo de 128 teclas
 	* Teclado de 37, 49, 61, 76, 88 teclas
 	* Teclado personalisable
-* Entrada
-	* Organo MIDI
-	* Teclado y raton
+	* Se destaca el teclado habilitado para tocar de acuerdo a la configuración
+* Entrada y Salida
+	* Admite multiples dispositivos de entrada y salida, con configuración independiente de:
+		* Volumen de entrada
+		* Volumen de salida
+		* Habilitar o no sensibilidad de teclado MIDI
+		* Rango de teclado
+		* Teclas luminosas
+	* Organos conectado por MIDI
+	* Teclado y ratón
 * Control de teclas luminosas
 	* Canal MIDI 1-16
 	* Casio LK-S250 SysEx
-* Musica de entrenamiento ([de linthesia](https://github.com/linthesia/linthesia/tree/master/music/Learning))
-* Reproduccion de karaoke (.kar)
+* Musica de entrenamiento ([de linthesia](https://github.com/linthesia/linthesia/tree/master/music/Learning)) y más
+* Reproducción de karaoke (.kar)
 * Configuración
 	* Carpetas MIDI personalizadas
-	* Dispositivos de entrada/salida
+	* Multiples dispositivos de entrada y salida
 
 ### Capturas
 
@@ -94,8 +101,7 @@ Se requieren los siguientes paquetes para compilar concertista midi.
 
 ### Instalar paquetes en Fedora
 
-	sudo yum install g++ cmake glew-devel SDL2-devel glm-devel alsa-lib-devel freetype-devel libicu-devel sqlite-devel
-(Ademas de los paquetes listados aquí tienes que instalar timidity)
+	sudo yum install g++ cmake glew-devel SDL2-devel glm-devel alsa-lib-devel freetype-devel libicu-devel sqlite-devel timidity++
 
 ### Instalar paquetes en Gentoo
 
@@ -142,9 +148,7 @@ Ya es posible ejecutar concertista midi con:
 
 	./concertistamidi
 
-En linux existe un dispositivo llamado **Midi Through** que no produce sonido (lo puedes encontrar en el nucleo como SND_SEQ_DUMMY), debes asegurarte que en la configuracion de Concertista MIDI este seleccionado el dispositivo de salida correcto en este caso **TiMidity**.
-
-Para la entrada puedes configurar el **Teclado y Raton** para tocar, es compatible con el teclado MIDI Casio LK-S250.
+Aviso: En linux existe un dispositivo llamado **Midi Through** que no produce sonido (lo puedes encontrar en el nucleo como SND_SEQ_DUMMY).
 
 -----------
 

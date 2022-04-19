@@ -127,7 +127,7 @@ if(NOT CONSTRUCCION_LOCAL)
 		/usr/share/applications
 	)
 	set(CPACK_RPM_PACKAGE_NAME ${CPACK_PACKAGE_NAME})
-	set(CPACK_RPM_PACKAGE_REQUIRES "libglvnd-opengl,libGLEW,SDL2,freetype,libicu,sqlite-libs,alsa-lib,timidity++")#fluid-soundfont-lite-patches
+	set(CPACK_RPM_PACKAGE_REQUIRES "libglvnd-opengl,libGLEW,SDL2,freetype,libicu,sqlite-libs,alsa-lib,timidity++")
 	set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION})
 	set(CPACK_RPM_PACKAGE_LICENSE "MIT")
 	include(CPack)
