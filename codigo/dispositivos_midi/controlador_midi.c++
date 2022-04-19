@@ -154,17 +154,17 @@ Dispositivo_Midi *Controlador_Midi::configurar_dispositivo(unsigned char cliente
 	{
 		if(m_dispositivos[x]->nombre() == nombre)
 		{
-			//Coincide al menos en el nombre
-			dispositivo = m_dispositivos[x];
+			//Coincide al menos en el nombre y el puerto
+			if(m_dispositivos[x]->puerto() == puerto)
+				dispositivo = m_dispositivos[x];
 
-			//Se es exactamente el mismo lo retorna
-			if(	m_dispositivos[x]->cliente() == cliente &&
-				m_dispositivos[x]->puerto() == puerto)
+			//Es exactamente el mismo cliente, lo retorna
+			if(	m_dispositivos[x]->cliente() == cliente)
 				return dispositivo;
 		}
 	}
-	//Retorna el dispositivo que coincide por nombre
-	//pero esta en otro cliente y mismo puerto
+	//Retorna el dispositivo que coincide por nombre y puerto
+	//pero esta en otro cliente
 	if(dispositivo != NULL && dispositivo->puerto() == puerto)
 	{
 		dispositivo->cambio_cliente(true);
