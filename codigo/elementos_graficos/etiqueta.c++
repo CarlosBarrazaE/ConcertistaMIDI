@@ -4,6 +4,7 @@ Color Etiqueta::Ultimo_color;
 
 Etiqueta::Etiqueta(Administrador_Recursos *recursos) : Elemento(0, 0, 0, 0), Figura(recursos->sombreador(S_Texto))
 {
+	m_rectangulo = recursos->figura(F_Rectangulo);
 }
 
 Etiqueta::Etiqueta(float x, float y, bool centrado, const std::string &texto, ModeloLetra tipografia, Administrador_Recursos *recursos) : Elemento(x, y, 0, 0), Figura(recursos->sombreador(S_Texto))
@@ -12,6 +13,7 @@ Etiqueta::Etiqueta(float x, float y, bool centrado, const std::string &texto, Mo
 	m_texto_actual = texto;
 	m_texto = texto.c_str();
 	m_tipografia = recursos->tipografia(tipografia);
+	m_rectangulo = recursos->figura(F_Rectangulo);
 	this->actualizar_texto();
 }
 
@@ -21,6 +23,7 @@ Etiqueta::Etiqueta(float x, float y, bool centrado, const std::string &texto, Ti
 	m_texto_actual = texto;
 	m_texto = texto.c_str();
 	m_tipografia = tipografia;
+	m_rectangulo = recursos->figura(F_Rectangulo);
 	this->actualizar_texto();
 }
 
@@ -30,6 +33,7 @@ Etiqueta::Etiqueta(float x, float y, float ancho, float alto, bool centrado, con
 	m_texto_actual = texto;
 	m_texto = texto.c_str();
 	m_tipografia = recursos->tipografia(tipografia);
+	m_rectangulo = recursos->figura(F_Rectangulo);
 	this->actualizar_texto();
 }
 
@@ -74,6 +78,15 @@ void Etiqueta::dibujar()
 {
 	if(m_texto.length() == 0)
 		return;
+
+	if(m_tipografia == NULL)
+		m_mostrar_fondo = true;
+
+	if(m_mostrar_fondo)
+	{
+		m_rectangulo->textura(false);
+		m_rectangulo->dibujar(this->x(), this->y(), this->ancho(), this->alto(), Color(0.2f, 0.7f, 0.5f, 0.5f));
+	}
 
 	if(m_tipografia == NULL)
 	{
@@ -172,4 +185,9 @@ float Etiqueta::alto_texto()
 std::string& Etiqueta::texto()
 {
 	return m_texto_actual;
+}
+
+void Etiqueta::mostrar_fondo(bool estado)
+{
+	m_mostrar_fondo = estado;
 }

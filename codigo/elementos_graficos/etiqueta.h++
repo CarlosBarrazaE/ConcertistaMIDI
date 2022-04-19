@@ -22,6 +22,9 @@ private:
 	float m_alto_texto = 0;
 	float m_margen = 0;
 
+	Rectangulo *m_rectangulo;
+	bool m_mostrar_fondo = false;
+
 	unsigned int m_indice_objeto = 0;
 
 	void actualizar_texto();
@@ -50,6 +53,8 @@ public:
 	float largo_texto();
 	float alto_texto();
 	std::string& texto();
+
+	void mostrar_fondo(bool estado);
 };
 
 #endif
