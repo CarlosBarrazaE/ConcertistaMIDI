@@ -347,7 +347,12 @@ Evento_Midi Controlador_Midi::leer()
 			if(!origen->sensitivo())
 				velocidad = VELOCIDAD_NORMAL;
 			if(origen->volumen_entrada() < 0.999 || origen->volumen_entrada() > 1.001 || !origen->sensitivo())
-				evento.velocidad_nota(static_cast<unsigned char>(velocidad * origen->volumen_entrada()));
+			{
+				velocidad = static_cast<unsigned char>(velocidad * origen->volumen_entrada());
+				if(velocidad == 0)
+					velocidad = 1;//Si es 0 se transforma en una nota apagada
+				evento.velocidad_nota(velocidad);
+			}
 		}
 	}
 	else if(evento.tipo_evento() == EventoMidi_ClienteConectado)
