@@ -16,7 +16,7 @@ Configuracion_Dispositivo::Configuracion_Dispositivo(float x, float y, float anc
 	m_nombre.posicion(x+40, y+10);
 	m_nombre.dimension(x+ancho-40, 20);
 	m_nombre.centrado_vertical(true);
-	m_nombre.texto(dispositivo.nombre() + " - Puerto " + t_puerto);
+	m_nombre.texto(dispositivo.nombre() + " - Puerto " + t_cliente + ":" + t_puerto);
 	m_nombre.tipografia(recursos->tipografia(LetraMediana));
 
 	if(dispositivo.habilitado())
