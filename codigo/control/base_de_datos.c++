@@ -397,8 +397,8 @@ void Base_de_Datos::eliminar_dispositivo(const Dispositivo_Midi &dispositivo)
 void Base_de_Datos::actualizar_cliente_dispositivo(unsigned char cliente_antiguo, const Dispositivo_Midi &dispositivo)
 {
 	//El dispositivo es encontrado en otro id cliente y hay que actualizarlo
-	this->consulta("UPDATE dispositivos SET cliente = '"+ std::to_string(static_cast<unsigned int>(cliente_antiguo))+"' "
-									"WHERE cliente = '"+ std::to_string(static_cast<unsigned int>(dispositivo.cliente()))+"' AND "
+	this->consulta("UPDATE dispositivos SET cliente = '"+ std::to_string(static_cast<unsigned int>(dispositivo.cliente()))+"' "
+									"WHERE cliente = '"+ std::to_string(static_cast<unsigned int>(cliente_antiguo))+"' AND "
 											"puerto = '"+ std::to_string(static_cast<unsigned int>(dispositivo.puerto()))+"' AND "
 											"nombre = '"+dispositivo.nombre()+"'");
 }
