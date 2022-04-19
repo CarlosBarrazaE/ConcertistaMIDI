@@ -24,26 +24,6 @@ Configuracion::Configuracion()
 		m_datos.abrir(ruta_base_de_datos);
 		m_datos.actualizar();//Actualiza la base de datos
 
-		std::vector<Dispositivo_Midi> lista_dispositivos = m_datos.lista_dispositivos();
-
-		for(Dispositivo_Midi &datos : lista_dispositivos)
-		{
-			if(datos.habilitado())
-			{
-				Dispositivo_Midi *dispositivo = m_controlador_midi.configurar_dispositivo(datos.cliente(), datos.puerto(), datos.capacidad(), datos.nombre());
-
-				//Si cambio el id del cliente se actualiza la base de datos
-				if(dispositivo->cambio_cliente())
-					m_datos.actualizar_cliente_dispositivo(datos.cliente(), *dispositivo);
-
-				//Carga la configuracion de la base de datos
-				dispositivo->copiar_configuracion(datos);
-				m_controlador_midi.conectar(dispositivo);
-			}
-		}
-
-		this->actualizar_rango_util_organo();
-
 		//Configuracion General
 		m_pantalla_completa_original = this->leer("pantalla_completa", m_pantalla_completa_original);
 
@@ -65,6 +45,26 @@ Configuracion::Configuracion()
 		m_datos.abrir(ruta_base_de_datos);
 		m_datos.crear();
 	}
+
+	//Se cargan los dispositivos disponibles
+	std::vector<Dispositivo_Midi> lista_dispositivos = m_datos.lista_dispositivos();
+	for(Dispositivo_Midi &datos : lista_dispositivos)
+	{
+		if(datos.habilitado())
+		{
+			Dispositivo_Midi *dispositivo = m_controlador_midi.configurar_dispositivo(datos.cliente(), datos.puerto(), datos.capacidad(), datos.nombre());
+
+			//Si cambio el id del cliente se actualiza la base de datos
+			if(dispositivo->cambio_cliente())
+				m_datos.actualizar_cliente_dispositivo(datos.cliente(), *dispositivo);
+
+			//Carga la configuracion de la base de datos
+			dispositivo->copiar_configuracion(datos);
+			m_controlador_midi.conectar(dispositivo);
+		}
+	}
+	this->actualizar_rango_util_organo();
+
 	//Se guarda la configuracion original para poder ver cual se ha modificado
 	//Configuracion General
 	m_pantalla_completa = m_pantalla_completa_original;
