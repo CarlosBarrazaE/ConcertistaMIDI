@@ -43,6 +43,7 @@ private:
 
 	std::vector<Etiqueta> m_etiquetas;
 	static std::vector<Mensaje *> notificaciones;
+	static int Tiempo_Minimo;
 
 	static void Registrar(std::string texto, int tiempo, CodigoEstado estado);
 

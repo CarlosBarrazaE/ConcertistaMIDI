@@ -1,6 +1,7 @@
 #include "notificacion.h++"
 
 std::vector<Mensaje *> Notificacion::notificaciones;
+int Notificacion::Tiempo_Minimo = 10;
 
 Notificacion::Notificacion(Administrador_Recursos *recursos) : Elemento(0, 0, 400, 40, true)
 {
@@ -13,10 +14,21 @@ Notificacion::~Notificacion()
 {
 	for(Mensaje *m : Notificacion::notificaciones)
 		delete m;
+	Notificacion::notificaciones.clear();
 }
 
 void Notificacion::actualizar(unsigned int diferencia_tiempo)
 {
+	//Si no hay notificaciones se omite
+	if(Notificacion::notificaciones.size() == 0)
+		return;
+
+	if(Notificacion::Tiempo_Minimo >= 0)
+	{
+		Notificacion::Tiempo_Minimo--;
+		return;
+	}
+
 	unsigned int contador = 0;
 	float mover = 0;
 	Mensaje *actual = NULL;
@@ -122,6 +134,9 @@ bool Notificacion::mostrando_notificaciones()
 
 void Notificacion::Registrar(std::string texto, int tiempo, CodigoEstado estado)
 {
+	if(Notificacion::Tiempo_Minimo > 0)//Ignora las notificaciones los primeros 10 fps
+		return;
+
 	if(tiempo < 3)
 		tiempo = 3;
 
