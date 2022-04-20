@@ -29,9 +29,9 @@ class Controlador_Juego
 private:
 	Administrador_Recursos *m_recursos;
 	Rectangulo *m_rectangulo;
-	Etiqueta m_texto_fps;
-	Etiqueta m_informacion;
-	Notificacion m_notificaciones;
+	Etiqueta *m_texto_fps;
+	Etiqueta *m_informacion;
+	Notificacion *m_notificaciones;
 
 	//Control de fps
 	bool m_fps_dinamico;
@@ -59,8 +59,9 @@ private:
 
 	void reiniciar_contador_inactividad();
 public:
-	Controlador_Juego(Administrador_Recursos *recursos);
+	Controlador_Juego();
 	~Controlador_Juego();
+	void asignar_administrador_recursos(Administrador_Recursos * recursos);
 	Administrador_Recursos *obtener_administrador_recursos();
 	void actualizar();
 
@@ -74,6 +75,8 @@ public:
 	void eventos_teclado(Tecla tecla, bool estado);
 	void evento_ventana(float ancho, float alto);
 	void evento_salir();
+
+	Configuracion *configuracion();
 };
 
 #endif

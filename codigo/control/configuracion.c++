@@ -296,3 +296,55 @@ Rango_Organo Configuracion::teclado_util()
 {
 	return m_teclado_util;
 }
+
+void Configuracion::posicion_ventana(int *x, int *y)
+{
+	std::string posicion = m_datos.leer_configuracion("posicion_ventana");
+	bool correcto = false;
+	if(posicion != "")
+	{
+		std::vector<std::string> datos = Texto::dividir_texto(posicion, ',');
+		if(datos.size() > 1)
+		{
+			*x = std::stoi(datos[0]);
+			*y = std::stoi(datos[1]);
+			correcto = true;
+		}
+	}
+	if(!correcto)
+	{
+		*x = 0;
+		*y = 0;
+	}
+}
+
+void Configuracion::dimension_ventana(int *ancho, int *alto)
+{
+	std::string dimension = m_datos.leer_configuracion("dimension_ventana");
+	bool correcto = false;
+	if(dimension != "")
+	{
+		std::vector<std::string> datos = Texto::dividir_texto(dimension, 'x');
+		if(datos.size() > 1)
+		{
+			*ancho = std::stoi(datos[0]);
+			*alto = std::stoi(datos[1]);
+			correcto = true;
+		}
+	}
+	if(!correcto)
+	{
+		*ancho = ANCHO;
+		*alto = ALTO;
+	}
+}
+
+void Configuracion::guardar_posicion_ventana(int x, int y)
+{
+	m_datos.escribir_configuracion("posicion_ventana", std::to_string(x) + "," + std::to_string(y));
+}
+
+void Configuracion::guardar_dimension_ventana(int ancho, int alto)
+{
+	m_datos.escribir_configuracion("dimension_ventana", std::to_string(ancho) + "x" + std::to_string(alto));
+}

@@ -12,9 +12,6 @@
 #include "version.h++"
 #include "configuracion_cmake.h++"
 
-#define ANCHO 800
-#define ALTO 600
-
 void configurar_gl();
 void ajustar_ventana(Controlador_Juego *controlador, int ancho_nuevo, int alto_nuevo);
 void eventos_raton_rueda(Controlador_Juego *controlador, int desplazamiento_x, int desplazamiento_y);
@@ -23,38 +20,60 @@ void eventos_raton_posicion(Controlador_Juego *controlador, int x, int y);
 void eventos_taclado(Controlador_Juego *controlador, int tecla, bool estado);
 void controlar_eventos(Controlador_Juego *controlador, SDL_Event *evento);
 void crear_carpeta_configuracion();
+void guardad_configuracion_pantalla(SDL_Window *ventana, Controlador_Juego *controlador, int *x, int *y, int *ancho, int *alto);
 
 int main (int /*n*/, char **/*argumentos*/)
 {
-	Registro::Nota("Concertista MIDI " + std::to_string(CONCERTISTAMIDI_VERSION_MAYOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_MENOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_PARCHE));
-
-	//Inicia el sintetizador midi lo antes posible
 	Sintetizador_Midi sintetizador;
 	sintetizador.iniciar();
 
-	Pantalla::Ancho = ANCHO;
-	Pantalla::Alto = ALTO;
+	crear_carpeta_configuracion();
+	Registro::Nota("Concertista MIDI " + std::to_string(CONCERTISTAMIDI_VERSION_MAYOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_MENOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_PARCHE));
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 	SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");//No suspende el compositor de ventana (No funciona en devuan mate)
 	//error: ‘SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR’ was not declared in this scope (devuan mate)
 	SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
-	std::string nombre_ventana = "Concertista MIDI " + std::to_string(CONCERTISTAMIDI_VERSION_MAYOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_MENOR) + "." + std::to_string(CONCERTISTAMIDI_VERSION_PARCHE);
-	SDL_Window *ventana = SDL_CreateWindow(nombre_ventana.c_str(), 0, 0, ANCHO, ALTO, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
 	//Se carga el icono
 	Archivo::Tga *icono_tga = new Archivo::Tga(std::string(RUTA_ARCHIVOS) + "/texturas/icono.tga");
-	SDL_Surface *icono = SDL_CreateRGBSurfaceFrom(icono_tga->imagen(), static_cast<int>(icono_tga->ancho()), static_cast<int>(icono_tga->alto()), static_cast<int>(icono_tga->bytes()), static_cast<int>(icono_tga->ancho())*4, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+	SDL_Surface *icono = SDL_CreateRGBSurfaceFrom(icono_tga->imagen(),
+												  static_cast<int>(icono_tga->ancho()),
+												  static_cast<int>(icono_tga->alto()),
+												  static_cast<int>(icono_tga->bytes()),
+												  static_cast<int>(icono_tga->ancho())*4,
+												  0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+
+	Controlador_Juego controlador;
+	int ventana_x = 0, ventana_y = 0, ventana_ancho = 0, ventana_alto = 0;
+	controlador.configuracion()->posicion_ventana(&ventana_x, &ventana_y);
+	controlador.configuracion()->dimension_ventana(&ventana_ancho, &ventana_alto);
+	Pantalla::Ancho = static_cast<float>(ventana_ancho);
+	Pantalla::Alto = static_cast<float>(ventana_alto);
+
+	unsigned int bandera_pantalla = 0;
+	if(controlador.es_pantalla_completa())
+	{
+		bandera_pantalla = SDL_WINDOW_FULLSCREEN_DESKTOP;
+		Pantalla::PantallaCompleta = true;
+	}
+
+	std::string nombre_ventana = "Concertista MIDI "
+								"" + std::to_string(CONCERTISTAMIDI_VERSION_MAYOR) + "."
+								"" + std::to_string(CONCERTISTAMIDI_VERSION_MENOR) + "."
+								"" + std::to_string(CONCERTISTAMIDI_VERSION_PARCHE);
+
+	SDL_Window *ventana = SDL_CreateWindow(nombre_ventana.c_str(), ventana_x, ventana_y, ventana_ancho, ventana_alto,
+										   SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | bandera_pantalla);
 	SDL_SetWindowIcon(ventana, icono);
+	SDL_SetWindowMinimumSize(ventana, 780, 500);
 
 	SDL_FreeSurface(icono);
 	delete icono_tga;
 
 	/*SDL_GLContext contexto = */SDL_GL_CreateContext(ventana);
 	SDL_GL_SetSwapInterval(1);//Limita a 60 fps
-
-	crear_carpeta_configuracion();
 
 	glewExperimental = GL_TRUE;
 	GLenum estado = glewInit();
@@ -68,7 +87,7 @@ int main (int /*n*/, char **/*argumentos*/)
 	configurar_gl();
 
 	Administrador_Recursos recursos;
-	Controlador_Juego controlador(&recursos);
+	controlador.asignar_administrador_recursos(&recursos);
 
 	while (!controlador.terminar())
 	{
@@ -83,12 +102,17 @@ int main (int /*n*/, char **/*argumentos*/)
 		//Pantalla Completa
 		if(controlador.es_pantalla_completa() && !Pantalla::PantallaCompleta)
 		{
+			//Guarda la posicion antes de ponerse en pantalla completa
+			guardad_configuracion_pantalla(ventana, &controlador, &ventana_x, &ventana_y, &ventana_ancho, &ventana_alto);
 			SDL_SetWindowFullscreen(ventana, SDL_WINDOW_FULLSCREEN_DESKTOP);
 			Pantalla::PantallaCompleta = true;
 		}
 		else if(!controlador.es_pantalla_completa() && Pantalla::PantallaCompleta)
 		{
 			SDL_SetWindowFullscreen(ventana, 0);
+			SDL_RestoreWindow(ventana);
+			SDL_SetWindowPosition(ventana, ventana_x, ventana_y);
+			SDL_SetWindowSize(ventana, ventana_ancho, ventana_alto);
 			Pantalla::PantallaCompleta = false;
 		}
 
@@ -108,6 +132,11 @@ int main (int /*n*/, char **/*argumentos*/)
 	}
 
 	sintetizador.detener();
+
+	//Se guarda la nueva posicion y dimencion de la pantalla si no esta en pantalla completa
+	if(!controlador.configuracion()->pantalla_completa())
+		guardad_configuracion_pantalla(ventana, &controlador, &ventana_x, &ventana_y, &ventana_ancho, &ventana_alto);
+
 	SDL_DestroyWindow(ventana);
 	SDL_Quit();
 
@@ -117,13 +146,13 @@ int main (int /*n*/, char **/*argumentos*/)
 void configurar_gl()
 {
 	glEnable (GL_CULL_FACE);
-	glViewport(0, 0, ANCHO, ALTO);
+	glViewport(0, 0, static_cast<int>(Pantalla::Ancho), static_cast<int>(Pantalla::Alto));
 	glClearColor(0.95f, 0.95f, 0.95f, 1.0f);
 	glActiveTexture(GL_TEXTURE0);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_SCISSOR_TEST);
-	glScissor(0, 0, ANCHO, ALTO);
+	glScissor(0, 0, static_cast<int>(Pantalla::Ancho), static_cast<int>(Pantalla::Alto));
 }
 
 void controlar_eventos(Controlador_Juego *controlador, SDL_Event *evento)
@@ -296,5 +325,26 @@ void crear_carpeta_configuracion()
 			std::filesystem::rename(Usuario::carpeta_personal() + ".concertista.db", Usuario::carpeta_juego() + "concertista.db");
 		if(std::filesystem::exists(Usuario::carpeta_personal() + ".registros_concertista_midi.txt"))
 			std::filesystem::rename(Usuario::carpeta_personal() + ".registros_concertista_midi.txt", Usuario::carpeta_juego() + "registro.txt");
+	}
+}
+
+void guardad_configuracion_pantalla(SDL_Window *ventana, Controlador_Juego *controlador, int *x, int *y, int *ancho, int *alto)
+{
+	int nueva_x = 0, nueva_y = 0, nuevo_ancho = 0, nuevo_alto = 0;
+	SDL_GetWindowPosition(ventana, &nueva_x, &nueva_y);
+	SDL_GetWindowSize(ventana, &nuevo_ancho, &nuevo_alto);
+
+	if(*x != nueva_x || *y != nueva_y)
+	{
+		controlador->configuracion()->guardar_posicion_ventana(nueva_x, nueva_y);
+		*x = nueva_x;
+		*y = nueva_y;
+	}
+
+	if(*ancho != nuevo_ancho || *alto != nuevo_alto)
+	{
+		controlador->configuracion()->guardar_dimension_ventana(nuevo_ancho, nuevo_alto);
+		*ancho = nuevo_ancho;
+		*alto = nuevo_alto;
 	}
 }

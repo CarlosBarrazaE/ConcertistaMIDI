@@ -19,15 +19,15 @@ Notificacion::~Notificacion()
 
 void Notificacion::actualizar(unsigned int diferencia_tiempo)
 {
-	//Si no hay notificaciones se omite
-	if(Notificacion::notificaciones.size() == 0)
-		return;
-
-	if(Notificacion::Tiempo_Minimo >= 0)
+	if(Notificacion::Tiempo_Minimo > 0)
 	{
 		Notificacion::Tiempo_Minimo--;
 		return;
 	}
+
+	//Si no hay notificaciones se omite
+	if(Notificacion::notificaciones.size() == 0)
+		return;
 
 	unsigned int contador = 0;
 	float mover = 0;

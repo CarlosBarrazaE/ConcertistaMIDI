@@ -1,19 +1,11 @@
 #include "controlador_juego.h++"
 
-Controlador_Juego::Controlador_Juego(Administrador_Recursos *recursos) : m_texto_fps(recursos), m_informacion(recursos), m_notificaciones(recursos)
+Controlador_Juego::Controlador_Juego()
 {
-	m_recursos = recursos;
-	m_rectangulo = recursos->figura(F_Rectangulo);
-	m_notificaciones.posicion(Pantalla::Centro_horizontal(), 165);
-
-	m_texto_fps.tipografia(recursos->tipografia(LetraChica));
-	m_texto_fps.posicion(10, 0);
-	m_texto_fps.dimension(40, 40);
-	m_texto_fps.centrado_vertical(true);
-
-	m_informacion.tipografia(recursos->tipografia(LetraChica));
-
-	m_ventana_actual = new VentanaTitulo(&m_configuracion, recursos);
+	m_notificaciones = NULL;
+	m_texto_fps = NULL;
+	m_informacion = NULL;
+	m_ventana_actual = NULL;
 
 	//Control dinamico de fps
 	m_consumir_eventos = true;
@@ -32,17 +24,38 @@ Controlador_Juego::Controlador_Juego(Administrador_Recursos *recursos) : m_texto
 	m_tiempo_espera_aviso = 0;
 
 	m_pantalla_completa = m_configuracion.pantalla_completa();
-	/*
-	SDL_SetWindowPosition(SDL_Window * window,int *x, int *y)
-	SDL_GetWindowPosition(SDL_Window * window,int *x, int *y)
-	SDL_SetWindowSize(SDL_Window * window, int w, int h)
-	SDL_GetWindowSize(SDL_Window * window, int w, int h)
-	 */
 }
 
 Controlador_Juego::~Controlador_Juego()
 {
-	delete m_ventana_actual;
+	if(m_notificaciones != NULL)
+		delete m_notificaciones;
+	if(m_texto_fps != NULL)
+		delete m_texto_fps;
+	if(m_informacion != NULL)
+		delete m_informacion;
+	if(m_ventana_actual != NULL)
+		delete m_ventana_actual;
+}
+
+void Controlador_Juego::asignar_administrador_recursos(Administrador_Recursos * recursos)
+{
+	m_recursos = recursos;
+	m_rectangulo = recursos->figura(F_Rectangulo);
+
+	m_notificaciones = new Notificacion(m_recursos);
+	m_notificaciones->posicion(Pantalla::Centro_horizontal(), 165);
+
+	m_texto_fps = new Etiqueta(m_recursos);
+	m_texto_fps->tipografia(recursos->tipografia(LetraChica));
+	m_texto_fps->posicion(10, 0);
+	m_texto_fps->dimension(40, 40);
+	m_texto_fps->centrado_vertical(true);
+
+	m_informacion = new Etiqueta(m_recursos);
+	m_informacion->tipografia(recursos->tipografia(LetraChica));
+
+	m_ventana_actual = new VentanaTitulo(&m_configuracion, recursos);
 }
 
 Administrador_Recursos *Controlador_Juego::obtener_administrador_recursos()
@@ -62,24 +75,24 @@ void Controlador_Juego::actualizar()
 		Notificacion::Nota(m_configuracion.controlador_midi()->siguiente_mensaje(), 5);
 
 	m_ventana_actual->actualizar(diferencia_tiempo);
-	m_notificaciones.actualizar(diferencia_tiempo);
+	m_notificaciones->actualizar(diferencia_tiempo);
 	m_ventana_actual->dibujar();
-	m_notificaciones.dibujar();
+	m_notificaciones->dibujar();
 
 	if(m_depurar)
 	{
 		if(Fps::Actualizar_fps())
-			m_texto_fps.texto("FPS: " + std::to_string(fps));
-		m_texto_fps.dibujar();
+			m_texto_fps->texto("FPS: " + std::to_string(fps));
+		m_texto_fps->dibujar();
 
 		//Dibuja Raton
 		m_rectangulo->textura(false);
 		m_rectangulo->dibujar(static_cast<float>(m_raton.x())-11, static_cast<float>(m_raton.y()), 21, 1, Color(1.0f, 0.0f, 0.0f));
 		m_rectangulo->dibujar(static_cast<float>(m_raton.x()), static_cast<float>(m_raton.y())-11, 1, 21, Color(1.0f, 0.0f, 0.0f));
 
-		m_informacion.posicion(static_cast<float>(m_raton.x()+2), static_cast<float>(m_raton.y()-15));
-		m_informacion.texto("X: " + std::to_string(m_raton.x()) + " Y: " + std::to_string(m_raton.y()));
-		m_informacion.dibujar();
+		m_informacion->posicion(static_cast<float>(m_raton.x()+2), static_cast<float>(m_raton.y()-15));
+		m_informacion->texto("X: " + std::to_string(m_raton.x()) + " Y: " + std::to_string(m_raton.y()));
+		m_informacion->dibujar();
 	}
 
 	bool cambio_ventana = false;
@@ -202,7 +215,7 @@ void Controlador_Juego::actualizar()
 		}
 	}
 
-	if(m_notificaciones.mostrando_notificaciones())
+	if(m_notificaciones->mostrando_notificaciones())
 		this->reiniciar_contador_inactividad();
 
 	if(!m_fps_reducido)
@@ -286,7 +299,7 @@ void Controlador_Juego::evento_ventana(float ancho, float alto)
 	Pantalla::Alto = alto;
 	m_recursos->actualizar_pantalla(ancho, alto);
 	m_ventana_actual->evento_pantalla(ancho, alto);
-	m_notificaciones.posicion(Pantalla::Centro_horizontal(), 165);
+	m_notificaciones->posicion(Pantalla::Centro_horizontal(), 165);
 	this->reiniciar_contador_inactividad();
 }
 
@@ -306,4 +319,9 @@ void Controlador_Juego::reiniciar_contador_inactividad()
 		m_fps_reducido = false;
 		SDL_GL_SetSwapInterval(1);
 	}
+}
+
+Configuracion *Controlador_Juego::configuracion()
+{
+	return &m_configuracion;
 }

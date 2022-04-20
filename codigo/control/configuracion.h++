@@ -3,10 +3,14 @@
 
 #include "base_de_datos.h++"
 #include "../util/usuario.h++"
+#include "../util/texto.h++"
 #include "../control/rango_organo.h++"
 #include "../elementos_graficos/notificacion.h++"
 #include "../dispositivos_midi/controlador_midi.h++"
 #include "../dispositivos_midi/teclas_luminosas.h++"
+
+#define ANCHO 800
+#define ALTO 600
 
 class Configuracion
 {
@@ -71,6 +75,11 @@ public:
 	bool subtitulos();
 	Rango_Organo teclado_visible();
 	Rango_Organo teclado_util();
+
+	void posicion_ventana(int *x, int *y);
+	void dimension_ventana(int *ancho, int *alto);
+	void guardar_posicion_ventana(int x, int y);
+	void guardar_dimension_ventana(int ancho, int alto);
 };
 
 #endif
