@@ -83,7 +83,7 @@ VentanaOrgano::VentanaOrgano(Configuracion *configuracion, Datos_Musica *musica,
 	m_retorno_carro = false;
 
 	m_descartar_texto_inicial = true;
-
+	m_maximo_tiempo_actualizar = LLONG_MAX;
 	this->inicializar();
 }
 
@@ -289,6 +289,13 @@ void VentanaOrgano::reproducir_eventos(unsigned int microsegundos_actualizar)
 {
 	if(m_pausa)
 		microsegundos_actualizar = 0;
+
+	//Solo avanza hasta el comienzo de la proxima nota a tocar si esta en modo aprender alguna pista
+	if(microsegundos_actualizar > m_maximo_tiempo_actualizar)
+	{
+		microsegundos_actualizar = static_cast<unsigned int>(m_maximo_tiempo_actualizar);
+		m_maximo_tiempo_actualizar = LLONG_MAX;//Se quita el limite porque ya se utilizó
+	}
 
 	MidiEventListWithTrackId eventos = m_musica->musica()->Update(microsegundos_actualizar);
 	m_tiempo_actual_midi = m_musica->musica()->GetSongPositionInMicroseconds();
@@ -639,6 +646,7 @@ void VentanaOrgano::calcular_teclas_activas(unsigned int diferencia_tiempo)
 	float posicion_y = 0;
 	float largo_nota = 0;
 	unsigned int numero_nota = 0;//Id de la nota desde 0 hasta 127
+	microseconds_t maximo_tiempo_actualizar = 0;
 	for(unsigned int pista=0; pista<m_notas.size(); pista++)
 	{
 		//Dibuja solo las pistas que tienen notas, hay pistas vacias
@@ -652,6 +660,19 @@ void VentanaOrgano::calcular_teclas_activas(unsigned int diferencia_tiempo)
 				//Se salta las notas fuera de la pantalla
 				if(numero_nota < m_teclado_visible.tecla_inicial() || numero_nota > m_teclado_visible.tecla_final())
 					continue;
+
+				//Calcula el tiempo maximo que puede desplazarce al actualizar para evitar saltarse notas muy cortas
+				//al detener la cancion en el modo Aprender
+				if(m_pistas->at(pista).modo() == Aprender)
+				{
+					//Menor a 0 indica una nota aun no tocada
+					if(m_notas[pista][n].start > m_tiempo_actual_midi)
+					{
+						maximo_tiempo_actualizar = m_notas[pista][n].start - m_tiempo_actual_midi;
+						if(maximo_tiempo_actualizar < m_maximo_tiempo_actualizar)//Se queda con la proxima nota mas cercana
+							m_maximo_tiempo_actualizar = maximo_tiempo_actualizar;
+					}
+				}
 
 				posicion_y = static_cast<float>(m_tiempo_actual_midi - m_notas[pista][n].start) / static_cast<float>(m_duracion_nota);
 

@@ -65,6 +65,7 @@ private:
 	std::vector<unsigned long int> m_primera_nota;//Ultima nota por cada pista
 	std::vector<Pista> *m_pistas;
 	microseconds_t m_tiempo_actual_midi;
+	microseconds_t m_maximo_tiempo_actualizar;
 
 	void inicializar();
 	void recalcular_puntaje();
