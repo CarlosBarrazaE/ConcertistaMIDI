@@ -79,8 +79,8 @@ int main (int /*n*/, char **/*argumentos*/)
 	GLenum estado = glewInit();
 	if(estado != GLEW_OK)
 	{
-		Registro::Error(std::string(reinterpret_cast<const char*>(glewGetErrorString(estado))));
-		return 0;
+		Registro::Error("Error al iniciar GLEW: " + std::string(reinterpret_cast<const char*>(glewGetErrorString(estado))));
+		//return 0; //Aveces puede funcionar cuando falla glew
 	}
 
 	Registro::Mostrar_detalles();

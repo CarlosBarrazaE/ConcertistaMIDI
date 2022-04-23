@@ -1,6 +1,6 @@
 # Concertista MIDI
 
-Concertista MIDI es un juego para aprender a tocar piano facilmente usando el teclado o el ratón de tu computador y también funciona con teclado MIDI, Concertista MIDI utiliza la libreria midi ([libmidi](https://github.com/linthesia/linthesia/tree/master/src/libmidi)) de linthesia para reproducir archivos y conectarse con dispositivos MIDI pero incluye varias mejoras como:
+Concertista MIDI es un juego para aprender a tocar piano facilmente usando el teclado o el ratón de tu computador y también funciona con teclado MIDI, Concertista MIDI utiliza la libreria midi ([libmidi](https://github.com/linthesia/linthesia/tree/master/src/libmidi)) de linthesia para reproducir archivos MIDI pero incluye varias mejoras como:
 
 * Pistas independientes para archivos MIDI formato 0
 * Se implemento el evento MidiMetaEvent_TimeSignature para representar correctamente canciones en compas distinto de 4/4

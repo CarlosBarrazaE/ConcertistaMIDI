@@ -97,14 +97,14 @@ if(NOT CONSTRUCCION_LOCAL)
 	install(DIRECTORY "${PROJECT_SOURCE_DIR}/sombreadores" DESTINATION ${INSTALACION_ARCHIVOS})
 	install(DIRECTORY "${PROJECT_SOURCE_DIR}/texturas" DESTINATION ${INSTALACION_ARCHIVOS})
 	install(FILES "${PROJECT_SOURCE_DIR}/codigo/libmidi/COPYING" DESTINATION ${INSTALACION_ARCHIVOS} RENAME "licencia_libmidi.txt")
-	install(FILES "${PROJECT_SOURCE_DIR}/Licencia.txt" DESTINATION ${INSTALACION_ARCHIVOS} RENAME "licencia_concertistamidi.txt")
+	install(FILES "${PROJECT_SOURCE_DIR}/LICENCIA.md" DESTINATION ${INSTALACION_ARCHIVOS} RENAME "licencia_concertistamidi.txt")
 	install(FILES "${PROJECT_SOURCE_DIR}/tipografias/NotoSans-Regular.ttf" DESTINATION "${INSTALACION_ARCHIVOS}/tipografias")
 	install(FILES "${PROJECT_SOURCE_DIR}/varios/Concertista MIDI.desktop" DESTINATION ${INSTALACION_LANZADOR})
 	install(FILES "${PROJECT_SOURCE_DIR}/varios/concertista_128.png" DESTINATION "${INSTALACION_ICONO}/128x128/apps" RENAME "concertistamidi.png")
 
 	#EMPAQUETAR
 	set(CPACK_PACKAGE_NAME ${CPACK_PACKAGE_NAME})
-	set(CPACK_PACKAGE_DESCRIPTION "Concertista MIDI es un juego para aprender a tocar piano facilmente usando el teclado, el raton o teclados MIDI, ahora incluso puede controlar las teclas luminosas del organo Casio LK-S250 y posiblemente muchos otros. Concertista MIDI utiliza la libreria midi de linthesia para reproducir archivos y conectarse con dispositivos MIDI pero incluye muchas mejoras.")
+	set(CPACK_PACKAGE_DESCRIPTION "Concertista MIDI es un juego para aprender a tocar piano facilmente usando el teclado, el raton o teclados MIDI, ahora incluso puede controlar las teclas luminosas del organo Casio LK-S250 y posiblemente muchos otros. Concertista MIDI utiliza la libreria midi de linthesia para reproducir archivos MIDI pero incluye muchas mejoras.")
 	set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/CarlosBarrazaE/ConcertistaMIDI")
 	set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/varios/concertista_128.png")
 	set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/LEEME.md")
@@ -114,7 +114,8 @@ if(NOT CONSTRUCCION_LOCAL)
 	#cpack -G DEB
 	set(CPACK_DEBIAN_PACKAGE_NAME ${CPACK_PACKAGE_NAME})
 	#set(CPACK_DEBIAN_PACKAGE_DEPENDS "libopengl0,libglew2.1,libsdl2-2.0-0,libfreetype6,libicu66,libsqlite3-0,libasound2,timidity")#ubuntu 20.04
-	set(CPACK_DEBIAN_PACKAGE_DEPENDS "libopengl0,libglew2.1,libsdl2-2.0-0,libfreetype6,libicu67,libsqlite3-0,libasound2,timidity")#debian 11, ubuntu 21.10
+	#set(CPACK_DEBIAN_PACKAGE_DEPENDS "libopengl0,libglew2.1,libsdl2-2.0-0,libfreetype6,libicu67,libsqlite3-0,libasound2,timidity")#debian 11, ubuntu 21.10
+	set(CPACK_DEBIAN_PACKAGE_DEPENDS "libopengl0,libglew2.2,libsdl2-2.0-0,libfreetype6,libicu70,libsqlite3-0,libasound2,timidity")#ubuntu 22.04
 	set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Carlos Barraza <carlosbarrazaes@gmail.com>")
 
 	#cpack -G RPM instalar rpm-build

@@ -2,6 +2,7 @@
 #define ADMINISTRADOR_DE_RECURSOS_H
 
 #include <map>
+#include <array>
 #include <stack>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
