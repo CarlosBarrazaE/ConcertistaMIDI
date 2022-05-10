@@ -26,7 +26,7 @@ MidiTrack MidiTrack::ReadFromStream(std::istream &stream)
 
 	std::string header(header_id);
 	if (header != MidiTrackHeader)
-		throw MidiError_BadTrackHeaderType;
+		throw MidiError(MidiError_BadTrackHeaderType);
 
 	// Pull the full track out of the file all at once -- there is an
 	// End-Of-Track event, but this allows us handle malformed MIDI a
