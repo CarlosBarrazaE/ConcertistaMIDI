@@ -33,28 +33,41 @@ void Selector_Archivos::cargar_tabla(std::string ruta_abrir)
 	//Seleccionar archivos
 	m_ruta_actual = ruta_abrir;
 	Registro::Depurar("Abriendo la carpeta " + ruta_abrir);
+	if(!std::ifstream(ruta_abrir))
+	{
+		Registro::Error("Permiso denegado, no se puede acceder a " + ruta_abrir);
+		return;
+	}
 	m_tabla.vaciar();//Se vacia la tabla
 	m_ruta.ruta("/", ruta_abrir);
 	m_lista_archivos.clear();
 	for(const std::filesystem::directory_entry &elemento : std::filesystem::directory_iterator(ruta_abrir))
 	{
-		std::string nombre_archivo = Funciones::nombre_archivo(elemento.path(), elemento.is_directory());
-
-		bool oculto = false;
-		if(nombre_archivo.length() > 0 && nombre_archivo[0] == '.')
-			oculto = true;
-
-		if((elemento.is_directory() || m_mostrar_archivos) && !oculto)
+		try
 		{
-			Datos_Archivos actual;
-			actual.nombre = nombre_archivo;
-			actual.ruta = elemento.path();
-			actual.es_carpeta = elemento.is_directory();
-			if(elemento.is_directory())
-				actual.tamanno = Funciones::numero_de_archivos(actual.ruta);
-			else
-				actual.tamanno = elemento.file_size();
-			m_lista_archivos.push_back(actual);
+			std::string nombre_archivo = Funciones::nombre_archivo(elemento.path(), elemento.is_directory());
+
+			bool oculto = false;
+			if(nombre_archivo.length() > 0 && nombre_archivo[0] == '.')
+				oculto = true;
+
+			if((elemento.is_directory() || m_mostrar_archivos) && !oculto)
+			{
+				Datos_Archivos actual;
+				actual.nombre = nombre_archivo;
+				actual.ruta = elemento.path();
+				actual.es_carpeta = elemento.is_directory();
+				if(elemento.is_directory())
+					actual.tamanno = Funciones::numero_de_archivos(actual.ruta);
+				else
+					actual.tamanno = elemento.file_size();
+				m_lista_archivos.push_back(actual);
+			}
+		}
+		catch(std::filesystem::filesystem_error &e)
+		{
+			Registro::Error("No se puede leer en: " + std::string(elemento.path()));
+			Registro::Error(std::string(e.what()));
 		}
 	}
 

@@ -120,10 +120,18 @@ namespace Funciones
 			return 0;
 		for(const std::filesystem::directory_entry &elemento : std::filesystem::directory_iterator(carpeta))
 		{
-			std::string ruta = std::string(elemento.path());
-			std::string extencion = Funciones::extencion_archivo(ruta);
-			if(elemento.is_directory() || Funciones::es_midi(extencion))
-				archivos++;
+			try
+			{
+				std::string ruta = std::string(elemento.path());
+				std::string extencion = Funciones::extencion_archivo(ruta);
+				if(elemento.is_directory() || Funciones::es_midi(extencion))
+					archivos++;
+			}
+			catch(std::filesystem::filesystem_error &e)
+			{
+				Registro::Error("No se puede leer en: " + std::string(elemento.path()));
+				Registro::Error(std::string(e.what()));
+			}
 		}
 		return archivos;
 	}

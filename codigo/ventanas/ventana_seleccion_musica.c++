@@ -102,50 +102,58 @@ void VentanaSeleccionMusica::cargar_contenido_carpeta(std::string ruta_abrir)
 	m_datos->iniciar_transaccion();
 	for(const std::filesystem::directory_entry &elemento : std::filesystem::directory_iterator(ruta_abrir))
 	{
-		std::string ruta = std::string(elemento.path());
-		std::string nombre_archivo = Funciones::nombre_archivo(ruta, elemento.is_directory());
-		std::string extencion_archivo = Funciones::extencion_archivo(ruta);
-
-		//Reemplaza el guion bajo por espacio
-		std::replace(nombre_archivo.begin(), nombre_archivo.end(), '_', ' ');
-
-		bool oculto = false;
-		if(nombre_archivo.length() > 0 && nombre_archivo[0] == '.')
-			oculto = true;
-
-		if((elemento.is_directory() && !oculto) || (!elemento.is_directory() && Funciones::es_midi(extencion_archivo)))
+		try
 		{
-			Datos_Archivos actual;
-			actual.ruta = elemento.path();
-			actual.es_carpeta = elemento.is_directory();
-			actual.fecha_acceso = "-";
+			std::string ruta = std::string(elemento.path());
+			std::string nombre_archivo = Funciones::nombre_archivo(ruta, elemento.is_directory());
+			std::string extencion_archivo = Funciones::extencion_archivo(ruta);
 
-			if(!elemento.is_directory())
+			//Reemplaza el guion bajo por espacio
+			std::replace(nombre_archivo.begin(), nombre_archivo.end(), '_', ' ');
+
+			bool oculto = false;
+			if(nombre_archivo.length() > 0 && nombre_archivo[0] == '.')
+				oculto = true;
+
+			if((elemento.is_directory() && !oculto) || (!elemento.is_directory() && Funciones::es_midi(extencion_archivo)))
 			{
-				actual.nombre = Texto::primera_letra_mayuscula(nombre_archivo);
-				std::vector<std::string> datos_midi = m_datos->datos_archivo(actual.ruta);
-				actual.tamanno = elemento.file_size();
+				Datos_Archivos actual;
+				actual.ruta = elemento.path();
+				actual.es_carpeta = elemento.is_directory();
+				actual.fecha_acceso = "-";
 
-				if(datos_midi.size() > 0)
+				if(!elemento.is_directory())
 				{
-					actual.visitas = static_cast<unsigned int>(std::stoi(datos_midi[0]));
-					actual.duracion = static_cast<microseconds_t>(std::stol(datos_midi[1]));
-					if(datos_midi[2] != "")
-						actual.fecha_acceso = datos_midi[2];
+					actual.nombre = Texto::primera_letra_mayuscula(nombre_archivo);
+					std::vector<std::string> datos_midi = m_datos->datos_archivo(actual.ruta);
+					actual.tamanno = elemento.file_size();
+
+					if(datos_midi.size() > 0)
+					{
+						actual.visitas = static_cast<unsigned int>(std::stoi(datos_midi[0]));
+						actual.duracion = static_cast<microseconds_t>(std::stol(datos_midi[1]));
+						if(datos_midi[2] != "")
+							actual.fecha_acceso = datos_midi[2];
+					}
+					else
+					{
+						actual.duracion = Funciones::duracion_midi(actual.ruta);//Tiempo en microsegundos
+						m_datos->agregar_archivo(actual.ruta, actual.duracion);
+					}
 				}
 				else
 				{
-					actual.duracion = Funciones::duracion_midi(actual.ruta);//Tiempo en microsegundos
-					m_datos->agregar_archivo(actual.ruta, actual.duracion);
+					actual.nombre = nombre_archivo;
+					actual.tamanno = Funciones::numero_de_archivos(actual.ruta);//Numero de archivos
 				}
-			}
-			else
-			{
-				actual.nombre = nombre_archivo;
-				actual.tamanno = Funciones::numero_de_archivos(actual.ruta);//Numero de archivos
-			}
 
-			m_lista_archivos.push_back(actual);
+				m_lista_archivos.push_back(actual);
+			}
+		}
+		catch(std::filesystem::filesystem_error &e)
+		{
+			Registro::Error("No se puede leer en: " + std::string(elemento.path()));
+			Registro::Error(std::string(e.what()));
 		}
 	}
 	m_datos->finalizar_transaccion();
@@ -181,7 +189,7 @@ void VentanaSeleccionMusica::crear_tabla(std::string ruta_abrir)
 		this->cargar_contenido_carpeta(ruta_abrir);
 	}
 	else if(ruta_abrir != "-")
-		Notificacion::Aviso("La carpeta no existe", 5);
+		Notificacion::Aviso("No se puede acceder a la carpeta", 5);
 	else
 	{
 		//Limpia la lista de archivos
