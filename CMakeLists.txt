@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.7 FATAL_ERROR)
 
-project(concertistamidi VERSION 1.2.1 LANGUAGES C CXX DESCRIPTION "Juego para aprender a tocar piano")
+project(concertistamidi VERSION 1.2.2 LANGUAGES C CXX DESCRIPTION "Juego para aprender a tocar piano")
 configure_file(codigo/version.h++.in version.h++)
 
 #Al menos se requiere C++17 para utilizar std::filesystem
