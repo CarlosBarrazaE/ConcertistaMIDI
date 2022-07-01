@@ -152,7 +152,7 @@ void Tabla::insertar_fila(const std::vector<std::string> &texto)
 		return;
 	}
 
-	Fila *f = new Fila(0, 0, this->ancho(), m_alto_fila, m_recursos);
+	Fila *f = new Fila(this->x(), 0, this->ancho(), m_alto_fila, m_recursos);
 	Etiqueta *nueva_etiqueta;
 	for(unsigned int x=0; x<texto.size(); x++)
 	{

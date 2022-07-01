@@ -67,9 +67,10 @@ void Fila::evento_raton(Raton *raton)
 
 void Fila::posicion(float x, float y)
 {
+	float desplazado = x - this->x();
 	this->_posicion(x, y);
 	for(Etiqueta* e : m_celda)
-		e->posicion(e->x(), this->y());
+		e->posicion(e->x()+desplazado, this->y());
 }
 
 void Fila::agregar_celda(Etiqueta *celda)
